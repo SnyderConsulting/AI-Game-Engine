@@ -1,5 +1,6 @@
 import {
   spawnZombie,
+  moveZombie,
   moveTowards,
   isColliding,
   generateWalls,
@@ -58,19 +59,17 @@ function update() {
   }
 
   if (spawnTimer <= 0) {
-    zombies.push(spawnZombie(canvas.width, canvas.height));
+    zombies.push(spawnZombie(canvas.width, canvas.height, walls));
     spawnTimer = 60;
   } else {
     spawnTimer--;
   }
 
   zombies.forEach((z) => {
-    const zx = z.x;
-    const zy = z.y;
-    moveTowards(z, player, 1);
+    moveZombie(z, player, walls, 1, canvas.width, canvas.height);
     if (walls.some((w) => circleRectColliding(z, w, 10))) {
-      z.x = zx;
-      z.y = zy;
+      // fallback in case of pathfinding error
+      moveTowards(z, player, 1);
     }
     if (isColliding(z, player, 10)) {
       gameOver = true;
