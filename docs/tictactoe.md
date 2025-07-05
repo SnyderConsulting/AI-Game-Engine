@@ -21,3 +21,4 @@ npm run dev
 ```
 
 Open the browser at `http://localhost:3000` to play. Click **New Game** to start and select a square to make your move. The computer opponent plays randomly.
+The Vite dev server forwards any `/tictactoe` requests to the backend running on `http://localhost:8000`, so no additional configuration is needed.
