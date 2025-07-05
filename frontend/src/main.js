@@ -7,6 +7,8 @@ import {
   generateWalls,
   circleRectColliding,
   SEGMENT_SIZE,
+  spawnTurret,
+  updateTurrets,
 } from "./game_logic.js";
 
 const canvas = document.getElementById("gameCanvas");
@@ -16,6 +18,7 @@ const restartBtn = document.getElementById("restartBtn");
 
 const player = { x: 0, y: 0, speed: 2 };
 let zombies = [];
+let turrets = [];
 let walls = [];
 let spawnTimer = 0;
 let gameOver = false;
@@ -23,10 +26,14 @@ const keys = {};
 
 function resetGame() {
   zombies = [];
+  turrets = [];
   walls = generateWalls(canvas.width, canvas.height, 4);
   const spawn = spawnPlayer(canvas.width, canvas.height, walls);
   player.x = spawn.x;
   player.y = spawn.y;
+  for (let i = 0; i < 3; i++) {
+    turrets.push(spawnTurret(canvas.width, canvas.height, walls));
+  }
   spawnTimer = 0;
   gameOver = false;
   restartBtn.style.display = "none";
@@ -78,6 +85,8 @@ function update() {
       restartBtn.style.display = "block";
     }
   });
+
+  updateTurrets(turrets, zombies);
 }
 
 function render() {
@@ -97,6 +106,13 @@ function render() {
   zombies.forEach((z) => {
     ctx.beginPath();
     ctx.arc(z.x, z.y, 10, 0, Math.PI * 2);
+    ctx.fill();
+  });
+
+  ctx.fillStyle = "blue";
+  turrets.forEach((t) => {
+    ctx.beginPath();
+    ctx.arc(t.x, t.y, 8, 0, Math.PI * 2);
     ctx.fill();
   });
 

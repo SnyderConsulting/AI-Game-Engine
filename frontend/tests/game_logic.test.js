@@ -13,6 +13,10 @@ import {
   findPath,
   hasLineOfSight,
   moveZombie,
+  spawnTurret,
+  updateTurrets,
+  TURRET_RANGE,
+  TURRET_RELOAD,
 } from "../src/game_logic.js";
 
 test("moveTowards moves entity toward target", () => {
@@ -123,4 +127,20 @@ test("moveZombie follows grid path when blocked", () => {
   // First path step keeps x ~20 but increases y toward open space
   assert(Math.abs(zombie.x - 20) < 1e-6);
   assert(zombie.y > 20);
+});
+
+test("spawnTurret avoids walls", () => {
+  const wall = { x: 40, y: 40, size: SEGMENT_SIZE };
+  for (let i = 0; i < 20; i++) {
+    const t = spawnTurret(80, 80, [wall]);
+    assert.strictEqual(circleRectColliding(t, wall, 10), false);
+  }
+});
+
+test("updateTurrets removes zombie in range", () => {
+  const turret = { x: 0, y: 0, cooldown: 0 };
+  const zombies = [{ x: TURRET_RANGE - 1, y: 0 }];
+  updateTurrets([turret], zombies);
+  assert.strictEqual(zombies.length, 0);
+  assert.strictEqual(turret.cooldown, TURRET_RELOAD);
 });

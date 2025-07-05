@@ -46,6 +46,26 @@ export function spawnPlayer(width, height, walls = []) {
 export const SEGMENT_SIZE = 40;
 export const TRIGGER_DISTANCE = 60;
 
+export function createTurret(x, y) {
+  return { x, y, cooldown: 0 };
+}
+
+export const TURRET_RANGE = 100;
+export const TURRET_RELOAD = 30;
+
+export function spawnTurret(width, height, walls = []) {
+  let turret;
+  let attempts = 0;
+  do {
+    turret = createTurret(Math.random() * width, Math.random() * height);
+    attempts++;
+  } while (
+    attempts < 20 &&
+    walls.some((w) => circleRectColliding(turret, w, 10))
+  );
+  return turret;
+}
+
 export function generateWalls(width, height, count = 3) {
   const walls = [];
   const gridW = Math.floor(width / SEGMENT_SIZE);
@@ -202,4 +222,20 @@ export function moveZombie(zombie, player, walls, speed, width, height) {
     y: ny * SEGMENT_SIZE + SEGMENT_SIZE / 2,
   };
   moveTowards(zombie, target, speed);
+}
+
+export function updateTurrets(turrets, zombies) {
+  turrets.forEach((t) => {
+    if (t.cooldown > 0) {
+      t.cooldown--;
+      return;
+    }
+    const idx = zombies.findIndex(
+      (z) => Math.hypot(z.x - t.x, z.y - t.y) <= TURRET_RANGE,
+    );
+    if (idx !== -1) {
+      zombies.splice(idx, 1);
+      t.cooldown = TURRET_RELOAD;
+    }
+  });
 }
