@@ -149,9 +149,31 @@ test("updateTurrets removes zombie in range", () => {
 
 test("attackZombies damages and removes zombies", () => {
   const player = { x: 0, y: 0 };
+  const dir = { x: 1, y: 0 };
   const zombies = [{ x: 5, y: 0, health: ZOMBIE_MAX_HEALTH }];
-  attackZombies(player, zombies, 1, 10);
+  attackZombies(player, zombies, 1, 10, dir, Math.PI / 2, 0);
   assert.strictEqual(zombies[0].health, ZOMBIE_MAX_HEALTH - 1);
-  attackZombies(player, zombies, 1, 10);
+  attackZombies(player, zombies, 1, 10, dir, Math.PI / 2, 0);
   assert.strictEqual(zombies.length, 0);
+});
+
+test("attackZombies ignores zombies outside the swing arc", () => {
+  const player = { x: 0, y: 0 };
+  const dir = { x: 1, y: 0 };
+  const zombies = [
+    { x: 5, y: 0, health: 1 },
+    { x: -5, y: 0, health: 1 },
+  ];
+  attackZombies(player, zombies, 1, 10, dir, Math.PI / 2, 0);
+  assert.strictEqual(zombies.length, 1);
+  assert.strictEqual(zombies[0].x < 0, true);
+});
+
+test("attackZombies applies knockback", () => {
+  const player = { x: 0, y: 0 };
+  const dir = { x: 1, y: 0 };
+  const zombies = [{ x: 10, y: 0, health: 2 }];
+  attackZombies(player, zombies, 1, 15, dir, Math.PI / 2, 5);
+  assert(zombies[0].x > 10);
+  assert.strictEqual(zombies[0].health, 1);
 });

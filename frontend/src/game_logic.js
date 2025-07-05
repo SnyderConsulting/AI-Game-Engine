@@ -268,11 +268,42 @@ export function spawnWeapon(width, height, walls = []) {
   return weapon;
 }
 
-export function attackZombies(player, zombies, damage = 1, range = 20) {
+export function attackZombies(
+  player,
+  zombies,
+  damage = 1,
+  range = 30,
+  direction = null,
+  arc = Math.PI / 2,
+  knockback = 0,
+) {
+  const cosHalf = Math.cos(arc / 2);
+  const dirNorm = direction
+    ? (() => {
+        const len = Math.hypot(direction.x, direction.y);
+        if (len === 0) return null;
+        return { x: direction.x / len, y: direction.y / len };
+      })()
+    : null;
+
   for (let i = zombies.length - 1; i >= 0; i--) {
     const z = zombies[i];
-    if (Math.hypot(z.x - player.x, z.y - player.y) <= range) {
+    const dx = z.x - player.x;
+    const dy = z.y - player.y;
+    const dist = Math.hypot(dx, dy);
+    if (dist > range) continue;
+
+    let withinArc = true;
+    if (dirNorm) {
+      withinArc = (dx * dirNorm.x + dy * dirNorm.y) / dist >= cosHalf;
+    }
+
+    if (withinArc) {
       z.health -= damage;
+      if (knockback && dist > 0) {
+        z.x += (dx / dist) * knockback;
+        z.y += (dy / dist) * knockback;
+      }
       if (z.health <= 0) {
         zombies.splice(i, 1);
       }
