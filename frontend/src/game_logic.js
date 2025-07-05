@@ -111,16 +111,37 @@ export function findPath(start, goal, walls, width, height) {
   return path;
 }
 
+export function lineIntersectsLine(x1, y1, x2, y2, x3, y3, x4, y4) {
+  const denom = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4);
+  if (denom === 0) return false;
+  const t = ((x1 - x3) * (y3 - y4) - (y1 - y3) * (x3 - x4)) / denom;
+  const u = -((x1 - x2) * (y1 - y3) - (y1 - y2) * (x1 - x3)) / denom;
+  return t >= 0 && t <= 1 && u >= 0 && u <= 1;
+}
+
+export function lineIntersectsRect(p1, p2, rect, pad = 0) {
+  const x1 = rect.x - pad;
+  const y1 = rect.y - pad;
+  const x2 = rect.x + rect.size + pad;
+  const y2 = rect.y + rect.size + pad;
+  // top
+  if (lineIntersectsLine(p1.x, p1.y, p2.x, p2.y, x1, y1, x2, y1)) return true;
+  // bottom
+  if (lineIntersectsLine(p1.x, p1.y, p2.x, p2.y, x1, y2, x2, y2)) return true;
+  // left
+  if (lineIntersectsLine(p1.x, p1.y, p2.x, p2.y, x1, y1, x1, y2)) return true;
+  // right
+  if (lineIntersectsLine(p1.x, p1.y, p2.x, p2.y, x2, y1, x2, y2)) return true;
+  return false;
+}
+
+export function hasLineOfSight(start, end, walls, radius = 0) {
+  return !walls.some((w) => lineIntersectsRect(start, end, w, radius));
+}
+
 export function moveZombie(zombie, player, walls, speed, width, height) {
-  const path = findPath(zombie, player, walls, width, height);
-  if (path.length > 1) {
-    const [nx, ny] = path[1];
-    const target = {
-      x: nx * SEGMENT_SIZE + SEGMENT_SIZE / 2,
-      y: ny * SEGMENT_SIZE + SEGMENT_SIZE / 2,
-    };
-    moveTowards(zombie, target, speed);
-  } else {
+  if (hasLineOfSight(zombie, player, walls, 10)) {
     moveTowards(zombie, player, speed);
+    return;
   }
 }
