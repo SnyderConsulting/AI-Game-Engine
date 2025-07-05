@@ -17,6 +17,8 @@ import {
   updateTurrets,
   TURRET_RANGE,
   TURRET_RELOAD,
+  attackZombies,
+  ZOMBIE_MAX_HEALTH,
 } from "../src/game_logic.js";
 
 test("moveTowards moves entity toward target", () => {
@@ -143,4 +145,13 @@ test("updateTurrets removes zombie in range", () => {
   updateTurrets([turret], zombies);
   assert.strictEqual(zombies.length, 0);
   assert.strictEqual(turret.cooldown, TURRET_RELOAD);
+});
+
+test("attackZombies damages and removes zombies", () => {
+  const player = { x: 0, y: 0 };
+  const zombies = [{ x: 5, y: 0, health: ZOMBIE_MAX_HEALTH }];
+  attackZombies(player, zombies, 1, 10);
+  assert.strictEqual(zombies[0].health, ZOMBIE_MAX_HEALTH - 1);
+  attackZombies(player, zombies, 1, 10);
+  assert.strictEqual(zombies.length, 0);
 });
