@@ -1,12 +1,22 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
+  <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>AI Game Engine</title>
-</head>
-<body>
-    <canvas id="gameCanvas" width="800" height="600"></canvas>
-    <script type="module" src="/src/main.js"></script>
-</body>
+  </head>
+  <body>
+    <h1>Tic Tac Toe</h1>
+    <div
+      id="board"
+      style="
+        display: grid;
+        grid-template-columns: repeat(3, 100px);
+        grid-gap: 5px;
+      "
+    ></div>
+    <p id="status"></p>
+    <button id="newGame">New Game</button>
+    <script type="module" src="/src/tictactoe.js"></script>
+  </body>
 </html>
