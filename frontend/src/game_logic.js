@@ -1,5 +1,5 @@
 export function createZombie(x, y) {
-  return { x, y };
+  return { x, y, triggered: false, wanderAngle: 0, wanderTimer: 0 };
 }
 
 export function moveTowards(entity, target, speed) {
@@ -31,6 +31,7 @@ export function spawnZombie(width, height, walls = []) {
 }
 
 export const SEGMENT_SIZE = 40;
+export const TRIGGER_DISTANCE = 60;
 
 export function generateWalls(width, height, count = 3) {
   const walls = [];
@@ -139,7 +140,37 @@ export function hasLineOfSight(start, end, walls, radius = 0) {
   return !walls.some((w) => lineIntersectsRect(start, end, w, radius));
 }
 
+export function wanderZombie(zombie, walls, width, height, speed = 0.2) {
+  if (zombie.wanderTimer <= 0) {
+    zombie.wanderAngle = Math.random() * Math.PI * 2;
+    zombie.wanderTimer = 30 + Math.random() * 30;
+  }
+  const prevX = zombie.x;
+  const prevY = zombie.y;
+  zombie.x += Math.cos(zombie.wanderAngle) * speed;
+  zombie.y += Math.sin(zombie.wanderAngle) * speed;
+  zombie.x = Math.max(10, Math.min(width - 10, zombie.x));
+  zombie.y = Math.max(10, Math.min(height - 10, zombie.y));
+  if (walls.some((w) => circleRectColliding(zombie, w, 10))) {
+    zombie.x = prevX;
+    zombie.y = prevY;
+    zombie.wanderTimer = 0;
+  } else {
+    zombie.wanderTimer--;
+  }
+}
+
 export function moveZombie(zombie, player, walls, speed, width, height) {
+  const dist = Math.hypot(player.x - zombie.x, player.y - zombie.y);
+  if (!zombie.triggered) {
+    if (dist <= TRIGGER_DISTANCE && hasLineOfSight(zombie, player, walls, 10)) {
+      zombie.triggered = true;
+    } else {
+      wanderZombie(zombie, walls, width, height);
+      return;
+    }
+  }
+
   if (hasLineOfSight(zombie, player, walls, 10)) {
     moveTowards(zombie, player, speed);
     return;
