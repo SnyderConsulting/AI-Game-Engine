@@ -26,6 +26,8 @@ const player = {
   health: PLAYER_MAX_HEALTH,
   damageCooldown: 0,
   weapon: null,
+  facing: { x: 1, y: 0 },
+  swingTimer: 0,
 };
 let zombies = [];
 let turrets = [];
@@ -66,10 +68,20 @@ function update() {
   const prevX = player.x;
   const prevY = player.y;
 
-  if (keys["arrowup"] || keys["w"]) player.y -= player.speed;
-  if (keys["arrowdown"] || keys["s"]) player.y += player.speed;
-  if (keys["arrowleft"] || keys["a"]) player.x -= player.speed;
-  if (keys["arrowright"] || keys["d"]) player.x += player.speed;
+  let moveX = 0;
+  let moveY = 0;
+  if (keys["arrowup"] || keys["w"]) moveY -= player.speed;
+  if (keys["arrowdown"] || keys["s"]) moveY += player.speed;
+  if (keys["arrowleft"] || keys["a"]) moveX -= player.speed;
+  if (keys["arrowright"] || keys["d"]) moveX += player.speed;
+
+  player.x += moveX;
+  player.y += moveY;
+  if (moveX !== 0 || moveY !== 0) {
+    const len = Math.hypot(moveX, moveY);
+    player.facing.x = moveX / len;
+    player.facing.y = moveY / len;
+  }
 
   if (player.damageCooldown > 0) player.damageCooldown--;
 
@@ -86,8 +98,19 @@ function update() {
     weapon = null;
   }
 
-  if (player.weapon && keys[" "]) {
-    attackZombies(player, zombies, player.weapon.damage, 20);
+  if (player.swingTimer > 0) player.swingTimer--;
+
+  if (player.weapon && keys[" "] && player.swingTimer <= 0) {
+    attackZombies(
+      player,
+      zombies,
+      player.weapon.damage,
+      30,
+      player.facing,
+      Math.PI / 2,
+      5,
+    );
+    player.swingTimer = 10;
   }
 
   if (spawnTimer <= 0) {
@@ -134,6 +157,16 @@ function render() {
   ctx.beginPath();
   ctx.arc(player.x, player.y, 10, 0, Math.PI * 2);
   ctx.fill();
+
+  if (player.swingTimer > 0) {
+    ctx.strokeStyle = "orange";
+    ctx.lineWidth = 3;
+    const startA = Math.atan2(player.facing.y, player.facing.x) - Math.PI / 4;
+    ctx.beginPath();
+    ctx.arc(player.x, player.y, 25, startA, startA + Math.PI / 2);
+    ctx.stroke();
+    ctx.lineWidth = 1;
+  }
   ctx.fillStyle = "black";
   ctx.font = "16px sans-serif";
   ctx.textAlign = "left";
