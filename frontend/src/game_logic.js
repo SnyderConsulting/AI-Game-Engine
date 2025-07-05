@@ -144,15 +144,4 @@ export function moveZombie(zombie, player, walls, speed, width, height) {
     moveTowards(zombie, player, speed);
     return;
   }
-  const path = findPath(zombie, player, walls, width, height);
-  if (path.length > 1) {
-    const [nx, ny] = path[1];
-    const target = {
-      x: nx * SEGMENT_SIZE + SEGMENT_SIZE / 2,
-      y: ny * SEGMENT_SIZE + SEGMENT_SIZE / 2,
-    };
-    moveTowards(zombie, target, speed);
-  } else {
-    moveTowards(zombie, player, speed);
-  }
 }
