@@ -7,3 +7,5 @@ Key goals:
 - Maintain lightweight, modular code.
 - Keep documentation up to date with code changes.
 - Provide clear separation between frontend and backend components.
+- Includes a sample Tic Tac Toe game demonstrating basic client/server
+  interaction.
