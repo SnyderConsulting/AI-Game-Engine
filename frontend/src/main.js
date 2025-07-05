@@ -1,5 +1,6 @@
 import {
   spawnZombie,
+  spawnPlayer,
   moveZombie,
   moveTowards,
   isColliding,
@@ -13,7 +14,7 @@ const ctx = canvas.getContext("2d");
 
 const restartBtn = document.getElementById("restartBtn");
 
-const player = { x: canvas.width / 2, y: canvas.height / 2, speed: 2 };
+const player = { x: 0, y: 0, speed: 2 };
 let zombies = [];
 let walls = [];
 let spawnTimer = 0;
@@ -21,10 +22,11 @@ let gameOver = false;
 const keys = {};
 
 function resetGame() {
-  player.x = canvas.width / 2;
-  player.y = canvas.height / 2;
   zombies = [];
   walls = generateWalls(canvas.width, canvas.height, 4);
+  const spawn = spawnPlayer(canvas.width, canvas.height, walls);
+  player.x = spawn.x;
+  player.y = spawn.y;
   spawnTimer = 0;
   gameOver = false;
   restartBtn.style.display = "none";
