@@ -5,9 +5,11 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "serve": "vite preview"
+    "serve": "vite preview",
+    "test": "node --test"
   },
   "devDependencies": {
     "vite": "^7.0.2"
-  }
+  },
+  "type": "module"
 }

@@ -9,7 +9,7 @@ This repository provides:
 * Decoupled frontend and backend components.
 * Clear architectural guidelines in the `docs/` folder.
 * Agent contribution rules in `AGENT_GUIDELINES.md`.
-* A simple Tic Tac Toe example demonstrating client/server gameplay.
+* A simple Zombie Survival example demonstrating basic canvas gameplay.
 
 ## Repository Structure
 

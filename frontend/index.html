@@ -3,20 +3,16 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>AI Game Engine</title>
+    <title>Zombie Survival</title>
   </head>
   <body>
-    <h1>Tic Tac Toe</h1>
-    <div
-      id="board"
-      style="
-        display: grid;
-        grid-template-columns: repeat(3, 100px);
-        grid-gap: 5px;
-      "
-    ></div>
-    <p id="status"></p>
-    <button id="newGame">New Game</button>
-    <script type="module" src="/src/tictactoe.js"></script>
+    <canvas
+      id="gameCanvas"
+      width="600"
+      height="400"
+      style="border: 1px solid #000"
+    ></canvas>
+    <p>Use WASD or arrow keys to move. Avoid the red zombies!</p>
+    <script type="module" src="/src/main.js"></script>
   </body>
 </html>
