@@ -1,11 +1,13 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
+  createZombie,
   moveTowards,
   isColliding,
   generateWalls,
   circleRectColliding,
   SEGMENT_SIZE,
+  TRIGGER_DISTANCE,
   spawnZombie,
   findPath,
   hasLineOfSight,
@@ -76,8 +78,27 @@ test("hasLineOfSight detects blockage", () => {
   assert.strictEqual(hasLineOfSight(start, end, [], 10), true);
 });
 
+test("zombie triggers when player is near and visible", () => {
+  const zombie = createZombie(0, 0);
+  const player = { x: TRIGGER_DISTANCE - 10, y: 0 };
+  moveZombie(zombie, player, [], 1, 100, 100);
+  assert.strictEqual(zombie.triggered, true);
+  assert(zombie.x > 0);
+});
+
+test("zombie wanders slowly when player is far", () => {
+  const zombie = createZombie(20, 20);
+  zombie.wanderAngle = 0;
+  zombie.wanderTimer = 10;
+  const player = { x: 95, y: 20 };
+  moveZombie(zombie, player, [], 1, 100, 100);
+  assert.strictEqual(zombie.triggered, false);
+  assert(zombie.x > 20 && zombie.x < 21);
+});
+
 test("moveZombie goes straight when unobstructed", () => {
-  const zombie = { x: 0, y: 0 };
+  const zombie = createZombie(0, 0);
+  zombie.triggered = true;
   const player = { x: 30, y: 0 };
   moveZombie(zombie, player, [], 1, 100, 100);
   assert(Math.abs(zombie.x - 1) < 1e-6);
@@ -85,7 +106,8 @@ test("moveZombie goes straight when unobstructed", () => {
 });
 
 test("moveZombie follows grid path when blocked", () => {
-  const zombie = { x: 20, y: 20 };
+  const zombie = createZombie(20, 20);
+  zombie.triggered = true;
   const player = { x: 80, y: 10 };
   const wall = { x: 40, y: 0, size: SEGMENT_SIZE };
   moveZombie(zombie, player, [wall], 1, 120, 80);
