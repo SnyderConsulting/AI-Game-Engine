@@ -144,4 +144,56 @@ export function moveZombie(zombie, player, walls, speed, width, height) {
     moveTowards(zombie, player, speed);
     return;
   }
+
+  // Determine which wall is blocking the direct path to the player
+  let block = null;
+  let minDist = Infinity;
+  for (const w of walls) {
+    if (lineIntersectsRect(zombie, player, w, 10)) {
+      // approximate distance from zombie to wall center
+      const cx = w.x + w.size / 2;
+      const cy = w.y + w.size / 2;
+      const dist = Math.hypot(zombie.x - cx, zombie.y - cy);
+      if (dist < minDist) {
+        minDist = dist;
+        block = w;
+      }
+    }
+  }
+
+  if (!block) {
+    // Shouldn't happen, but fallback to direct movement
+    moveTowards(zombie, player, speed);
+    return;
+  }
+
+  // Candidate corners just outside of the blocking wall
+  const pad = 10;
+  const corners = [
+    { x: block.x - pad, y: block.y - pad },
+    { x: block.x + block.size + pad, y: block.y - pad },
+    { x: block.x - pad, y: block.y + block.size + pad },
+    { x: block.x + block.size + pad, y: block.y + block.size + pad },
+  ];
+
+  let target = null;
+  let best = Infinity;
+
+  for (const c of corners) {
+    if (!hasLineOfSight(zombie, c, walls, 10)) continue;
+    const cost =
+      Math.hypot(zombie.x - c.x, zombie.y - c.y) +
+      Math.hypot(player.x - c.x, player.y - c.y);
+    if (cost < best) {
+      best = cost;
+      target = c;
+    }
+  }
+
+  if (target) {
+    moveTowards(zombie, target, speed);
+  } else {
+    // If all corners are blocked, slowly head straight toward the player
+    moveTowards(zombie, player, speed);
+  }
 }
