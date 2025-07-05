@@ -1,5 +1,14 @@
+export const ZOMBIE_MAX_HEALTH = 2;
 export function createZombie(x, y) {
-  return { x, y, triggered: false, wanderAngle: 0, wanderTimer: 0 };
+  return {
+    x,
+    y,
+    triggered: false,
+    wanderAngle: 0,
+    wanderTimer: 0,
+    health: ZOMBIE_MAX_HEALTH,
+    attackCooldown: 0,
+  };
 }
 
 export function moveTowards(entity, target, speed) {
@@ -42,6 +51,8 @@ export function spawnPlayer(width, height, walls = []) {
   );
   return player;
 }
+
+export const PLAYER_MAX_HEALTH = 3;
 
 export const SEGMENT_SIZE = 40;
 export const TRIGGER_DISTANCE = 60;
@@ -238,4 +249,33 @@ export function updateTurrets(turrets, zombies) {
       t.cooldown = TURRET_RELOAD;
     }
   });
+}
+
+export function createWeapon(x, y, damage = 1) {
+  return { x, y, damage };
+}
+
+export function spawnWeapon(width, height, walls = []) {
+  let weapon;
+  let attempts = 0;
+  do {
+    weapon = createWeapon(Math.random() * width, Math.random() * height);
+    attempts++;
+  } while (
+    attempts < 20 &&
+    walls.some((w) => circleRectColliding(weapon, w, 10))
+  );
+  return weapon;
+}
+
+export function attackZombies(player, zombies, damage = 1, range = 20) {
+  for (let i = zombies.length - 1; i >= 0; i--) {
+    const z = zombies[i];
+    if (Math.hypot(z.x - player.x, z.y - player.y) <= range) {
+      z.health -= damage;
+      if (z.health <= 0) {
+        zombies.splice(i, 1);
+      }
+    }
+  }
 }
