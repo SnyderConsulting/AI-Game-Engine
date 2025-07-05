@@ -17,8 +17,17 @@ export function isColliding(a, b, radius) {
   return Math.hypot(dx, dy) < radius * 2;
 }
 
-export function spawnZombie(width, height) {
-  return createZombie(Math.random() * width, Math.random() * height);
+export function spawnZombie(width, height, walls = []) {
+  let zombie;
+  let attempts = 0;
+  do {
+    zombie = createZombie(Math.random() * width, Math.random() * height);
+    attempts++;
+  } while (
+    attempts < 20 &&
+    walls.some((w) => circleRectColliding(zombie, w, 10))
+  );
+  return zombie;
 }
 
 export const SEGMENT_SIZE = 40;
@@ -56,4 +65,94 @@ export function circleRectColliding(circle, rect, radius) {
   const dx = circle.x - closestX;
   const dy = circle.y - closestY;
   return dx * dx + dy * dy < radius * radius;
+}
+
+export function findPath(start, goal, walls, width, height) {
+  const gridW = Math.floor(width / SEGMENT_SIZE);
+  const gridH = Math.floor(height / SEGMENT_SIZE);
+  const sx = Math.floor(start.x / SEGMENT_SIZE);
+  const sy = Math.floor(start.y / SEGMENT_SIZE);
+  const gx = Math.floor(goal.x / SEGMENT_SIZE);
+  const gy = Math.floor(goal.y / SEGMENT_SIZE);
+  const blocked = new Set(
+    walls.map((w) => `${w.x / SEGMENT_SIZE},${w.y / SEGMENT_SIZE}`),
+  );
+  const queue = [[sx, sy]];
+  const key = (x, y) => `${x},${y}`;
+  const cameFrom = new Map([[key(sx, sy), null]]);
+  const dirs = [
+    [1, 0],
+    [-1, 0],
+    [0, 1],
+    [0, -1],
+  ];
+  while (queue.length) {
+    const [cx, cy] = queue.shift();
+    if (cx === gx && cy === gy) break;
+    for (const [dx, dy] of dirs) {
+      const nx = cx + dx;
+      const ny = cy + dy;
+      if (nx < 0 || ny < 0 || nx >= gridW || ny >= gridH) continue;
+      const nKey = key(nx, ny);
+      if (blocked.has(nKey) || cameFrom.has(nKey)) continue;
+      cameFrom.set(nKey, [cx, cy]);
+      queue.push([nx, ny]);
+    }
+  }
+
+  const path = [];
+  let cur = [gx, gy];
+  while (cur) {
+    path.unshift(cur);
+    const parent = cameFrom.get(key(cur[0], cur[1]));
+    cur = parent || null;
+  }
+  if (path[0][0] !== sx || path[0][1] !== sy) return [];
+  return path;
+}
+
+export function lineIntersectsLine(x1, y1, x2, y2, x3, y3, x4, y4) {
+  const denom = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4);
+  if (denom === 0) return false;
+  const t = ((x1 - x3) * (y3 - y4) - (y1 - y3) * (x3 - x4)) / denom;
+  const u = -((x1 - x2) * (y1 - y3) - (y1 - y2) * (x1 - x3)) / denom;
+  return t >= 0 && t <= 1 && u >= 0 && u <= 1;
+}
+
+export function lineIntersectsRect(p1, p2, rect, pad = 0) {
+  const x1 = rect.x - pad;
+  const y1 = rect.y - pad;
+  const x2 = rect.x + rect.size + pad;
+  const y2 = rect.y + rect.size + pad;
+  // top
+  if (lineIntersectsLine(p1.x, p1.y, p2.x, p2.y, x1, y1, x2, y1)) return true;
+  // bottom
+  if (lineIntersectsLine(p1.x, p1.y, p2.x, p2.y, x1, y2, x2, y2)) return true;
+  // left
+  if (lineIntersectsLine(p1.x, p1.y, p2.x, p2.y, x1, y1, x1, y2)) return true;
+  // right
+  if (lineIntersectsLine(p1.x, p1.y, p2.x, p2.y, x2, y1, x2, y2)) return true;
+  return false;
+}
+
+export function hasLineOfSight(start, end, walls, radius = 0) {
+  return !walls.some((w) => lineIntersectsRect(start, end, w, radius));
+}
+
+export function moveZombie(zombie, player, walls, speed, width, height) {
+  if (hasLineOfSight(zombie, player, walls, 10)) {
+    moveTowards(zombie, player, speed);
+    return;
+  }
+  const path = findPath(zombie, player, walls, width, height);
+  if (path.length > 1) {
+    const [nx, ny] = path[1];
+    const target = {
+      x: nx * SEGMENT_SIZE + SEGMENT_SIZE / 2,
+      y: ny * SEGMENT_SIZE + SEGMENT_SIZE / 2,
+    };
+    moveTowards(zombie, target, speed);
+  } else {
+    moveTowards(zombie, player, speed);
+  }
 }

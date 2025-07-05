@@ -6,6 +6,10 @@ import {
   generateWalls,
   circleRectColliding,
   SEGMENT_SIZE,
+  spawnZombie,
+  findPath,
+  hasLineOfSight,
+  moveZombie,
 } from "../src/game_logic.js";
 
 test("moveTowards moves entity toward target", () => {
@@ -40,4 +44,42 @@ test("circleRectColliding detects intersection", () => {
   assert.strictEqual(circleRectColliding(circle, rect, 10), true);
   const far = { x: 10, y: 10 };
   assert.strictEqual(circleRectColliding(far, rect, 10), false);
+});
+
+test("spawnZombie avoids walls", () => {
+  const wall = { x: 40, y: 40, size: SEGMENT_SIZE };
+  for (let i = 0; i < 20; i++) {
+    const z = spawnZombie(80, 80, [wall]);
+    assert.strictEqual(circleRectColliding(z, wall, 10), false);
+  }
+});
+
+test("findPath navigates around walls", () => {
+  const walls = [{ x: 40, y: 0, size: SEGMENT_SIZE }];
+  const start = { x: 10, y: 10 };
+  const end = { x: 90, y: 50 };
+  const path = findPath(start, end, walls, 120, 80);
+  assert(path.length > 0);
+  const blocked = new Set(
+    walls.map((w) => `${w.x / SEGMENT_SIZE},${w.y / SEGMENT_SIZE}`),
+  );
+  path.forEach((c) => {
+    assert.strictEqual(blocked.has(`${c[0]},${c[1]}`), false);
+  });
+});
+
+test("hasLineOfSight detects blockage", () => {
+  const wall = { x: 40, y: 0, size: SEGMENT_SIZE };
+  const start = { x: 10, y: 10 };
+  const end = { x: 90, y: 10 };
+  assert.strictEqual(hasLineOfSight(start, end, [wall], 10), false);
+  assert.strictEqual(hasLineOfSight(start, end, [], 10), true);
+});
+
+test("moveZombie goes straight when unobstructed", () => {
+  const zombie = { x: 0, y: 0 };
+  const player = { x: 30, y: 0 };
+  moveZombie(zombie, player, [], 1, 100, 100);
+  assert(Math.abs(zombie.x - 1) < 1e-6);
+  assert(Math.abs(zombie.y) < 1e-6);
 });
