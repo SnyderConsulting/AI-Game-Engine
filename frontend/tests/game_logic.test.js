@@ -84,12 +84,12 @@ test("moveZombie goes straight when unobstructed", () => {
   assert(Math.abs(zombie.y) < 1e-6);
 });
 
-test("moveZombie heads toward nearest corner when blocked", () => {
+test("moveZombie follows grid path when blocked", () => {
   const zombie = { x: 20, y: 20 };
   const player = { x: 80, y: 10 };
   const wall = { x: 40, y: 0, size: SEGMENT_SIZE };
-  moveZombie(zombie, player, [wall], 1, 100, 100);
-  // Should steer up toward the top-left corner of the wall
-  assert(zombie.x > 20);
-  assert(zombie.y < 20);
+  moveZombie(zombie, player, [wall], 1, 120, 80);
+  // First path step keeps x ~20 but increases y toward open space
+  assert(Math.abs(zombie.x - 20) < 1e-6);
+  assert(zombie.y > 20);
 });
