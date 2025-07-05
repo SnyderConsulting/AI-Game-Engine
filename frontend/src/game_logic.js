@@ -4,6 +4,9 @@ export function createZombie(x, y) {
     x,
     y,
     triggered: false,
+    // Used by passive roaming logic
+    dest: null,
+    idleTimer: 0,
     wanderAngle: 0,
     wanderTimer: 0,
     health: ZOMBIE_MAX_HEALTH,
@@ -50,6 +53,37 @@ export function spawnPlayer(width, height, walls = []) {
     walls.some((w) => circleRectColliding(player, w, 10))
   );
   return player;
+}
+
+export function randomOpenPosition(width, height, walls = []) {
+  let p;
+  let attempts = 0;
+  do {
+    p = { x: Math.random() * width, y: Math.random() * height };
+    attempts++;
+  } while (attempts < 20 && walls.some((w) => circleRectColliding(p, w, 10)));
+  return p;
+}
+
+export function createSpawnDoor(width, height, walls = []) {
+  let door;
+  do {
+    const edge = Math.floor(Math.random() * 4);
+    if (edge === 0) {
+      door = { x: Math.random() * width, y: 0 };
+    } else if (edge === 1) {
+      door = { x: Math.random() * width, y: height };
+    } else if (edge === 2) {
+      door = { x: 0, y: Math.random() * height };
+    } else {
+      door = { x: width, y: Math.random() * height };
+    }
+  } while (walls.some((w) => circleRectColliding(door, w, 10)));
+  return door;
+}
+
+export function spawnZombieAtDoor(door) {
+  return createZombie(door.x, door.y);
 }
 
 export const PLAYER_MAX_HEALTH = 3;
@@ -185,23 +219,34 @@ export function hasLineOfSight(start, end, walls, radius = 0) {
 }
 
 export function wanderZombie(zombie, walls, width, height, speed = 0.2) {
-  if (zombie.wanderTimer <= 0) {
-    zombie.wanderAngle = Math.random() * Math.PI * 2;
-    zombie.wanderTimer = 30 + Math.random() * 30;
+  if (zombie.idleTimer > 0) {
+    zombie.idleTimer--;
+    return;
   }
-  const prevX = zombie.x;
-  const prevY = zombie.y;
-  zombie.x += Math.cos(zombie.wanderAngle) * speed;
-  zombie.y += Math.sin(zombie.wanderAngle) * speed;
-  zombie.x = Math.max(10, Math.min(width - 10, zombie.x));
-  zombie.y = Math.max(10, Math.min(height - 10, zombie.y));
-  if (walls.some((w) => circleRectColliding(zombie, w, 10))) {
-    zombie.x = prevX;
-    zombie.y = prevY;
-    zombie.wanderTimer = 0;
-  } else {
-    zombie.wanderTimer--;
+
+  if (!zombie.dest) {
+    zombie.dest = randomOpenPosition(width, height, walls);
   }
+
+  const dist = Math.hypot(zombie.dest.x - zombie.x, zombie.dest.y - zombie.y);
+  if (dist < 5) {
+    zombie.dest = null;
+    zombie.idleTimer = 60 + Math.random() * 120;
+    return;
+  }
+
+  const path = findPath(zombie, zombie.dest, walls, width, height);
+  if (path.length < 2) {
+    moveTowards(zombie, zombie.dest, speed);
+    return;
+  }
+
+  const [nx, ny] = path[1];
+  const target = {
+    x: nx * SEGMENT_SIZE + SEGMENT_SIZE / 2,
+    y: ny * SEGMENT_SIZE + SEGMENT_SIZE / 2,
+  };
+  moveTowards(zombie, target, speed);
 }
 
 export function moveZombie(zombie, player, walls, speed, width, height) {

@@ -12,6 +12,8 @@ import {
   attackZombies,
   PLAYER_MAX_HEALTH,
   ZOMBIE_MAX_HEALTH,
+  createSpawnDoor,
+  spawnZombieAtDoor,
 } from "./game_logic.js";
 
 const canvas = document.getElementById("gameCanvas");
@@ -34,6 +36,7 @@ let turrets = [];
 let walls = [];
 let weapon = null;
 let spawnTimer = 0;
+let spawnDoor = null;
 let gameOver = false;
 const keys = {};
 
@@ -41,6 +44,7 @@ function resetGame() {
   zombies = [];
   turrets = [];
   walls = generateWalls(canvas.width, canvas.height, 4);
+  spawnDoor = createSpawnDoor(canvas.width, canvas.height, walls);
   const spawn = spawnPlayer(canvas.width, canvas.height, walls);
   player.x = spawn.x;
   player.y = spawn.y;
@@ -114,8 +118,8 @@ function update() {
   }
 
   if (spawnTimer <= 0) {
-    zombies.push(spawnZombie(canvas.width, canvas.height, walls));
-    spawnTimer = 60;
+    zombies.push(spawnZombieAtDoor(spawnDoor));
+    spawnTimer = 180 + Math.random() * 120;
   } else {
     spawnTimer--;
   }
@@ -152,6 +156,10 @@ function render() {
   walls.forEach((w) => {
     ctx.fillRect(w.x, w.y, SEGMENT_SIZE, SEGMENT_SIZE);
   });
+  if (spawnDoor) {
+    ctx.fillStyle = "brown";
+    ctx.fillRect(spawnDoor.x - 5, spawnDoor.y - 5, 10, 10);
+  }
 
   ctx.fillStyle = "green";
   ctx.beginPath();

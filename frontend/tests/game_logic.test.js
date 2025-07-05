@@ -19,6 +19,7 @@ import {
   TURRET_RELOAD,
   attackZombies,
   ZOMBIE_MAX_HEALTH,
+  spawnZombieAtDoor,
 } from "../src/game_logic.js";
 
 test("moveTowards moves entity toward target", () => {
@@ -103,12 +104,18 @@ test("zombie triggers when player is near and visible", () => {
 
 test("zombie wanders slowly when player is far", () => {
   const zombie = createZombie(20, 20);
-  zombie.wanderAngle = 0;
-  zombie.wanderTimer = 10;
   const player = { x: 95, y: 20 };
   moveZombie(zombie, player, [], 1, 100, 100);
   assert.strictEqual(zombie.triggered, false);
-  assert(zombie.x > 20 && zombie.x < 21);
+  const dist = Math.hypot(zombie.x - 20, zombie.y - 20);
+  assert(dist > 0 && dist <= 0.3);
+});
+
+test("spawnZombieAtDoor spawns at door location", () => {
+  const door = { x: 0, y: 50 };
+  const z = spawnZombieAtDoor(door);
+  assert.strictEqual(z.x, door.x);
+  assert.strictEqual(z.y, door.y);
 });
 
 test("moveZombie goes straight when unobstructed", () => {
