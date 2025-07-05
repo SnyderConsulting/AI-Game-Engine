@@ -30,6 +30,19 @@ export function spawnZombie(width, height, walls = []) {
   return zombie;
 }
 
+export function spawnPlayer(width, height, walls = []) {
+  let player;
+  let attempts = 0;
+  do {
+    player = { x: Math.random() * width, y: Math.random() * height };
+    attempts++;
+  } while (
+    attempts < 20 &&
+    walls.some((w) => circleRectColliding(player, w, 10))
+  );
+  return player;
+}
+
 export const SEGMENT_SIZE = 40;
 export const TRIGGER_DISTANCE = 60;
 

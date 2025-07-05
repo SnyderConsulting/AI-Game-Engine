@@ -9,6 +9,7 @@ import {
   SEGMENT_SIZE,
   TRIGGER_DISTANCE,
   spawnZombie,
+  spawnPlayer,
   findPath,
   hasLineOfSight,
   moveZombie,
@@ -53,6 +54,14 @@ test("spawnZombie avoids walls", () => {
   for (let i = 0; i < 20; i++) {
     const z = spawnZombie(80, 80, [wall]);
     assert.strictEqual(circleRectColliding(z, wall, 10), false);
+  }
+});
+
+test("spawnPlayer avoids walls", () => {
+  const wall = { x: 40, y: 40, size: SEGMENT_SIZE };
+  for (let i = 0; i < 20; i++) {
+    const p = spawnPlayer(80, 80, [wall]);
+    assert.strictEqual(circleRectColliding(p, wall, 10), false);
   }
 });
 
