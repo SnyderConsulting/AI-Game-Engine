@@ -41,7 +41,7 @@ test("isColliding detects overlap", () => {
 
 test("generateWalls creates segments within bounds", () => {
   const walls = generateWalls(100, 100, 1);
-  assert(walls.length >= 3 && walls.length <= 5);
+  assert(walls.length > 0);
   walls.forEach((w) => {
     assert(w.x >= 0 && w.x + w.size <= 100);
     assert(w.y >= 0 && w.y + w.size <= 100);

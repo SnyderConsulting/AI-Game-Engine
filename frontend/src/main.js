@@ -22,7 +22,10 @@ import {
   moveItem,
   moveToHotbar,
   consumeHotbarItem,
+  countItem,
+  removeItem,
 } from "./inventory.js";
+import { RECIPES, canCraft, craftRecipe } from "./crafting.js";
 
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
@@ -35,6 +38,8 @@ const inventoryDiv = document.getElementById("inventory");
 const inventoryGrid = document.getElementById("inventoryGrid");
 const hotbarDiv = document.getElementById("hotbar");
 const pickupMsg = document.getElementById("pickupMessage");
+const craftingDiv = document.getElementById("craftingMenu");
+const craftingList = document.getElementById("craftingList");
 
 const player = {
   x: 0,
@@ -57,6 +62,7 @@ const keys = {};
 let loopStarted = false;
 let inventory = createInventory();
 let inventoryOpen = false;
+let craftingOpen = false;
 let worldItems = [];
 let pickupMessageTimer = 0;
 
@@ -128,6 +134,47 @@ function renderHotbar() {
   });
 }
 
+function renderCrafting() {
+  craftingList.innerHTML = "";
+  RECIPES.forEach((r) => {
+    const hasAny = Object.keys(r.ingredients).some(
+      (id) => countItem(inventory, id) > 0,
+    );
+    if (!hasAny) return;
+    const container = document.createElement("div");
+    container.style.border = "1px solid white";
+    container.style.padding = "4px";
+    container.style.marginBottom = "4px";
+    const title = document.createElement("div");
+    title.textContent = r.title;
+    title.style.fontWeight = "bold";
+    container.appendChild(title);
+    const desc = document.createElement("div");
+    desc.textContent = r.description;
+    container.appendChild(desc);
+    const req = document.createElement("div");
+    Object.entries(r.ingredients).forEach(([id, qty]) => {
+      const line = document.createElement("div");
+      line.textContent = `${id} ${countItem(inventory, id)}/${qty}`;
+      req.appendChild(line);
+    });
+    container.appendChild(req);
+    if (canCraft(inventory, r)) {
+      container.style.cursor = "pointer";
+      container.addEventListener("click", () => {
+        const added = craftRecipe(inventory, r);
+        if (!added) {
+          worldItems.push({ x: player.x, y: player.y, type: r.id, count: 1 });
+        }
+        renderInventory();
+        renderCrafting();
+        renderHotbar();
+      });
+    }
+    craftingList.appendChild(container);
+  });
+}
+
 function dropLoot(zombie) {
   if (!zombie) return;
   ZOMBIE_DROPS.forEach((d) => {
@@ -170,8 +217,10 @@ function resetGame() {
   inventory = createInventory();
   worldItems = [];
   inventoryOpen = false;
+  craftingOpen = false;
   pickupMessageTimer = 0;
   inventoryDiv.style.display = "none";
+  craftingDiv.style.display = "none";
   pickupMsg.textContent = "";
   renderInventory();
   renderHotbar();
@@ -195,6 +244,15 @@ window.addEventListener("keydown", (e) => {
     inventoryOpen = !inventoryOpen;
     inventoryDiv.style.display = inventoryOpen ? "block" : "none";
     if (inventoryOpen) renderInventory();
+    if (!inventoryOpen) {
+      craftingOpen = false;
+      craftingDiv.style.display = "none";
+    }
+  }
+  if (e.key.toLowerCase() === "c" && inventoryOpen) {
+    craftingOpen = !craftingOpen;
+    craftingDiv.style.display = craftingOpen ? "block" : "none";
+    if (craftingOpen) renderCrafting();
   }
   if (/^[1-5]$/.test(e.key)) {
     const used = consumeHotbarItem(inventory, parseInt(e.key) - 1);

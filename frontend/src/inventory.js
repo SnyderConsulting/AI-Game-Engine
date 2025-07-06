@@ -52,3 +52,26 @@ export function consumeHotbarItem(inv, hotbarIndex) {
   }
   return item;
 }
+
+export function countItem(inv, itemId) {
+  let total = 0;
+  [...inv.slots, ...inv.hotbar].forEach((slot) => {
+    if (slot.item === itemId) total += slot.count;
+  });
+  return total;
+}
+
+export function removeItem(inv, itemId, amount = 1) {
+  for (const source of [inv.slots, inv.hotbar]) {
+    for (const slot of source) {
+      if (slot.item === itemId) {
+        const take = Math.min(amount, slot.count);
+        slot.count -= take;
+        amount -= take;
+        if (slot.count === 0) slot.item = null;
+        if (amount === 0) return true;
+      }
+    }
+  }
+  return amount === 0;
+}
