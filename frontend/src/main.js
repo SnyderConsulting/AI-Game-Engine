@@ -26,6 +26,8 @@ import {
   consumeHotbarItem,
   countItem,
   removeItem,
+  setActiveHotbar,
+  getActiveHotbarItem,
 } from "./inventory.js";
 import { RECIPES, canCraft, craftRecipe } from "./crafting.js";
 
@@ -209,7 +211,7 @@ function renderHotbar() {
         div.appendChild(count);
       }
     }
-    if (slot.item === (player.weapon && player.weapon.type)) {
+    if (i === inventory.active) {
       div.style.borderColor = "yellow";
     }
     div.addEventListener("click", () => {
@@ -251,20 +253,42 @@ function renderCrafting() {
     container.style.border = "1px solid white";
     container.style.padding = "4px";
     container.style.marginBottom = "4px";
+    container.style.display = "flex";
+    container.style.gap = "6px";
+
+    const icon = document.createElement("img");
+    if (ITEM_ICONS[r.id]) {
+      icon.src = ITEM_ICONS[r.id];
+    }
+    icon.style.width = "40px";
+    icon.style.height = "40px";
+    container.appendChild(icon);
+
+    const info = document.createElement("div");
     const title = document.createElement("div");
     title.textContent = r.title;
     title.style.fontWeight = "bold";
-    container.appendChild(title);
+    info.appendChild(title);
     const desc = document.createElement("div");
     desc.textContent = r.description;
-    container.appendChild(desc);
+    info.appendChild(desc);
+
     const req = document.createElement("div");
     Object.entries(r.ingredients).forEach(([id, qty]) => {
       const line = document.createElement("div");
-      line.textContent = `${id} ${countItem(inventory, id)}/${qty}`;
+      const ingIcon = document.createElement("img");
+      if (ITEM_ICONS[id]) ingIcon.src = ITEM_ICONS[id];
+      ingIcon.style.width = "16px";
+      ingIcon.style.height = "16px";
+      ingIcon.style.marginRight = "4px";
+      line.appendChild(ingIcon);
+      const text = document.createElement("span");
+      text.textContent = `${countItem(inventory, id)}/${qty}`;
+      line.appendChild(text);
       req.appendChild(line);
     });
-    container.appendChild(req);
+    info.appendChild(req);
+    container.appendChild(info);
     if (canCraft(inventory, r)) {
       container.style.cursor = "pointer";
       container.addEventListener("click", () => {
@@ -436,20 +460,16 @@ window.addEventListener("keydown", (e) => {
   }
   if (/^[1-5]$/.test(e.key)) {
     const idx = parseInt(e.key) - 1;
+    setActiveHotbar(inventory, idx);
     const slot = inventory.hotbar[idx];
-    if (!slot.item) return;
-    if (slot.item === "baseball_bat") {
-      player.weapon = { type: "baseball_bat", damage: 1 };
-      renderHotbar();
-    } else {
-      player.weapon = null;
+    if (slot.item && slot.item !== "baseball_bat") {
       const used = consumeHotbarItem(inventory, idx);
       if (used) {
         pickupMsg.textContent = `Used ${used}`;
         pickupMessageTimer = 60;
-        renderHotbar();
       }
     }
+    renderHotbar();
   }
 });
 window.addEventListener("keyup", (e) => {
@@ -458,6 +478,13 @@ window.addEventListener("keyup", (e) => {
 
 function update() {
   if (gameOver) return;
+
+  const activeSlot = getActiveHotbarItem(inventory);
+  if (activeSlot && activeSlot.item === "baseball_bat") {
+    player.weapon = { type: "baseball_bat", damage: 1 };
+  } else {
+    player.weapon = null;
+  }
 
   const prevX = player.x;
   const prevY = player.y;
@@ -491,7 +518,6 @@ function update() {
     addItem(inventory, weapon.type, 1);
     const idx = inventory.slots.findIndex((s) => s.item === weapon.type);
     if (idx !== -1) moveToHotbar(inventory, idx, 0);
-    player.weapon = { type: weapon.type, damage: weapon.damage };
     weapon = null;
     renderInventory();
     renderHotbar();

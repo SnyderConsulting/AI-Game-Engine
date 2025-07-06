@@ -9,6 +9,8 @@ import {
   moveFromHotbar,
   countItem,
   removeItem,
+  setActiveHotbar,
+  getActiveHotbarItem,
 } from "../src/inventory.js";
 
 test("addItem stacks and fills slots", () => {
@@ -64,4 +66,14 @@ test("moveFromHotbar moves item back to inventory", () => {
   moveFromHotbar(inv, 0, 1);
   assert.strictEqual(inv.hotbar[0].item, null);
   assert.strictEqual(inv.slots[1].item, "core");
+});
+
+test("setActiveHotbar updates active slot", () => {
+  const inv = createInventory();
+  addItem(inv, "core", 1);
+  moveToHotbar(inv, 0, 2);
+  setActiveHotbar(inv, 2);
+  const slot = getActiveHotbarItem(inv);
+  assert.strictEqual(inv.active, 2);
+  assert.strictEqual(slot.item, "core");
 });

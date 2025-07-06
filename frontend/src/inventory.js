@@ -4,7 +4,7 @@ export function createInventory(rows = 5, cols = 5) {
     count: 0,
   }));
   const hotbar = Array.from({ length: 5 }, () => ({ item: null, count: 0 }));
-  return { rows, cols, slots, hotbar };
+  return { rows, cols, slots, hotbar, active: 0 };
 }
 
 export function addItem(inv, itemId, amount = 1) {
@@ -86,4 +86,12 @@ export function removeItem(inv, itemId, amount = 1) {
     }
   }
   return amount === 0;
+}
+
+export function setActiveHotbar(inv, index) {
+  inv.active = Math.max(0, Math.min(inv.hotbar.length - 1, index));
+}
+
+export function getActiveHotbarItem(inv) {
+  return inv.hotbar[inv.active];
 }
