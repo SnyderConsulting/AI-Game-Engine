@@ -36,6 +36,7 @@ import { createFireball, updateFireballs } from "./spells.js";
 import { unlockFireball } from "./skill_tree.js";
 import { makeDraggable } from "./ui.js";
 
+import { applyConsumableEffect, CONSUMABLE_ITEMS } from "./items.js";
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
@@ -129,6 +130,7 @@ let inventoryPos = { left: null, top: null };
 let craftingPos = { left: null, top: null };
 let skillTreePos = { left: null, top: null };
 
+let prevUse = false;
 const LOOT_TIME = 180; // 3 seconds at 60fps
 const LOOT_DIST = 20;
 const MEDKIT_CHANCE = 0.64;
@@ -199,14 +201,6 @@ function renderInventory() {
     div.addEventListener("contextmenu", (e) => {
       e.preventDefault();
       const slot = inventory.slots[i];
-      if (slot.item === "mutation_serum_fire") {
-        removeItem(inventory, "mutation_serum_fire", 1);
-        player.fireMutationPoints += 1;
-        pickupMsg.textContent = "Gained 1 Mutation Point";
-        pickupMessageTimer = 60;
-        renderInventory();
-        return;
-      }
       const idx = inventory.hotbar.findIndex((s) => !s.item);
       moveToHotbar(inventory, i, idx === -1 ? 0 : idx);
       selectedSlot = null;
@@ -278,15 +272,6 @@ function renderHotbar() {
     });
     div.addEventListener("contextmenu", (e) => {
       e.preventDefault();
-      const slot = inventory.hotbar[i];
-      if (slot.item === "mutation_serum_fire") {
-        consumeHotbarItem(inventory, i);
-        player.fireMutationPoints += 1;
-        pickupMsg.textContent = "Gained 1 Mutation Point";
-        pickupMessageTimer = 60;
-        renderInventory();
-        return;
-      }
       const idx = inventory.slots.findIndex((s) => !s.item);
       if (idx !== -1) {
         moveFromHotbar(inventory, i, idx);
@@ -573,20 +558,6 @@ window.addEventListener("keydown", (e) => {
   if (/^[1-5]$/.test(key)) {
     const idx = parseInt(key) - 1;
     setActiveHotbar(inventory, idx);
-    const slot = inventory.hotbar[idx];
-    if (slot.item && !["baseball_bat", "fireball_spell"].includes(slot.item)) {
-      const used = consumeHotbarItem(inventory, idx);
-      if (used) {
-        if (used === "medkit") {
-          player.health = Math.min(PLAYER_MAX_HEALTH, player.health + 3);
-          renderInventory();
-        } else if (used === "mutation_serum_fire") {
-          player.fireMutationPoints += 1;
-        }
-        pickupMsg.textContent = `Used ${used}`;
-        pickupMessageTimer = 60;
-      }
-    }
     renderHotbar();
   }
 });
@@ -604,6 +575,10 @@ function update() {
     player.weapon = null;
   }
 
+  const useHeld = keys[" "] || keys.mouse;
+  const useTrigger = useHeld && !prevUse;
+  prevUse = useHeld;
+
   const prevX = player.x;
   const prevY = player.y;
 
@@ -616,10 +591,12 @@ function update() {
 
   player.x += moveX;
   player.y += moveY;
-  if (moveX !== 0 || moveY !== 0) {
-    const len = Math.hypot(moveX, moveY);
-    player.facing.x = moveX / len;
-    player.facing.y = moveY / len;
+  const toMouseX = mousePos.x - player.x;
+  const toMouseY = mousePos.y - player.y;
+  const len = Math.hypot(toMouseX, toMouseY);
+  if (len > 0) {
+    player.facing.x = toMouseX / len;
+    player.facing.y = toMouseY / len;
   }
 
   if (player.damageCooldown > 0) player.damageCooldown--;
@@ -714,7 +691,7 @@ function update() {
     activeSlot &&
     activeSlot.item === "fireball_spell" &&
     player.abilities.fireball &&
-    keys[" "] &&
+    useHeld &&
     fireballCooldown <= 0
   ) {
     if (countItem(inventory, "fire_core") > 0) {
@@ -731,7 +708,7 @@ function update() {
     }
   }
 
-  if (player.weapon && keys[" "] && player.swingTimer <= 0) {
+  if (player.weapon && useHeld && player.swingTimer <= 0) {
     const killed = attackZombiesWithKills(
       player,
       zombies,
@@ -743,6 +720,17 @@ function update() {
     );
     killed.forEach((z) => dropLoot(z, worldItems));
     player.swingTimer = 10;
+  }
+
+  if (useTrigger && activeSlot && CONSUMABLE_ITEMS.has(activeSlot.item)) {
+    const used = consumeHotbarItem(inventory, inventory.active);
+    if (used) {
+      applyConsumableEffect(player, used);
+      pickupMsg.textContent = `Used ${used}`;
+      pickupMessageTimer = 60;
+      renderInventory();
+      renderHotbar();
+    }
   }
 
   if (spawnTimer <= 0) {
@@ -775,6 +763,9 @@ function update() {
     pickupMessageTimer--;
     if (pickupMessageTimer === 0) pickupMsg.textContent = "";
   }
+
+  if (craftingOpen) renderCrafting();
+  if (skillTreeOpen) renderSkillTree();
 }
 
 function render() {
@@ -848,12 +839,15 @@ function render() {
     }
     const img = z.variant === "fire" ? fireZombieSprite : zombieSprite;
     drawSprite(ctx, img, z.x, z.y, z.facing);
-    ctx.fillStyle = "black";
     ctx.fillRect(z.x - 10, z.y - 16, 20, 4);
     ctx.fillStyle = "lime";
     ctx.fillRect(z.x - 10, z.y - 16, (z.health / ZOMBIE_MAX_HEALTH) * 20, 4);
   });
 
+  ctx.strokeStyle = "white";
+  ctx.beginPath();
+  ctx.arc(mousePos.x, mousePos.y, 5, 0, Math.PI * 2);
+  ctx.stroke();
   // The overlay div already shows the Game Over message
   // and restart button, so nothing is drawn here when
   // the player loses.
@@ -870,4 +864,11 @@ canvas.addEventListener("mousemove", (e) => {
   const rect = canvas.getBoundingClientRect();
   mousePos.x = e.clientX - rect.left;
   mousePos.y = e.clientY - rect.top;
+});
+
+canvas.addEventListener("mousedown", (e) => {
+  if (e.button === 0) keys.mouse = true;
+});
+canvas.addEventListener("mouseup", (e) => {
+  if (e.button === 0) keys.mouse = false;
 });
