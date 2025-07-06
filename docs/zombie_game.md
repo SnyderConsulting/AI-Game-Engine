@@ -33,3 +33,7 @@ Zombies may drop **core**, **flesh**, or **teeth** when killed. Walk over a drop
 ## Crafting
 
 Press **C** to open the crafting menu at any time. Only recipes for which you own at least one ingredient are shown. Each entry now displays an icon of the resulting item along with icons for all required materials and their counts. Clicking a recipe crafts it instantly if you have enough parts. Ingredients are removed from the inventory and the crafted item is placed there as well, or dropped at your feet if no space remains.
+
+## Containers
+
+Brown containers are scattered around the arena. Stand next to one and hold **F** to loot it. A progress bar appears in the center of the screen for three seconds while you search. When the bar completes the container opens. Each container can hold a single Medkit with a 64% chance. If found and your inventory has space, the Medkit is automatically added. Otherwise, the container keeps the item and displays "Inventory Full". Empty containers show "Container Empty" and cannot be looted again. Opened containers appear faded so you know they have been searched.
