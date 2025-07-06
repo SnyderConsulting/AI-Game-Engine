@@ -19,7 +19,10 @@ test("dropLoot gives fire core for fire zombie", () => {
   withRandomValues([0.5, 1, 1, 1], () => {
     dropLoot({ x: 0, y: 0, variant: "fire" }, world);
   });
-  assert.strictEqual(world.some((it) => it.type === "fire_core"), true);
+  assert.strictEqual(
+    world.some((it) => it.type === "fire_core"),
+    true,
+  );
 });
 
 test("dropLoot does not give fire core for normal zombie", () => {
@@ -27,5 +30,8 @@ test("dropLoot does not give fire core for normal zombie", () => {
   withRandomValues([0.5, 1, 1, 1], () => {
     dropLoot({ x: 0, y: 0, variant: "normal" }, world);
   });
-  assert.strictEqual(world.some((it) => it.type === "fire_core"), false);
+  assert.strictEqual(
+    world.some((it) => it.type === "fire_core"),
+    false,
+  );
 });

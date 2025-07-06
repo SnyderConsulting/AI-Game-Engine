@@ -34,6 +34,7 @@ import {
 import { RECIPES, canCraft, craftRecipe } from "./crafting.js";
 import { dropLoot } from "./loot.js";
 import { createFireball, updateFireballs } from "./spells.js";
+import { unlockFireball } from "./skill_tree.js";
 
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
@@ -54,6 +55,11 @@ const craftingBar = document.getElementById("craftingBar");
 const craftingClose = document.getElementById("craftingClose");
 const lootDiv = document.getElementById("lootProgress");
 const lootFill = document.getElementById("lootFill");
+const skillTreeDiv = document.getElementById("skillTree");
+const skillTreeBar = document.getElementById("skillTreeBar");
+const skillTreeClose = document.getElementById("skillTreeClose");
+const skillPointsDiv = document.getElementById("skillPoints");
+const skillGrid = document.getElementById("skillGrid");
 
 // Mapping from item ids to icon paths. If an item is missing, a
 // question mark will be shown instead of an image.
@@ -66,7 +72,7 @@ const ITEM_ICONS = {
   transformation_syringe: "assets/transformation_syringe.png",
   fire_core: "assets/fire_core.png",
   mutation_serum_fire: "assets/mutation_serum_fire.png",
-  fireball_spell: "assets/fire_core.png",
+  fireball_spell: "assets/skill_fireball.png",
   baseball_bat: "assets/baseball_bat.png",
   medkit: "assets/medkit.png",
 };
@@ -114,6 +120,7 @@ let loopStarted = false;
 let inventory = createInventory();
 let inventoryOpen = false;
 let craftingOpen = false;
+let skillTreeOpen = false;
 let worldItems = [];
 let fireballs = [];
 let fireballCooldown = 0;
@@ -121,6 +128,7 @@ let mousePos = { x: 0, y: 0 };
 let pickupMessageTimer = 0;
 let inventoryPos = { left: null, top: null };
 let craftingPos = { left: null, top: null };
+let skillTreePos = { left: null, top: null };
 
 const LOOT_TIME = 180; // 3 seconds at 60fps
 const LOOT_DIST = 20;
@@ -194,23 +202,10 @@ function renderInventory() {
       const slot = inventory.slots[i];
       if (slot.item === "mutation_serum_fire") {
         removeItem(inventory, "mutation_serum_fire", 1);
-        player.abilities.fireball = true;
-        if (
-          !inventory.hotbar.some((s) => s.item === "fireball_spell") &&
-          !inventory.slots.some((s) => s.item === "fireball_spell")
-        ) {
-          const added = addItem(inventory, "fireball_spell", 1);
-          if (added) {
-            const idx = inventory.slots.findIndex(
-              (s) => s.item === "fireball_spell",
-            );
-            if (idx !== -1) moveToHotbar(inventory, idx, 0);
-          }
-        }
-        pickupMsg.textContent = "Fireball unlocked!";
+        player.fireMutationPoints += 1;
+        pickupMsg.textContent = "Gained 1 Mutation Point";
         pickupMessageTimer = 60;
         renderInventory();
-        renderHotbar();
         return;
       }
       const idx = inventory.hotbar.findIndex((s) => !s.item);
@@ -287,23 +282,10 @@ function renderHotbar() {
       const slot = inventory.hotbar[i];
       if (slot.item === "mutation_serum_fire") {
         consumeHotbarItem(inventory, i);
-        player.abilities.fireball = true;
-        if (
-          !inventory.hotbar.some((s) => s.item === "fireball_spell") &&
-          !inventory.slots.some((s) => s.item === "fireball_spell")
-        ) {
-          const added = addItem(inventory, "fireball_spell", 1);
-          if (added) {
-            const idxAdd = inventory.slots.findIndex(
-              (s) => s.item === "fireball_spell",
-            );
-            if (idxAdd !== -1) moveToHotbar(inventory, idxAdd, i);
-          }
-        }
-        pickupMsg.textContent = "Fireball unlocked!";
+        player.fireMutationPoints += 1;
+        pickupMsg.textContent = "Gained 1 Mutation Point";
         pickupMessageTimer = 60;
         renderInventory();
-        renderHotbar();
         return;
       }
       const idx = inventory.slots.findIndex((s) => !s.item);
@@ -426,6 +408,70 @@ function toggleCrafting(open) {
   }
 }
 
+function renderSkillTree() {
+  skillPointsDiv.textContent = `Fire Mutation Points Available: ${player.fireMutationPoints}`;
+  skillGrid.innerHTML = "";
+  const tile = document.createElement("div");
+  Object.assign(tile.style, {
+    width: "60px",
+    height: "60px",
+    border: "1px solid white",
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "center",
+    alignItems: "center",
+    cursor:
+      player.abilities.fireball || player.fireMutationPoints < 2
+        ? "default"
+        : "pointer",
+    background: player.abilities.fireball ? "rgba(255,255,255,0.1)" : "none",
+  });
+  const img = document.createElement("img");
+  img.src = ITEM_ICONS["fireball_spell"];
+  img.style.width = "48px";
+  img.style.height = "48px";
+  img.style.opacity = player.abilities.fireball ? 1 : 0.5;
+  tile.appendChild(img);
+  const label = document.createElement("div");
+  label.style.fontSize = "10px";
+  label.textContent = player.abilities.fireball ? "Unlocked" : "Cost: 2";
+  tile.appendChild(label);
+  if (!player.abilities.fireball && player.fireMutationPoints >= 2) {
+    tile.addEventListener("click", () => {
+      if (unlockFireball(player, inventory, addItem, moveToHotbar)) {
+        renderInventory();
+        renderHotbar();
+        renderSkillTree();
+      }
+    });
+  }
+  skillGrid.appendChild(tile);
+}
+
+function toggleSkillTree(open) {
+  if (open === skillTreeOpen) return;
+  skillTreeOpen = open;
+  if (skillTreeOpen) {
+    if (skillTreePos.left !== null) {
+      skillTreeDiv.style.left = skillTreePos.left + "px";
+      skillTreeDiv.style.top = skillTreePos.top + "px";
+      skillTreeDiv.style.transform = "none";
+    } else {
+      skillTreeDiv.style.left = "50%";
+      skillTreeDiv.style.top = "50%";
+      skillTreeDiv.style.transform = "translate(-50%, -50%)";
+    }
+    skillTreeDiv.style.display = "block";
+    renderSkillTree();
+  } else {
+    skillTreePos = {
+      left: skillTreeDiv.offsetLeft,
+      top: skillTreeDiv.offsetTop,
+    };
+    skillTreeDiv.style.display = "none";
+  }
+}
+
 function makeDraggable(div, bar, closeBtn, posStore, toggleFn) {
   let dragging = false;
   let offsetX = 0;
@@ -529,6 +575,13 @@ makeDraggable(
   craftingPos,
   toggleCrafting,
 );
+makeDraggable(
+  skillTreeDiv,
+  skillTreeBar,
+  skillTreeClose,
+  skillTreePos,
+  toggleSkillTree,
+);
 
 window.addEventListener("keydown", (e) => {
   const key = e.key.toLowerCase();
@@ -538,6 +591,9 @@ window.addEventListener("keydown", (e) => {
   }
   if (key === "c") {
     toggleCrafting(!craftingOpen);
+  }
+  if (key === "k") {
+    toggleSkillTree(!skillTreeOpen);
   }
   if (/^[1-5]$/.test(key)) {
     const idx = parseInt(key) - 1;
@@ -550,19 +606,7 @@ window.addEventListener("keydown", (e) => {
           player.health = Math.min(PLAYER_MAX_HEALTH, player.health + 3);
           renderInventory();
         } else if (used === "mutation_serum_fire") {
-          player.abilities.fireball = true;
-          if (
-            !inventory.hotbar.some((s) => s.item === "fireball_spell") &&
-            !inventory.slots.some((s) => s.item === "fireball_spell")
-          ) {
-            const added = addItem(inventory, "fireball_spell", 1);
-            if (added) {
-              const idxAdd = inventory.slots.findIndex(
-                (s) => s.item === "fireball_spell",
-              );
-              if (idxAdd !== -1) moveToHotbar(inventory, idxAdd, idx);
-            }
-          }
+          player.fireMutationPoints += 1;
         }
         pickupMsg.textContent = `Used ${used}`;
         pickupMessageTimer = 60;
