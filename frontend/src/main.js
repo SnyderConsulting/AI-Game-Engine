@@ -36,10 +36,14 @@ const gameOverDiv = document.getElementById("gameOver");
 const newGameBtn = document.getElementById("newGameBtn");
 const inventoryDiv = document.getElementById("inventory");
 const inventoryGrid = document.getElementById("inventoryGrid");
+const inventoryBar = document.getElementById("inventoryBar");
+const inventoryClose = document.getElementById("inventoryClose");
 const hotbarDiv = document.getElementById("hotbar");
 const pickupMsg = document.getElementById("pickupMessage");
 const craftingDiv = document.getElementById("craftingMenu");
 const craftingList = document.getElementById("craftingList");
+const craftingBar = document.getElementById("craftingBar");
+const craftingClose = document.getElementById("craftingClose");
 
 const player = {
   x: 0,
@@ -65,6 +69,8 @@ let inventoryOpen = false;
 let craftingOpen = false;
 let worldItems = [];
 let pickupMessageTimer = 0;
+let inventoryPos = { left: null, top: null };
+let craftingPos = { left: null, top: null };
 
 const ZOMBIE_DROPS = [
   { type: "core", chance: 0.1 },
@@ -84,6 +90,7 @@ function renderInventory() {
       height: "40px",
       border: "1px solid white",
       color: "white",
+      background: "rgba(0,0,0,0.7)",
       display: "flex",
       justifyContent: "center",
       alignItems: "center",
@@ -175,6 +182,74 @@ function renderCrafting() {
   });
 }
 
+function toggleInventory(open) {
+  if (open === inventoryOpen) return;
+  inventoryOpen = open;
+  if (inventoryOpen) {
+    if (inventoryPos.left !== null) {
+      inventoryDiv.style.left = inventoryPos.left + "px";
+      inventoryDiv.style.top = inventoryPos.top + "px";
+      inventoryDiv.style.transform = "none";
+    } else {
+      inventoryDiv.style.left = "50%";
+      inventoryDiv.style.top = "50%";
+      inventoryDiv.style.transform = "translate(-50%, -50%)";
+    }
+    inventoryDiv.style.display = "block";
+    renderInventory();
+  } else {
+    inventoryDiv.style.display = "none";
+    inventoryPos = {
+      left: inventoryDiv.offsetLeft,
+      top: inventoryDiv.offsetTop,
+    };
+  }
+}
+
+function toggleCrafting(open) {
+  if (open === craftingOpen) return;
+  craftingOpen = open;
+  if (craftingOpen) {
+    if (craftingPos.left !== null) {
+      craftingDiv.style.left = craftingPos.left + "px";
+      craftingDiv.style.top = craftingPos.top + "px";
+      craftingDiv.style.transform = "none";
+    } else {
+      craftingDiv.style.left = "50%";
+      craftingDiv.style.top = "50%";
+      craftingDiv.style.transform = "translate(-50%, -50%)";
+    }
+    craftingDiv.style.display = "block";
+    renderCrafting();
+  } else {
+    craftingDiv.style.display = "none";
+    craftingPos = { left: craftingDiv.offsetLeft, top: craftingDiv.offsetTop };
+  }
+}
+
+function makeDraggable(div, bar, closeBtn, posStore, toggleFn) {
+  let dragging = false;
+  let offsetX = 0;
+  let offsetY = 0;
+  bar.addEventListener("mousedown", (e) => {
+    dragging = true;
+    offsetX = e.clientX - div.offsetLeft;
+    offsetY = e.clientY - div.offsetTop;
+    div.style.transform = "none";
+  });
+  document.addEventListener("mousemove", (e) => {
+    if (!dragging) return;
+    posStore.left = e.clientX - offsetX;
+    posStore.top = e.clientY - offsetY;
+    div.style.left = posStore.left + "px";
+    div.style.top = posStore.top + "px";
+  });
+  document.addEventListener("mouseup", () => {
+    dragging = false;
+  });
+  closeBtn.addEventListener("click", () => toggleFn(false));
+}
+
 function dropLoot(zombie) {
   if (!zombie) return;
   ZOMBIE_DROPS.forEach((d) => {
@@ -237,22 +312,28 @@ newGameBtn.addEventListener("click", () => {
 });
 
 window.addEventListener("resize", resizeCanvas);
+makeDraggable(
+  inventoryDiv,
+  inventoryBar,
+  inventoryClose,
+  inventoryPos,
+  toggleInventory,
+);
+makeDraggable(
+  craftingDiv,
+  craftingBar,
+  craftingClose,
+  craftingPos,
+  toggleCrafting,
+);
 
 window.addEventListener("keydown", (e) => {
   keys[e.key.toLowerCase()] = true;
   if (e.key === "i" || e.key === "e") {
-    inventoryOpen = !inventoryOpen;
-    inventoryDiv.style.display = inventoryOpen ? "block" : "none";
-    if (inventoryOpen) renderInventory();
-    if (!inventoryOpen) {
-      craftingOpen = false;
-      craftingDiv.style.display = "none";
-    }
+    toggleInventory(!inventoryOpen);
   }
-  if (e.key.toLowerCase() === "c" && inventoryOpen) {
-    craftingOpen = !craftingOpen;
-    craftingDiv.style.display = craftingOpen ? "block" : "none";
-    if (craftingOpen) renderCrafting();
+  if (e.key.toLowerCase() === "c") {
+    toggleCrafting(!craftingOpen);
   }
   if (/^[1-5]$/.test(e.key)) {
     const used = consumeHotbarItem(inventory, parseInt(e.key) - 1);

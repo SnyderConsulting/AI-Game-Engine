@@ -23,7 +23,7 @@ The arena contains a single melee weapon that can be picked up. Press the spaceb
 
 ## Inventory System
 
-Press **I** to open the 5x5 inventory grid. Items stack up to 10 per slot. A five slot hotbar sits at the bottom of the screen for quick use. Drag to rearrange items or right click to move them to the hotbar. Use the number keys **1-5** to use hotbar items.
+Press **I** to open the 5x5 inventory grid. Items stack up to 10 per slot. A five slot hotbar sits at the bottom of the screen for quick use and now appears on a dark background so it is easy to see. Drag to rearrange items or right click to move them to the hotbar. Use the number keys **1-5** to use hotbar items. Both the inventory and crafting windows can be dragged by their top bars and will remember their last position when closed.
 
 ## Zombie Drops
 
@@ -31,4 +31,4 @@ Zombies may drop **core**, **flesh**, or **teeth** when killed. Walk over a drop
 
 ## Crafting
 
-Press **C** while the inventory is open to view available recipes. Only recipes for which you own at least one ingredient are shown. Each entry lists the required materials and how many you currently hold. Clicking a recipe crafts it instantly if you have enough parts. Ingredients are removed from the inventory and the crafted item is placed there as well, or dropped at your feet if no space remains.
+Press **C** to open the crafting menu at any time. Only recipes for which you own at least one ingredient are shown. Each entry lists the required materials and how many you currently hold. Clicking a recipe crafts it instantly if you have enough parts. Ingredients are removed from the inventory and the crafted item is placed there as well, or dropped at your feet if no space remains.

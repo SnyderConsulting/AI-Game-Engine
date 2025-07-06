@@ -54,13 +54,37 @@
         left: 50%;
         transform: translate(-50%, -50%);
         background: rgba(0, 0, 0, 0.7);
-        padding: 8px;
+        padding: 0;
         display: none;
       "
     >
       <div
+        style="
+          display: flex;
+          justify-content: space-between;
+          background: rgba(255, 255, 255, 0.1);
+          cursor: move;
+          padding: 4px;
+          color: white;
+        "
+        id="inventoryBar"
+      >
+        <span>Inventory</span>
+        <button
+          id="inventoryClose"
+          style="background: none; border: none; color: white"
+        >
+          x
+        </button>
+      </div>
+      <div
         id="inventoryGrid"
-        style="display: grid; grid-template-columns: repeat(5, 40px); gap: 4px"
+        style="
+          display: grid;
+          grid-template-columns: repeat(5, 40px);
+          gap: 4px;
+          padding: 8px;
+        "
       ></div>
     </div>
     <div
@@ -71,13 +95,31 @@
         left: 50%;
         transform: translate(-50%, -50%);
         background: rgba(0, 0, 0, 0.7);
-        padding: 8px;
+        padding: 0;
         display: none;
         max-width: 300px;
         color: white;
       "
     >
-      <div id="craftingList"></div>
+      <div
+        style="
+          display: flex;
+          justify-content: space-between;
+          background: rgba(255, 255, 255, 0.1);
+          cursor: move;
+          padding: 4px;
+        "
+        id="craftingBar"
+      >
+        <span>Crafting</span>
+        <button
+          id="craftingClose"
+          style="background: none; border: none; color: white"
+        >
+          x
+        </button>
+      </div>
+      <div id="craftingList" style="padding: 8px"></div>
     </div>
     <div
       id="hotbar"
@@ -88,6 +130,10 @@
         transform: translateX(-50%);
         display: flex;
         gap: 4px;
+        background: rgba(0, 0, 0, 0.5);
+        padding: 4px;
+        border: 1px solid white;
+        border-radius: 4px;
       "
     ></div>
     <div
