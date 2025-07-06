@@ -19,7 +19,7 @@ The canvas now automatically resizes to fill the entire browser window so the ac
 Players now have a small health pool instead of dying instantly. A "Health" display shows the remaining points. Each zombie also has a simple green bar above its head to indicate remaining health.
 The on-screen control instructions are fixed to the bottom-left corner so they never cover the health readout.
 
-The arena contains a baseball bat that starts on the ground. It now appears using its bat icon rather than an orange dot. When collected it automatically occupies the first open hotbar slot. Only the item in the **active** hotbar slot can be used. The first slot is active by default and you can switch slots by pressing the number keys **1-5**. If the baseball bat is not in the active slot it cannot be swung. Press the spacebar to swing when it is equipped. Zombies hit by the swing take damage, are pushed back slightly, and can be struck from a small distance away. Turrets no longer spawn automatically; future updates will let players place them manually.
+The arena contains a baseball bat that starts on the ground. It now appears using its bat icon rather than an orange dot. When collected it automatically occupies the first open hotbar slot. Only the item in the **active** hotbar slot can be used. The first slot is active by default and you can switch slots by pressing the number keys **1-5**. If the baseball bat is not in the active slot it cannot be swung. Press the spacebar to swing when it is equipped. Zombies hit by the swing take damage, are pushed back slightly, and can be struck from a small distance away. Earlier builds included turrets, but they have been removed to simplify gameplay.
 
 ## Inventory System
 
