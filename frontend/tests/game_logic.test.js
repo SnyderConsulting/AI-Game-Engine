@@ -217,3 +217,13 @@ test("spawnContainers places non-colliding containers", () => {
     assert.strictEqual(c.type, "cardboard_box");
   });
 });
+
+test("moveZombie does not move through walls when path fails", () => {
+  const wall = { x: 40, y: 40, size: SEGMENT_SIZE };
+  const zombie = createZombie(30, 60);
+  zombie.triggered = true;
+  // Player is inside the wall so no path exists
+  const player = { x: 60, y: 60 };
+  moveZombie(zombie, player, [wall], 1, 120, 120);
+  assert.strictEqual(circleRectColliding(zombie, wall, 10), false);
+});

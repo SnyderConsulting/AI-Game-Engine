@@ -495,15 +495,16 @@ makeDraggable(
 );
 
 window.addEventListener("keydown", (e) => {
-  keys[e.key.toLowerCase()] = true;
-  if (e.key === "i" || e.key === "e") {
+  const key = e.key.toLowerCase();
+  keys[key] = true;
+  if (key === "i" || key === "e") {
     toggleInventory(!inventoryOpen);
   }
-  if (e.key.toLowerCase() === "c") {
+  if (key === "c") {
     toggleCrafting(!craftingOpen);
   }
-  if (/^[1-5]$/.test(e.key)) {
-    const idx = parseInt(e.key) - 1;
+  if (/^[1-5]$/.test(key)) {
+    const idx = parseInt(key) - 1;
     setActiveHotbar(inventory, idx);
     const slot = inventory.hotbar[idx];
     if (slot.item && slot.item !== "baseball_bat") {
@@ -661,10 +662,6 @@ function update() {
 
   zombies.forEach((z) => {
     moveZombie(z, player, walls, 1, canvas.width, canvas.height);
-    if (walls.some((w) => circleRectColliding(z, w, 10))) {
-      // fallback in case of pathfinding error
-      moveTowards(z, player, 1);
-    }
     if (z.attackCooldown > 0) z.attackCooldown--;
     if (
       isColliding(z, player, 10) &&
