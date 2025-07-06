@@ -38,6 +38,7 @@ import { unlockFireball } from "./skill_tree.js";
 import { makeDraggable } from "./ui.js";
 
 import { applyConsumableEffect, CONSUMABLE_ITEMS } from "./items.js";
+import { getItemCooldown } from "./cooldowns.js";
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
@@ -182,6 +183,20 @@ function renderInventory() {
           fontSize: "10px",
         });
         div.appendChild(count);
+      }
+
+      const { remaining, max } = getItemCooldown(slot.item);
+      if (max > 0 && remaining > 0) {
+        const deg = (remaining / max) * 360;
+        const overlay = document.createElement("div");
+        Object.assign(overlay.style, {
+          position: "absolute",
+          inset: "0",
+          borderRadius: "2px",
+          pointerEvents: "none",
+          background: `conic-gradient(from -90deg, rgba(128,128,128,0.6) 0deg ${deg}deg, transparent ${deg}deg 360deg)`,
+        });
+        div.appendChild(overlay);
       }
     }
     div.addEventListener("click", () => {
@@ -766,6 +781,8 @@ function update() {
   }
 
   if (skillTreeOpen) renderSkillTree();
+
+  renderHotbar();
 }
 
 function render() {
