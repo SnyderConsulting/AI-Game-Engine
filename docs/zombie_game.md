@@ -28,3 +28,7 @@ Press **I** to open the 5x5 inventory grid. Items stack up to 10 per slot. A fiv
 ## Zombie Drops
 
 Zombies may drop **core**, **flesh**, or **teeth** when killed. Walk over a dropped icon to collect it if you have space. Items remain on the ground when the inventory is full and a brief pickup message appears when collecting or using items.
+
+## Crafting
+
+Press **C** while the inventory is open to view available recipes. Only recipes for which you own at least one ingredient are shown. Each entry lists the required materials and how many you currently hold. Clicking a recipe crafts it instantly if you have enough parts. Ingredients are removed from the inventory and the crafted item is placed there as well, or dropped at your feet if no space remains.

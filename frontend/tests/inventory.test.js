@@ -5,6 +5,8 @@ import {
   addItem,
   consumeHotbarItem,
   moveToHotbar,
+  countItem,
+  removeItem,
 } from "../src/inventory.js";
 
 test("addItem stacks and fills slots", () => {
@@ -23,4 +25,21 @@ test("consumeHotbarItem reduces count", () => {
   const item = consumeHotbarItem(inv, 0);
   assert.strictEqual(item, "flesh");
   assert.strictEqual(inv.hotbar[0].item, null);
+});
+
+test("countItem totals across slots and hotbar", () => {
+  const inv = createInventory();
+  addItem(inv, "core", 3);
+  moveToHotbar(inv, 0, 0);
+  addItem(inv, "core", 2);
+  assert.strictEqual(countItem(inv, "core"), 5);
+});
+
+test("removeItem deducts from inventory", () => {
+  const inv = createInventory();
+  addItem(inv, "teeth", 2);
+  removeItem(inv, "teeth", 1);
+  assert.strictEqual(countItem(inv, "teeth"), 1);
+  removeItem(inv, "teeth", 1);
+  assert.strictEqual(countItem(inv, "teeth"), 0);
 });
