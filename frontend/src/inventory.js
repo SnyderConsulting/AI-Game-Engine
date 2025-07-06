@@ -52,8 +52,11 @@ export function moveItem(inv, fromIndex, toIndex) {
 
 export function moveToHotbar(inv, fromIndex, hotbarIndex) {
   const slot = inv.slots[fromIndex];
+  const dest = inv.hotbar[hotbarIndex];
+  if (!slot.item || dest.item) return false;
   inv.hotbar[hotbarIndex] = slot;
   inv.slots[fromIndex] = { item: null, count: 0 };
+  return true;
 }
 
 export function swapHotbar(inv, indexA, indexB) {
