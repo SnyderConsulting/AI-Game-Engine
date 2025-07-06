@@ -165,6 +165,49 @@
         style="height: 100%; width: 0; background: green"
       ></div>
     </div>
+    <div
+      id="skillTree"
+      style="
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: rgba(0, 0, 0, 0.7);
+        padding: 0;
+        display: none;
+        color: white;
+      "
+    >
+      <div
+        style="
+          display: flex;
+          justify-content: space-between;
+          background: rgba(255, 255, 255, 0.1);
+          cursor: move;
+          padding: 4px;
+        "
+        id="skillTreeBar"
+      >
+        <span>Skill Tree</span>
+        <button
+          id="skillTreeClose"
+          style="background: none; border: none; color: white"
+        >
+          x
+        </button>
+      </div>
+      <div style="padding: 8px">
+        <div id="skillPoints" style="margin-bottom: 8px"></div>
+        <div
+          id="skillGrid"
+          style="
+            display: grid;
+            grid-template-columns: repeat(3, 60px);
+            gap: 8px;
+          "
+        ></div>
+      </div>
+    </div>
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>

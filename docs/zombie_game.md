@@ -24,6 +24,7 @@ The arena contains a baseball bat that starts on the ground. It now appears usin
 ## Inventory System
 
 Press **I** (or **E**) to open the 5x5 inventory grid. Keys are matched case-insensitively so holding Shift won't prevent the menus from toggling. Items stack up to 10 per slot. A five slot hotbar sits at the bottom of the screen for quick access and now appears on a dark background so it is easy to see. Newly picked up items fill the first empty hotbar slot before using inventory space. Drag to rearrange items or right click to move them to the hotbar. Use the number keys **1-5** to change the active slot. Both the inventory and crafting windows can be dragged by their top bars and will remember their last position when closed.
+Press **K** to open the skill tree and spend mutation points.
 Inventory and hotbar slots now display the item icons found in the `assets` folder. If an icon is missing for an item, a `?` will appear instead.
 
 ## Zombie Drops
@@ -48,9 +49,8 @@ Some zombies emerge imbued with flame. These **Fire Zombies** appear with a red 
 
 Collecting Fire Cores unlocks a new recipe:
 
-- **Fire Mutation Serum** - Combine three Fire Cores to craft. Right-click the serum in your inventory or hotbar to inject it and gain the Fireball ability for the rest of the current game.
+- **Fire Mutation Serum** - Combine three Fire Cores to craft. Right-click the serum in your inventory or hotbar to inject it. Each injection grants one **Fire Mutation Point** you can spend in the skill tree (press **K** to open).
 
 ## Fireball Ability
 
-Injecting the serum adds a new _Fireball_ entry to your hotbar. Equip it like any other item by selecting the slot with the number keys. While equipped press **Spacebar** to hurl a blazing projectile toward the mouse cursor. Each cast consumes one Fire Core from your inventory. The Fireball travels about eight tiles, damaging zombies it hits and dissipating on impact with walls or enemies. If you attempt to cast without any cores a brief "Out of Fire Cores!" message appears.
-Starting a new game resets this ability so you must craft the serum again in future runs.
+Spend **2 Fire Mutation Points** in the skill tree to unlock the _Fireball_ ability. Unlocking places a Fireball icon in your hotbar. Equip it like any other item by selecting the slot with the number keys. While equipped press **Spacebar** to hurl a blazing projectile toward the mouse cursor. Each cast consumes one Fire Core from your inventory. The Fireball travels about eight tiles, damaging zombies it hits and dissipating on impact with walls or enemies. If you attempt to cast without any cores a brief "Out of Fire Cores!" message appears. Starting a new game resets points and skills so you must craft the serum again in future runs.
