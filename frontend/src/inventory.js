@@ -8,7 +8,8 @@ export function createInventory(rows = 5, cols = 5) {
 }
 
 export function addItem(inv, itemId, amount = 1) {
-  for (const slot of inv.slots) {
+  // First fill existing stacks across hotbar and inventory
+  for (const slot of [...inv.hotbar, ...inv.slots]) {
     if (slot.item === itemId && slot.count < 10) {
       const add = Math.min(amount, 10 - slot.count);
       slot.count += add;
@@ -16,6 +17,19 @@ export function addItem(inv, itemId, amount = 1) {
       if (amount === 0) return true;
     }
   }
+
+  // Next place new stacks into open hotbar slots
+  for (const slot of inv.hotbar) {
+    if (!slot.item) {
+      const add = Math.min(amount, 10);
+      slot.item = itemId;
+      slot.count = add;
+      amount -= add;
+      if (amount === 0) return true;
+    }
+  }
+
+  // Finally fill empty inventory slots
   for (const slot of inv.slots) {
     if (!slot.item) {
       const add = Math.min(amount, 10);
@@ -25,6 +39,7 @@ export function addItem(inv, itemId, amount = 1) {
       if (amount === 0) return true;
     }
   }
+
   return amount === 0;
 }
 

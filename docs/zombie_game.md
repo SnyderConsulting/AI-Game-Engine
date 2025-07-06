@@ -19,11 +19,11 @@ The canvas now automatically resizes to fill the entire browser window so the ac
 Players now have a small health pool instead of dying instantly. A "Health" display shows the remaining points. Each zombie also has a simple green bar above its head to indicate remaining health.
 The on-screen control instructions are fixed to the bottom-left corner so they never cover the health readout.
 
-The arena contains a baseball bat that starts on the ground. It now appears using its bat icon rather than an orange dot. When collected it is automatically placed in your inventory and the first hotbar slot. Only the item in the **active** hotbar slot can be used. The first slot is active by default and you can switch slots by pressing the number keys **1-5**. If the baseball bat is not in the active slot it cannot be swung. Press the spacebar to swing when it is equipped. Zombies hit by the swing take damage, are pushed back slightly, and can be struck from a small distance away. Turrets no longer spawn automatically; future updates will let players place them manually.
+The arena contains a baseball bat that starts on the ground. It now appears using its bat icon rather than an orange dot. When collected it automatically occupies the first open hotbar slot. Only the item in the **active** hotbar slot can be used. The first slot is active by default and you can switch slots by pressing the number keys **1-5**. If the baseball bat is not in the active slot it cannot be swung. Press the spacebar to swing when it is equipped. Zombies hit by the swing take damage, are pushed back slightly, and can be struck from a small distance away. Turrets no longer spawn automatically; future updates will let players place them manually.
 
 ## Inventory System
 
-Press **I** (or **E**) to open the 5x5 inventory grid. Keys are matched case-insensitively so holding Shift won't prevent the menus from toggling. Items stack up to 10 per slot. A five slot hotbar sits at the bottom of the screen for quick access and now appears on a dark background so it is easy to see. Drag to rearrange items or right click to move them to the hotbar. Use the number keys **1-5** to change the active slot. Both the inventory and crafting windows can be dragged by their top bars and will remember their last position when closed.
+Press **I** (or **E**) to open the 5x5 inventory grid. Keys are matched case-insensitively so holding Shift won't prevent the menus from toggling. Items stack up to 10 per slot. A five slot hotbar sits at the bottom of the screen for quick access and now appears on a dark background so it is easy to see. Newly picked up items fill the first empty hotbar slot before using inventory space. Drag to rearrange items or right click to move them to the hotbar. Use the number keys **1-5** to change the active slot. Both the inventory and crafting windows can be dragged by their top bars and will remember their last position when closed.
 Inventory and hotbar slots now display the item icons found in the `assets` folder. If an icon is missing for an item, a `?` will appear instead.
 
 ## Zombie Drops
@@ -38,7 +38,7 @@ Press **C** to open the crafting menu at any time. Only recipes for which you ow
 
 ## Containers
 
-Cardboard boxes are scattered around the arena. They are now rendered using a box icon instead of a brown square. Stand next to one and hold **F** to loot it. A progress bar appears in the center of the screen for three seconds while you search. When the bar completes the box opens. Each box can hold a single Medkit with a 64% chance. If found and your inventory has space, the Medkit is automatically added. Otherwise, the box keeps the item and displays "Inventory Full". Empty boxes show "Container Empty" and cannot be looted again. Opened boxes appear faded so you know they have been searched.
+Cardboard boxes are scattered around the arena. They are now rendered using a box icon instead of a brown square. Stand next to one and hold **F** to loot it. A progress bar appears in the center of the screen for three seconds while you search. When the bar completes the box opens. Each box can hold a single Medkit with a 64% chance. If found and there is room in your hotbar or inventory, the Medkit is automatically added. Otherwise, the box keeps the item and displays "Inventory Full". Empty boxes show "Container Empty" and cannot be looted again. Opened boxes appear faded so you know they have been searched.
 
 Using a Medkit from the hotbar restores up to 3 health without exceeding your maximum.
 
