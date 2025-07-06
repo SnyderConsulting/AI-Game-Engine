@@ -209,6 +209,7 @@ function renderInventory() {
     });
     inventoryGrid.appendChild(div);
   });
+  if (craftingOpen) renderCrafting();
 }
 
 function renderHotbar() {
@@ -764,7 +765,6 @@ function update() {
     if (pickupMessageTimer === 0) pickupMsg.textContent = "";
   }
 
-  if (craftingOpen) renderCrafting();
   if (skillTreeOpen) renderSkillTree();
 }
 
