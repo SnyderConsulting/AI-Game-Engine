@@ -15,3 +15,13 @@ test("craftRecipe consumes ingredients and adds item", () => {
     true,
   );
 });
+
+test("craft fire mutation serum", () => {
+  const inv = createInventory();
+  addItem(inv, "fire_core", 3);
+  const recipe = RECIPES.find((r) => r.id === "mutation_serum_fire");
+  const success = craftRecipe(inv, recipe);
+  assert.strictEqual(success, true);
+  assert.strictEqual(inv.slots.some((s) => s.item === "mutation_serum_fire"), true);
+  assert.strictEqual(inv.slots.some((s) => s.item === "fire_core"), false);
+});
