@@ -86,7 +86,7 @@ export function spawnZombieAtDoor(door) {
   return createZombie(door.x, door.y);
 }
 
-export const PLAYER_MAX_HEALTH = 3;
+export const PLAYER_MAX_HEALTH = 10;
 
 export const SEGMENT_SIZE = 40;
 export const TRIGGER_DISTANCE = 60;
