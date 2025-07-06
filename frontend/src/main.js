@@ -32,6 +32,7 @@ import {
 } from "./inventory.js";
 import { RECIPES, canCraft, craftRecipe } from "./crafting.js";
 import { dropLoot } from "./loot.js";
+import { createFireball, updateFireballs } from "./spells.js";
 
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
@@ -64,6 +65,7 @@ const ITEM_ICONS = {
   transformation_syringe: "assets/transformation_syringe.png",
   fire_core: "assets/fire_core.png",
   mutation_serum_fire: "assets/mutation_serum_fire.png",
+  fireball_spell: "assets/fire_core.png",
   baseball_bat: "assets/baseball_bat.png",
   medkit: "assets/medkit.png",
 };
@@ -104,7 +106,7 @@ const player = {
   weapon: null,
   facing: { x: 1, y: 0 },
   swingTimer: 0,
-  fireballUnlocked: false,
+  abilities: { fireball: false },
 };
 let zombies = [];
 let turrets = [];
@@ -122,6 +124,9 @@ let inventory = createInventory();
 let inventoryOpen = false;
 let craftingOpen = false;
 let worldItems = [];
+let fireballs = [];
+let fireballCooldown = 0;
+let mousePos = { x: 0, y: 0 };
 let pickupMessageTimer = 0;
 let inventoryPos = { left: null, top: null };
 let craftingPos = { left: null, top: null };
@@ -198,8 +203,20 @@ function renderInventory() {
       const slot = inventory.slots[i];
       if (slot.item === "mutation_serum_fire") {
         removeItem(inventory, "mutation_serum_fire", 1);
-        player.fireballUnlocked = true;
-        pickupMsg.textContent = "Injected Fire Serum";
+        player.abilities.fireball = true;
+        if (
+          !inventory.hotbar.some((s) => s.item === "fireball_spell") &&
+          !inventory.slots.some((s) => s.item === "fireball_spell")
+        ) {
+          const added = addItem(inventory, "fireball_spell", 1);
+          if (added) {
+            const idx = inventory.slots.findIndex(
+              (s) => s.item === "fireball_spell",
+            );
+            if (idx !== -1) moveToHotbar(inventory, idx, 0);
+          }
+        }
+        pickupMsg.textContent = "Fireball unlocked!";
         pickupMessageTimer = 60;
         renderInventory();
         renderHotbar();
@@ -279,8 +296,20 @@ function renderHotbar() {
       const slot = inventory.hotbar[i];
       if (slot.item === "mutation_serum_fire") {
         consumeHotbarItem(inventory, i);
-        player.fireballUnlocked = true;
-        pickupMsg.textContent = "Injected Fire Serum";
+        player.abilities.fireball = true;
+        if (
+          !inventory.hotbar.some((s) => s.item === "fireball_spell") &&
+          !inventory.slots.some((s) => s.item === "fireball_spell")
+        ) {
+          const added = addItem(inventory, "fireball_spell", 1);
+          if (added) {
+            const idxAdd = inventory.slots.findIndex(
+              (s) => s.item === "fireball_spell",
+            );
+            if (idxAdd !== -1) moveToHotbar(inventory, idxAdd, i);
+          }
+        }
+        pickupMsg.textContent = "Fireball unlocked!";
         pickupMessageTimer = 60;
         renderInventory();
         renderHotbar();
@@ -429,8 +458,6 @@ function makeDraggable(div, bar, closeBtn, posStore, toggleFn) {
   closeBtn.addEventListener("click", () => toggleFn(false));
 }
 
-
-
 function resizeCanvas() {
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
@@ -471,6 +498,13 @@ function resetGame() {
   gameOverDiv.style.display = "none";
   inventory = createInventory();
   worldItems = [];
+  fireballs = [];
+  fireballCooldown = 0;
+  if (player.abilities.fireball) {
+    addItem(inventory, "fireball_spell", 1);
+    const idx = inventory.slots.findIndex((s) => s.item === "fireball_spell");
+    if (idx !== -1) moveToHotbar(inventory, idx, 0);
+  }
   inventoryOpen = false;
   craftingOpen = false;
   pickupMessageTimer = 0;
@@ -520,14 +554,26 @@ window.addEventListener("keydown", (e) => {
     const idx = parseInt(key) - 1;
     setActiveHotbar(inventory, idx);
     const slot = inventory.hotbar[idx];
-    if (slot.item && slot.item !== "baseball_bat") {
+    if (slot.item && !["baseball_bat", "fireball_spell"].includes(slot.item)) {
       const used = consumeHotbarItem(inventory, idx);
       if (used) {
         if (used === "medkit") {
           player.health = Math.min(PLAYER_MAX_HEALTH, player.health + 3);
           renderInventory();
         } else if (used === "mutation_serum_fire") {
-          player.fireballUnlocked = true;
+          player.abilities.fireball = true;
+          if (
+            !inventory.hotbar.some((s) => s.item === "fireball_spell") &&
+            !inventory.slots.some((s) => s.item === "fireball_spell")
+          ) {
+            const added = addItem(inventory, "fireball_spell", 1);
+            if (added) {
+              const idxAdd = inventory.slots.findIndex(
+                (s) => s.item === "fireball_spell",
+              );
+              if (idxAdd !== -1) moveToHotbar(inventory, idxAdd, idx);
+            }
+          }
         }
         pickupMsg.textContent = `Used ${used}`;
         pickupMessageTimer = 60;
@@ -654,6 +700,29 @@ function update() {
 
   if (player.swingTimer > 0) player.swingTimer--;
 
+  if (fireballCooldown > 0) fireballCooldown--;
+
+  if (
+    activeSlot &&
+    activeSlot.item === "fireball_spell" &&
+    player.abilities.fireball &&
+    keys[" "] &&
+    fireballCooldown <= 0
+  ) {
+    if (countItem(inventory, "fire_core") > 0) {
+      removeItem(inventory, "fire_core", 1);
+      const dir = { x: mousePos.x - player.x, y: mousePos.y - player.y };
+      const fb = createFireball(player.x, player.y, dir);
+      if (fb) fireballs.push(fb);
+      fireballCooldown = 15;
+      renderInventory();
+      renderHotbar();
+    } else {
+      pickupMsg.textContent = "Out of Fire Cores!";
+      pickupMessageTimer = 60;
+    }
+  }
+
   if (player.weapon && keys[" "] && player.swingTimer <= 0) {
     const killed = attackZombiesWithKills(
       player,
@@ -692,6 +761,8 @@ function update() {
       }
     }
   });
+
+  updateFireballs(fireballs, zombies, walls, (z) => dropLoot(z, worldItems));
 
   updateTurrets(turrets, zombies, (z) => dropLoot(z, worldItems));
 
@@ -753,6 +824,13 @@ function render() {
     ctx.fill();
   });
 
+  ctx.fillStyle = "orange";
+  fireballs.forEach((fb) => {
+    ctx.beginPath();
+    ctx.arc(fb.x, fb.y, 4, 0, Math.PI * 2);
+    ctx.fill();
+  });
+
   zombies.forEach((z) => {
     if (z.variant === "fire") {
       const grad = ctx.createRadialGradient(z.x, z.y, 0, z.x, z.y, 20);
@@ -790,3 +868,8 @@ function gameLoop() {
 }
 
 window.addEventListener("load", resizeCanvas);
+canvas.addEventListener("mousemove", (e) => {
+  const rect = canvas.getBoundingClientRect();
+  mousePos.x = e.clientX - rect.left;
+  mousePos.y = e.clientY - rect.top;
+});
