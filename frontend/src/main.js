@@ -844,10 +844,6 @@ function render() {
     ctx.fillRect(z.x - 10, z.y - 16, (z.health / ZOMBIE_MAX_HEALTH) * 20, 4);
   });
 
-  ctx.strokeStyle = "white";
-  ctx.beginPath();
-  ctx.arc(mousePos.x, mousePos.y, 5, 0, Math.PI * 2);
-  ctx.stroke();
   // The overlay div already shows the Game Over message
   // and restart button, so nothing is drawn here when
   // the player loses.
