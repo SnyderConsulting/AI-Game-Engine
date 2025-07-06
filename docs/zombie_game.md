@@ -12,7 +12,7 @@ npm install
 npm run dev
 ```
 
-The game runs entirely in the browser. Open `http://localhost:3000` and you will be greeted with a simple main menu. Click **Start Game** to jump into the action. Use the arrow keys or WASD to move the green player blob. The player still spawns randomly, but zombies now emerge from a single door placed along the outer edge of the arena. A new zombie steps through this door every 3–5 seconds. They roam toward random destinations so they naturally spread out but will pursue the player once spotted. Grey wall segments are scattered around the level and block both you and the zombies. The fullscreen layout now uses about twenty segments instead of just four. If a zombie touches you, the game ends and a **New Game** button appears so you can immediately play again.
+The game runs entirely in the browser. Open `http://localhost:3000` and you will be greeted with a simple main menu. Click **Start Game** to jump into the action. Use the arrow keys or WASD to move the player character, now drawn using a full sprite rather than a green dot. Zombies also use sprites that rotate to match their movement direction. The player still spawns randomly, but zombies now emerge from a single door placed along the outer edge of the arena. A new zombie steps through this door every 3–5 seconds. They roam toward random destinations so they naturally spread out but will pursue the player once spotted. Grey wall segments are scattered around the level and block both you and the zombies. The fullscreen layout now uses about twenty segments instead of just four. If a zombie touches you, the game ends and a **New Game** button appears so you can immediately play again.
 
 The canvas now automatically resizes to fill the entire browser window so the action takes up all available space.
 
@@ -37,3 +37,5 @@ Press **C** to open the crafting menu at any time. Only recipes for which you ow
 ## Containers
 
 Brown containers are scattered around the arena. Stand next to one and hold **F** to loot it. A progress bar appears in the center of the screen for three seconds while you search. When the bar completes the container opens. Each container can hold a single Medkit with a 64% chance. If found and your inventory has space, the Medkit is automatically added. Otherwise, the container keeps the item and displays "Inventory Full". Empty containers show "Container Empty" and cannot be looted again. Opened containers appear faded so you know they have been searched.
+
+Using a Medkit from the hotbar restores up to 3 health without exceeding your maximum.

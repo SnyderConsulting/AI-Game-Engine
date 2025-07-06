@@ -65,6 +65,20 @@ const ITEM_ICONS = {
   medkit: "assets/medkit.png",
 };
 
+const playerSprite = new Image();
+playerSprite.src = "assets/sprite_player.png";
+const zombieSprite = new Image();
+zombieSprite.src = "assets/sprite_zombie.png";
+
+function drawSprite(ctx, img, x, y, facing, size = 32) {
+  const angle = Math.atan2(facing.y, facing.x) - Math.PI / 2;
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(angle);
+  ctx.drawImage(img, -size / 2, -size / 2, size, size);
+  ctx.restore();
+}
+
 const player = {
   x: 0,
   y: 0,
@@ -484,6 +498,10 @@ window.addEventListener("keydown", (e) => {
     if (slot.item && slot.item !== "baseball_bat") {
       const used = consumeHotbarItem(inventory, idx);
       if (used) {
+        if (used === "medkit") {
+          player.health = Math.min(PLAYER_MAX_HEALTH, player.health + 3);
+          renderInventory();
+        }
         pickupMsg.textContent = `Used ${used}`;
         pickupMessageTimer = 60;
       }
@@ -678,10 +696,7 @@ function render() {
     ctx.fillRect(spawnDoor.x - 5, spawnDoor.y - 5, 10, 10);
   }
 
-  ctx.fillStyle = "green";
-  ctx.beginPath();
-  ctx.arc(player.x, player.y, 10, 0, Math.PI * 2);
-  ctx.fill();
+  drawSprite(ctx, playerSprite, player.x, player.y, player.facing);
 
   if (player.swingTimer > 0) {
     ctx.strokeStyle = "orange";
@@ -711,16 +726,12 @@ function render() {
     ctx.fill();
   });
 
-  ctx.fillStyle = "red";
   zombies.forEach((z) => {
-    ctx.beginPath();
-    ctx.arc(z.x, z.y, 10, 0, Math.PI * 2);
-    ctx.fill();
+    drawSprite(ctx, zombieSprite, z.x, z.y, z.facing);
     ctx.fillStyle = "black";
     ctx.fillRect(z.x - 10, z.y - 16, 20, 4);
     ctx.fillStyle = "lime";
     ctx.fillRect(z.x - 10, z.y - 16, (z.health / ZOMBIE_MAX_HEALTH) * 20, 4);
-    ctx.fillStyle = "red";
   });
 
   ctx.fillStyle = "blue";

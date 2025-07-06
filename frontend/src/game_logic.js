@@ -3,6 +3,7 @@ export function createZombie(x, y) {
   return {
     x,
     y,
+    facing: { x: 0, y: 1 },
     triggered: false,
     // Used by passive roaming logic
     dest: null,
@@ -21,6 +22,10 @@ export function moveTowards(entity, target, speed) {
   if (dist === 0) return;
   entity.x += (dx / dist) * speed;
   entity.y += (dy / dist) * speed;
+  if (entity.facing) {
+    entity.facing.x = dx / dist;
+    entity.facing.y = dy / dist;
+  }
 }
 
 export function isColliding(a, b, radius) {
