@@ -7,7 +7,6 @@ import {
   generateWalls,
   circleRectColliding,
   SEGMENT_SIZE,
-  updateTurrets,
   spawnWeapon,
   attackZombies,
   attackZombiesWithKills,
@@ -35,6 +34,7 @@ import { RECIPES, canCraft, craftRecipe } from "./crafting.js";
 import { dropLoot } from "./loot.js";
 import { createFireball, updateFireballs } from "./spells.js";
 import { unlockFireball } from "./skill_tree.js";
+import { makeDraggable } from "./ui.js";
 
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
@@ -106,7 +106,6 @@ function drawSprite(ctx, img, x, y, facing, size = 32) {
 
 const player = createPlayer(PLAYER_MAX_HEALTH);
 let zombies = [];
-let turrets = [];
 let walls = [];
 let weapon = null;
 let spawnTimer = 0;
@@ -472,29 +471,6 @@ function toggleSkillTree(open) {
   }
 }
 
-function makeDraggable(div, bar, closeBtn, posStore, toggleFn) {
-  let dragging = false;
-  let offsetX = 0;
-  let offsetY = 0;
-  bar.addEventListener("mousedown", (e) => {
-    dragging = true;
-    offsetX = e.clientX - div.offsetLeft;
-    offsetY = e.clientY - div.offsetTop;
-    div.style.transform = "none";
-  });
-  document.addEventListener("mousemove", (e) => {
-    if (!dragging) return;
-    posStore.left = e.clientX - offsetX;
-    posStore.top = e.clientY - offsetY;
-    div.style.left = posStore.left + "px";
-    div.style.top = posStore.top + "px";
-  });
-  document.addEventListener("mouseup", () => {
-    dragging = false;
-  });
-  closeBtn.addEventListener("click", () => toggleFn(false));
-}
-
 function resizeCanvas() {
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
@@ -511,7 +487,6 @@ function startGame() {
 
 function resetGame() {
   zombies = [];
-  turrets = [];
   // Use more walls now that the canvas covers the full screen
   walls = generateWalls(canvas.width, canvas.height, 20);
   spawnDoor = createSpawnDoor(canvas.width, canvas.height, walls);
@@ -796,9 +771,6 @@ function update() {
   });
 
   updateFireballs(fireballs, zombies, walls, (z) => dropLoot(z, worldItems));
-
-  updateTurrets(turrets, zombies, (z) => dropLoot(z, worldItems));
-
   if (pickupMessageTimer > 0) {
     pickupMessageTimer--;
     if (pickupMessageTimer === 0) pickupMsg.textContent = "";
@@ -880,13 +852,6 @@ function render() {
     ctx.fillRect(z.x - 10, z.y - 16, 20, 4);
     ctx.fillStyle = "lime";
     ctx.fillRect(z.x - 10, z.y - 16, (z.health / ZOMBIE_MAX_HEALTH) * 20, 4);
-  });
-
-  ctx.fillStyle = "blue";
-  turrets.forEach((t) => {
-    ctx.beginPath();
-    ctx.arc(t.x, t.y, 8, 0, Math.PI * 2);
-    ctx.fill();
   });
 
   // The overlay div already shows the Game Over message
