@@ -185,7 +185,11 @@ function renderInventory() {
         div.appendChild(count);
       }
 
-      const { remaining, max } = getItemCooldown(slot.item);
+      const { remaining, max } = getItemCooldown(
+        slot.item,
+        player,
+        fireballCooldown,
+      );
       if (max > 0 && remaining > 0) {
         const deg = (remaining / max) * 360;
         const overlay = document.createElement("div");
@@ -199,7 +203,7 @@ function renderInventory() {
         div.appendChild(overlay);
       }
     }
-    div.addEventListener("click", () => {
+    div.addEventListener("mousedown", () => {
       if (!selectedSlot) {
         selectedSlot = { type: "inventory", index: i };
       } else {
@@ -216,11 +220,14 @@ function renderInventory() {
     div.addEventListener("contextmenu", (e) => {
       e.preventDefault();
       const slot = inventory.slots[i];
+      if (!slot.item) return;
       const idx = inventory.hotbar.findIndex((s) => !s.item);
-      moveToHotbar(inventory, i, idx === -1 ? 0 : idx);
-      selectedSlot = null;
-      renderInventory();
-      renderHotbar();
+      if (idx !== -1) {
+        moveToHotbar(inventory, i, idx);
+        selectedSlot = null;
+        renderInventory();
+        renderHotbar();
+      }
     });
     inventoryGrid.appendChild(div);
   });
@@ -268,11 +275,28 @@ function renderHotbar() {
         });
         div.appendChild(count);
       }
+      const { remaining, max } = getItemCooldown(
+        slot.item,
+        player,
+        fireballCooldown,
+      );
+      if (max > 0 && remaining > 0) {
+        const deg = (remaining / max) * 360;
+        const overlay = document.createElement("div");
+        Object.assign(overlay.style, {
+          position: "absolute",
+          inset: "0",
+          borderRadius: "2px",
+          pointerEvents: "none",
+          background: `conic-gradient(from -90deg, rgba(128,128,128,0.6) 0deg ${deg}deg, transparent ${deg}deg 360deg)`,
+        });
+        div.appendChild(overlay);
+      }
     }
     if (i === inventory.active) {
       div.style.borderColor = "yellow";
     }
-    div.addEventListener("click", () => {
+    div.addEventListener("mousedown", () => {
       if (!selectedSlot) {
         selectedSlot = { type: "hotbar", index: i };
       } else {
@@ -437,7 +461,7 @@ function renderSkillTree() {
   label.textContent = player.abilities.fireball ? "Unlocked" : "Cost: 2";
   tile.appendChild(label);
   if (!player.abilities.fireball && player.fireMutationPoints >= 2) {
-    tile.addEventListener("click", () => {
+    tile.addEventListener("mousedown", () => {
       if (unlockFireball(player, inventory, addItem, moveToHotbar)) {
         renderInventory();
         renderHotbar();

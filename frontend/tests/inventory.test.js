@@ -7,6 +7,7 @@ import {
   swapHotbar,
   swapInventoryHotbar,
   moveFromHotbar,
+  moveToHotbar,
   countItem,
   removeItem,
   setActiveHotbar,
@@ -82,4 +83,14 @@ test("swapInventoryHotbar exchanges inventory and hotbar", () => {
   swapInventoryHotbar(inv, 1, 1);
   assert.strictEqual(inv.slots[1].item, "flesh");
   assert.strictEqual(inv.hotbar[1].item, "core");
+});
+
+test("moveToHotbar requires source item and free slot", () => {
+  const inv = createInventory();
+  addItem(inv, "core", 1);
+  moveFromHotbar(inv, 0, 0); // place core in inventory slot 0
+  addItem(inv, "flesh", 1); // fills hotbar[0]
+  assert.strictEqual(moveToHotbar(inv, 0, 0), false); // dest occupied
+  assert.strictEqual(inv.slots[0].item, "core");
+  assert.strictEqual(moveToHotbar(inv, 2, 1), false); // source empty
 });
