@@ -279,14 +279,26 @@ export function moveZombie(zombie, player, walls, speed, width, height) {
   }
 
   if (hasLineOfSight(zombie, player, walls, 10)) {
+    const prevX = zombie.x;
+    const prevY = zombie.y;
     moveTowards(zombie, player, speed);
+    if (walls.some((w) => circleRectColliding(zombie, w, 10))) {
+      zombie.x = prevX;
+      zombie.y = prevY;
+    }
     return;
   }
 
   const path = findPath(zombie, player, walls, width, height);
   if (path.length < 2) {
     // Fallback to direct movement when no path is found
+    const prevX = zombie.x;
+    const prevY = zombie.y;
     moveTowards(zombie, player, speed);
+    if (walls.some((w) => circleRectColliding(zombie, w, 10))) {
+      zombie.x = prevX;
+      zombie.y = prevY;
+    }
     return;
   }
 
@@ -295,7 +307,13 @@ export function moveZombie(zombie, player, walls, speed, width, height) {
     x: nx * SEGMENT_SIZE + SEGMENT_SIZE / 2,
     y: ny * SEGMENT_SIZE + SEGMENT_SIZE / 2,
   };
+  const prevX = zombie.x;
+  const prevY = zombie.y;
   moveTowards(zombie, target, speed);
+  if (walls.some((w) => circleRectColliding(zombie, w, 10))) {
+    zombie.x = prevX;
+    zombie.y = prevY;
+  }
 }
 
 export function updateTurrets(turrets, zombies, onKill = () => {}) {
