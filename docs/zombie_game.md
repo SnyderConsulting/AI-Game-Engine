@@ -30,6 +30,8 @@ Inventory and hotbar slots now display the item icons found in the `assets` fold
 
 Zombies may drop **core**, **flesh**, or **teeth** when killed. Walk over a dropped icon to collect it if you have space. Items remain on the ground when the inventory is full and a brief pickup message appears when collecting or using items.
 
+Fire Zombies have a 75% chance to drop a glowing **Fire Core**. Cores behave like other loot and stack in your inventory.
+
 ## Crafting
 
 Press **C** to open the crafting menu at any time. Only recipes for which you own at least one ingredient are shown. Each entry now displays an icon of the resulting item along with icons for all required materials and their counts. Clicking a recipe crafts it instantly if you have enough parts. Ingredients are removed from the inventory and the crafted item is placed there as well, or dropped at your feet if no space remains.
@@ -43,3 +45,7 @@ Using a Medkit from the hotbar restores up to 3 health without exceeding your ma
 ## Fire Zombies
 
 Some zombies emerge imbued with flame. These **Fire Zombies** appear with a red tint and glow effect so they are easy to spot. They behave like normal zombies but spawn with a 20% probability whenever a new zombie enters through the door.
+
+Collecting Fire Cores unlocks a new recipe:
+
+* **Fire Mutation Serum** - Combine three Fire Cores to craft. Right-click the serum in your inventory or hotbar to inject it and permanently gain the Fireball ability (ability implementation coming later).

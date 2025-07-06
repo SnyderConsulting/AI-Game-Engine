@@ -17,6 +17,12 @@ export const RECIPES = [
     description: "Inject to transform a zombie.",
     ingredients: { zombie_core: 1, elemental_potion: 1 },
   },
+  {
+    id: "mutation_serum_fire",
+    title: "Fire Mutation Serum",
+    description: "Unlocks the Fireball ability.",
+    ingredients: { fire_core: 3 },
+  },
 ];
 
 import { addItem, countItem, removeItem } from "./inventory.js";
