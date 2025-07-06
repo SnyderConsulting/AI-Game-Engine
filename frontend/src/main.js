@@ -80,6 +80,8 @@ const playerSprite = new Image();
 playerSprite.src = "assets/sprite_player.png";
 const zombieSprite = new Image();
 zombieSprite.src = "assets/sprite_zombie.png";
+const fireZombieSprite = new Image();
+fireZombieSprite.src = "assets/sprite_fire_zombie.png";
 
 function drawSprite(ctx, img, x, y, facing, size = 32) {
   const angle = Math.atan2(facing.y, facing.x) - Math.PI / 2;
@@ -739,7 +741,17 @@ function render() {
   });
 
   zombies.forEach((z) => {
-    drawSprite(ctx, zombieSprite, z.x, z.y, z.facing);
+    if (z.variant === "fire") {
+      const grad = ctx.createRadialGradient(z.x, z.y, 0, z.x, z.y, 20);
+      grad.addColorStop(0, "rgba(255,100,0,0.8)");
+      grad.addColorStop(1, "rgba(255,0,0,0)");
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.arc(z.x, z.y, 20, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    const img = z.variant === "fire" ? fireZombieSprite : zombieSprite;
+    drawSprite(ctx, img, z.x, z.y, z.facing);
     ctx.fillStyle = "black";
     ctx.fillRect(z.x - 10, z.y - 16, 20, 4);
     ctx.fillStyle = "lime";

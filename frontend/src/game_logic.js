@@ -1,5 +1,7 @@
 export const ZOMBIE_MAX_HEALTH = 2;
-export function createZombie(x, y) {
+export const FIRE_ZOMBIE_CHANCE = 0.2;
+
+export function createZombie(x, y, variant = "normal") {
   return {
     x,
     y,
@@ -12,7 +14,12 @@ export function createZombie(x, y) {
     wanderTimer: 0,
     health: ZOMBIE_MAX_HEALTH,
     attackCooldown: 0,
+    variant,
   };
+}
+
+export function createFireZombie(x, y) {
+  return createZombie(x, y, "fire");
 }
 
 export function moveTowards(entity, target, speed) {
@@ -38,7 +45,12 @@ export function spawnZombie(width, height, walls = []) {
   let zombie;
   let attempts = 0;
   do {
-    zombie = createZombie(Math.random() * width, Math.random() * height);
+    const variant = Math.random() < FIRE_ZOMBIE_CHANCE ? "fire" : "normal";
+    zombie = createZombie(
+      Math.random() * width,
+      Math.random() * height,
+      variant,
+    );
     attempts++;
   } while (
     attempts < 20 &&
@@ -101,7 +113,8 @@ export function createSpawnDoor(width, height, walls = []) {
 }
 
 export function spawnZombieAtDoor(door) {
-  return createZombie(door.x, door.y);
+  const variant = Math.random() < FIRE_ZOMBIE_CHANCE ? "fire" : "normal";
+  return createZombie(door.x, door.y, variant);
 }
 
 export const PLAYER_MAX_HEALTH = 10;

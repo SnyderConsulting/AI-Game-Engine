@@ -121,6 +121,18 @@ test("spawnZombieAtDoor spawns at door location", () => {
   assert.strictEqual(z.y, door.y);
 });
 
+test("spawnZombieAtDoor uses random chance for fire variant", () => {
+  const door = { x: 10, y: 10 };
+  const originalRandom = Math.random;
+  Math.random = () => 0.1; // below threshold
+  const fire = spawnZombieAtDoor(door);
+  Math.random = () => 0.9; // above threshold
+  const normal = spawnZombieAtDoor(door);
+  Math.random = originalRandom;
+  assert.strictEqual(fire.variant, "fire");
+  assert.strictEqual(normal.variant, "normal");
+});
+
 test("moveZombie goes straight when unobstructed", () => {
   const zombie = createZombie(0, 0);
   zombie.triggered = true;
