@@ -71,7 +71,7 @@ export function randomOpenPosition(width, height, walls = []) {
 }
 
 export function createContainer(x, y) {
-  return { x, y, opened: false, item: null };
+  return { x, y, opened: false, item: null, type: "cardboard_box" };
 }
 
 export function spawnContainers(width, height, walls = [], count = 3) {
