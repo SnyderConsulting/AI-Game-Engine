@@ -65,6 +65,19 @@ export function randomOpenPosition(width, height, walls = []) {
   return p;
 }
 
+export function createContainer(x, y) {
+  return { x, y, opened: false, item: null };
+}
+
+export function spawnContainers(width, height, walls = [], count = 3) {
+  const containers = [];
+  for (let i = 0; i < count; i++) {
+    const pos = randomOpenPosition(width, height, walls);
+    containers.push(createContainer(pos.x, pos.y));
+  }
+  return containers;
+}
+
 export function createSpawnDoor(width, height, walls = []) {
   let door;
   do {

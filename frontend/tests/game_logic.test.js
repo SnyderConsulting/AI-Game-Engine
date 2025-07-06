@@ -21,6 +21,8 @@ import {
   attackZombiesWithKills,
   ZOMBIE_MAX_HEALTH,
   spawnZombieAtDoor,
+  createContainer,
+  spawnContainers,
 } from "../src/game_logic.js";
 
 test("moveTowards moves entity toward target", () => {
@@ -204,4 +206,13 @@ test("attackZombiesWithKills returns dead zombies", () => {
   );
   assert.strictEqual(killed.length, 1);
   assert.strictEqual(zombies.length, 1);
+});
+
+test("spawnContainers places non-colliding containers", () => {
+  const walls = [{ x: 40, y: 40, size: SEGMENT_SIZE }];
+  const containers = spawnContainers(80, 80, walls, 3);
+  assert.strictEqual(containers.length, 3);
+  containers.forEach((c) => {
+    assert.strictEqual(circleRectColliding(c, walls[0], 10), false);
+  });
 });

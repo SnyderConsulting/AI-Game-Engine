@@ -15,6 +15,7 @@ import {
   ZOMBIE_MAX_HEALTH,
   createSpawnDoor,
   spawnZombieAtDoor,
+  spawnContainers,
 } from "./game_logic.js";
 import {
   createInventory,
@@ -48,6 +49,8 @@ const craftingDiv = document.getElementById("craftingMenu");
 const craftingList = document.getElementById("craftingList");
 const craftingBar = document.getElementById("craftingBar");
 const craftingClose = document.getElementById("craftingClose");
+const lootDiv = document.getElementById("lootProgress");
+const lootFill = document.getElementById("lootFill");
 
 // Mapping from item ids to icon paths. If an item is missing, a
 // question mark will be shown instead of an image.
@@ -59,6 +62,7 @@ const ITEM_ICONS = {
   elemental_potion: "assets/elemental_potion.png",
   transformation_syringe: "assets/transformation_syringe.png",
   baseball_bat: "assets/baseball_bat.png",
+  medkit: "assets/medkit.png",
 };
 
 const player = {
@@ -77,6 +81,9 @@ let walls = [];
 let weapon = null;
 let spawnTimer = 0;
 let spawnDoor = null;
+let containers = [];
+let looting = null;
+let lootTimer = 0;
 let gameOver = false;
 const keys = {};
 let loopStarted = false;
@@ -93,6 +100,10 @@ const ZOMBIE_DROPS = [
   { type: "flesh", chance: 0.8 },
   { type: "teeth", chance: 0.4 },
 ];
+
+const LOOT_TIME = 180; // 3 seconds at 60fps
+const LOOT_DIST = 20;
+const MEDKIT_CHANCE = 0.64;
 
 // When managing inventory/hotbar the user can select a slot.
 // The structure is { type: "inventory" | "hotbar", index: number }.
@@ -410,6 +421,14 @@ function resetGame() {
   player.weapon = null;
   weapon = spawnWeapon(canvas.width, canvas.height, walls, "baseball_bat", 1);
   spawnTimer = 0;
+  containers = spawnContainers(
+    canvas.width,
+    canvas.height,
+    walls,
+    3 + Math.floor(Math.random() * 3),
+  );
+  looting = null;
+  lootTimer = 0;
   gameOver = false;
   gameOverDiv.style.display = "none";
   inventory = createInventory();
@@ -523,6 +542,58 @@ function update() {
     renderHotbar();
   }
 
+  if (!looting && keys["f"]) {
+    const cont = containers.find(
+      (c) =>
+        Math.hypot(c.x - player.x, c.y - player.y) <= LOOT_DIST &&
+        (!c.opened || c.item),
+    );
+    if (cont) {
+      looting = cont;
+      lootTimer = LOOT_TIME;
+      lootFill.style.width = "0%";
+      lootDiv.style.display = "block";
+    }
+  }
+
+  if (looting) {
+    const dist = Math.hypot(looting.x - player.x, looting.y - player.y);
+    if (dist > LOOT_DIST || !keys["f"]) {
+      looting = null;
+      lootDiv.style.display = "none";
+    } else {
+      lootTimer--;
+      lootFill.style.width = `${((LOOT_TIME - lootTimer) / LOOT_TIME) * 100}%`;
+      if (lootTimer <= 0) {
+        if (!looting.opened) {
+          looting.opened = true;
+          if (Math.random() < MEDKIT_CHANCE) {
+            looting.item = "medkit";
+          } else {
+            looting.item = null;
+          }
+        }
+        if (looting.item) {
+          if (addItem(inventory, "medkit", 1)) {
+            looting.item = null;
+            pickupMsg.textContent = "Picked up medkit";
+            pickupMessageTimer = 60;
+            renderInventory();
+            renderHotbar();
+          } else {
+            pickupMsg.textContent = "Inventory Full";
+            pickupMessageTimer = 60;
+          }
+        } else {
+          pickupMsg.textContent = "Container Empty";
+          pickupMessageTimer = 60;
+        }
+        looting = null;
+        lootDiv.style.display = "none";
+      }
+    }
+  }
+
   for (let i = worldItems.length - 1; i >= 0; i--) {
     const it = worldItems[i];
     if (isColliding(player, it, 10)) {
@@ -595,6 +666,12 @@ function render() {
   ctx.fillStyle = "gray";
   walls.forEach((w) => {
     ctx.fillRect(w.x, w.y, SEGMENT_SIZE, SEGMENT_SIZE);
+  });
+  ctx.fillStyle = "brown";
+  containers.forEach((c) => {
+    ctx.globalAlpha = c.opened ? 0.5 : 1;
+    ctx.fillRect(c.x - 10, c.y - 10, 20, 20);
+    ctx.globalAlpha = 1;
   });
   if (spawnDoor) {
     ctx.fillStyle = "brown";
