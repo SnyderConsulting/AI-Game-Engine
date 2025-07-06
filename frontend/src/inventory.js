@@ -41,6 +41,18 @@ export function moveToHotbar(inv, fromIndex, hotbarIndex) {
   inv.slots[fromIndex] = { item: null, count: 0 };
 }
 
+export function swapHotbar(inv, indexA, indexB) {
+  const tmp = inv.hotbar[indexA];
+  inv.hotbar[indexA] = inv.hotbar[indexB];
+  inv.hotbar[indexB] = tmp;
+}
+
+export function moveFromHotbar(inv, hotbarIndex, invIndex) {
+  const slot = inv.hotbar[hotbarIndex];
+  inv.slots[invIndex] = slot;
+  inv.hotbar[hotbarIndex] = { item: null, count: 0 };
+}
+
 export function consumeHotbarItem(inv, hotbarIndex) {
   const slot = inv.hotbar[hotbarIndex];
   if (!slot.item) return null;
