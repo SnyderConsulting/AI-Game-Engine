@@ -39,3 +39,7 @@ Press **C** to open the crafting menu at any time. Only recipes for which you ow
 Cardboard boxes are scattered around the arena. They are now rendered using a box icon instead of a brown square. Stand next to one and hold **F** to loot it. A progress bar appears in the center of the screen for three seconds while you search. When the bar completes the box opens. Each box can hold a single Medkit with a 64% chance. If found and your inventory has space, the Medkit is automatically added. Otherwise, the box keeps the item and displays "Inventory Full". Empty boxes show "Container Empty" and cannot be looted again. Opened boxes appear faded so you know they have been searched.
 
 Using a Medkit from the hotbar restores up to 3 health without exceeding your maximum.
+
+## Fire Zombies
+
+Some zombies emerge imbued with flame. These **Fire Zombies** appear with a red tint and glow effect so they are easy to spot. They behave like normal zombies but spawn with a 20% probability whenever a new zombie enters through the door.
