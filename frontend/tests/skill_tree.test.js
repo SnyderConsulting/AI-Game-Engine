@@ -1,24 +1,42 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { unlockFireball } from "../src/skill_tree.js";
-import { createPlayer } from "../src/player.js";
+import { upgradeFireball } from "../src/skill_tree.js";
+import { createPlayer, resetPlayerForNewGame } from "../src/player.js";
 import { createInventory } from "../src/inventory.js";
 import { PLAYER_MAX_HEALTH } from "../src/game_logic.js";
 import { addItem, moveToHotbar } from "../src/inventory.js";
 
-// simple helper to mimic unlock sequence
-function setup() {
+function setup(points = 2) {
   const player = createPlayer(PLAYER_MAX_HEALTH);
   const inv = createInventory();
-  player.fireMutationPoints = 2;
+  player.fireMutationPoints = points;
   return { player, inv };
 }
 
-test("unlockFireball consumes points and adds item", () => {
-  const { player, inv } = setup();
-  const res = unlockFireball(player, inv, addItem, moveToHotbar);
+test("upgradeFireball unlocks and adds item", () => {
+  const { player, inv } = setup(2);
+  const res = upgradeFireball(player, inv, addItem, moveToHotbar);
   assert.strictEqual(res, true);
   assert.strictEqual(player.fireMutationPoints, 0);
-  assert.strictEqual(player.abilities.fireball, true);
+  assert.strictEqual(player.abilities.fireballLevel, 1);
   assert.strictEqual(inv.hotbar[0].item, "fireball_spell");
+});
+
+test("upgradeFireball upgrades levels with correct costs", () => {
+  const { player, inv } = setup(7);
+  // unlock
+  assert(upgradeFireball(player, inv, addItem, moveToHotbar));
+  assert.strictEqual(player.abilities.fireballLevel, 1);
+  // level 2
+  assert(upgradeFireball(player, inv, addItem, moveToHotbar));
+  assert.strictEqual(player.abilities.fireballLevel, 2);
+  // level 3
+  assert(upgradeFireball(player, inv, addItem, moveToHotbar));
+  assert.strictEqual(player.abilities.fireballLevel, 3);
+  assert.strictEqual(player.fireMutationPoints, 0);
+  // cannot exceed max
+  assert.strictEqual(
+    upgradeFireball(player, inv, addItem, moveToHotbar),
+    false,
+  );
 });

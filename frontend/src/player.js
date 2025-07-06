@@ -8,7 +8,7 @@ export function createPlayer(PLAYER_MAX_HEALTH) {
     weapon: null,
     facing: { x: 1, y: 0 },
     swingTimer: 0,
-    abilities: { fireball: false },
+    abilities: { fireball: false, fireballLevel: 0 },
     fireMutationPoints: 0,
   };
 }
@@ -19,5 +19,6 @@ export function resetPlayerForNewGame(player, PLAYER_MAX_HEALTH) {
   player.weapon = null;
   player.swingTimer = 0;
   player.abilities.fireball = false;
+  player.abilities.fireballLevel = 0;
   player.fireMutationPoints = 0;
 }

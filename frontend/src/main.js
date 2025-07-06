@@ -34,7 +34,7 @@ import {
 import { RECIPES, canCraft, craftRecipe } from "./crafting.js";
 import { dropLoot } from "./loot.js";
 import { createFireball, updateFireballs } from "./spells.js";
-import { unlockFireball } from "./skill_tree.js";
+import { upgradeFireball } from "./skill_tree.js";
 import { makeDraggable } from "./ui.js";
 
 import { applyConsumableEffect, CONSUMABLE_ITEMS } from "./items.js";
@@ -436,6 +436,10 @@ function renderSkillTree() {
   skillPointsDiv.textContent = `Fire Mutation Points Available: ${player.fireMutationPoints}`;
   skillGrid.innerHTML = "";
   const tile = document.createElement("div");
+  const level = player.abilities.fireballLevel;
+  const max = 3;
+  const costs = [0, 2, 2, 3];
+  const nextCost = level < max ? costs[level + 1] : null;
   Object.assign(tile.style, {
     width: "60px",
     height: "60px",
@@ -445,24 +449,28 @@ function renderSkillTree() {
     justifyContent: "center",
     alignItems: "center",
     cursor:
-      player.abilities.fireball || player.fireMutationPoints < 2
-        ? "default"
-        : "pointer",
-    background: player.abilities.fireball ? "rgba(255,255,255,0.1)" : "none",
+      nextCost && player.fireMutationPoints >= nextCost ? "pointer" : "default",
+    background: level > 0 ? "rgba(255,255,255,0.1)" : "none",
   });
   const img = document.createElement("img");
   img.src = ITEM_ICONS["fireball_spell"];
   img.style.width = "48px";
   img.style.height = "48px";
-  img.style.opacity = player.abilities.fireball ? 1 : 0.5;
+  img.style.opacity = level > 0 ? 1 : 0.5;
   tile.appendChild(img);
   const label = document.createElement("div");
   label.style.fontSize = "10px";
-  label.textContent = player.abilities.fireball ? "Unlocked" : "Cost: 2";
+  label.textContent = `Lv ${level}/${max}`;
   tile.appendChild(label);
-  if (!player.abilities.fireball && player.fireMutationPoints >= 2) {
+  if (nextCost) {
+    const costDiv = document.createElement("div");
+    costDiv.style.fontSize = "10px";
+    costDiv.textContent = `Cost: ${nextCost}`;
+    tile.appendChild(costDiv);
+  }
+  if (nextCost && player.fireMutationPoints >= nextCost) {
     tile.addEventListener("mousedown", () => {
-      if (unlockFireball(player, inventory, addItem, moveToHotbar)) {
+      if (upgradeFireball(player, inventory, addItem, moveToHotbar)) {
         renderInventory();
         renderHotbar();
         renderSkillTree();
@@ -737,7 +745,12 @@ function update() {
     if (countItem(inventory, "fire_core") > 0) {
       removeItem(inventory, "fire_core", 1);
       const dir = { x: mousePos.x - player.x, y: mousePos.y - player.y };
-      const fb = createFireball(player.x, player.y, dir);
+      const fb = createFireball(
+        player.x,
+        player.y,
+        dir,
+        player.abilities.fireballLevel,
+      );
       if (fb) fireballs.push(fb);
       fireballCooldown = 15;
       renderInventory();
