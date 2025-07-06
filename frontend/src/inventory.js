@@ -62,6 +62,12 @@ export function swapHotbar(inv, indexA, indexB) {
   inv.hotbar[indexB] = tmp;
 }
 
+export function swapInventoryHotbar(inv, invIndex, hotbarIndex) {
+  const tmp = inv.slots[invIndex];
+  inv.slots[invIndex] = inv.hotbar[hotbarIndex];
+  inv.hotbar[hotbarIndex] = tmp;
+}
+
 export function moveFromHotbar(inv, hotbarIndex, invIndex) {
   const slot = inv.hotbar[hotbarIndex];
   inv.slots[invIndex] = slot;

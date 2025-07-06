@@ -24,7 +24,7 @@ The arena contains a baseball bat that starts on the ground. It now appears usin
 
 ## Inventory System
 
-Press **I** (or **E**) to open the 5x5 inventory grid. Keys are matched case-insensitively so holding Shift won't prevent the menus from toggling. Items stack up to 10 per slot. A five slot hotbar sits at the bottom of the screen for quick access and now appears on a dark background so it is easy to see. Newly picked up items fill the first empty hotbar slot before using inventory space. Drag to rearrange items or right click to move them to the hotbar. Use the number keys **1-5** to change the active slot. Both the inventory and crafting windows can be dragged by their top bars and will remember their last position when closed.
+Press **I** (or **E**) to open the 5x5 inventory grid. Keys are matched case-insensitively so holding Shift won't prevent the menus from toggling. Items stack up to 10 per slot. A five slot hotbar sits at the bottom of the screen for quick access and now appears on a dark background so it is easy to see. Newly picked up items fill the first empty hotbar slot before using inventory space. Drag to rearrange items or right click to move them to the hotbar. Clicking any inventory slot and then a hotbar slot (or vice versa) now swaps their contents even if one is empty. Use the number keys **1-5** to change the active slot. Both the inventory and crafting windows can be dragged by their top bars and will remember their last position when closed.
 Press **K** to open the skill tree and spend mutation points.
 Inventory and hotbar slots now display the item icons found in the `assets` folder. If an icon is missing for an item, a `?` will appear instead.
 
