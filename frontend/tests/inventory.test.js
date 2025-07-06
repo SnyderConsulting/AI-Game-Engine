@@ -5,6 +5,8 @@ import {
   addItem,
   consumeHotbarItem,
   moveToHotbar,
+  swapHotbar,
+  moveFromHotbar,
   countItem,
   removeItem,
 } from "../src/inventory.js";
@@ -42,4 +44,24 @@ test("removeItem deducts from inventory", () => {
   assert.strictEqual(countItem(inv, "teeth"), 1);
   removeItem(inv, "teeth", 1);
   assert.strictEqual(countItem(inv, "teeth"), 0);
+});
+
+test("swapHotbar exchanges slots", () => {
+  const inv = createInventory();
+  addItem(inv, "core", 1);
+  addItem(inv, "flesh", 1);
+  moveToHotbar(inv, 0, 0);
+  moveToHotbar(inv, 1, 1);
+  swapHotbar(inv, 0, 1);
+  assert.strictEqual(inv.hotbar[0].item, "flesh");
+  assert.strictEqual(inv.hotbar[1].item, "core");
+});
+
+test("moveFromHotbar moves item back to inventory", () => {
+  const inv = createInventory();
+  addItem(inv, "core", 1);
+  moveToHotbar(inv, 0, 0);
+  moveFromHotbar(inv, 0, 1);
+  assert.strictEqual(inv.hotbar[0].item, null);
+  assert.strictEqual(inv.slots[1].item, "core");
 });

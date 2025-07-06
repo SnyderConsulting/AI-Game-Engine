@@ -297,15 +297,26 @@ export function updateTurrets(turrets, zombies, onKill = () => {}) {
   });
 }
 
-export function createWeapon(x, y, damage = 1) {
-  return { x, y, damage };
+export function createWeapon(x, y, type = "baseball_bat", damage = 1) {
+  return { x, y, type, damage };
 }
 
-export function spawnWeapon(width, height, walls = []) {
+export function spawnWeapon(
+  width,
+  height,
+  walls = [],
+  type = "baseball_bat",
+  damage = 1,
+) {
   let weapon;
   let attempts = 0;
   do {
-    weapon = createWeapon(Math.random() * width, Math.random() * height);
+    weapon = createWeapon(
+      Math.random() * width,
+      Math.random() * height,
+      type,
+      damage,
+    );
     attempts++;
   } while (
     attempts < 20 &&

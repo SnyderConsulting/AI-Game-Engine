@@ -19,11 +19,12 @@ The canvas now automatically resizes to fill the entire browser window so the ac
 Players now have a small health pool instead of dying instantly. A "Health" display shows the remaining points. Each zombie also has a simple green bar above its head to indicate remaining health.
 The on-screen control instructions are fixed to the bottom-left corner so they never cover the health readout.
 
-The arena contains a single melee weapon that can be picked up. Press the spacebar to swing the weapon. The swing now follows the last direction you moved, creating a short arc in front of the player. Zombies hit by the swing take damage, are pushed back slightly, and can be struck from a small distance away. Turrets no longer spawn automatically; future updates will let players place them manually.
+The arena contains a baseball bat that can be picked up. When collected it is automatically placed in your inventory and the first hotbar slot. Press the spacebar to swing the bat. The swing now follows the last direction you moved, creating a short arc in front of the player. Zombies hit by the swing take damage, are pushed back slightly, and can be struck from a small distance away. Turrets no longer spawn automatically; future updates will let players place them manually.
 
 ## Inventory System
 
 Press **I** to open the 5x5 inventory grid. Items stack up to 10 per slot. A five slot hotbar sits at the bottom of the screen for quick use and now appears on a dark background so it is easy to see. Drag to rearrange items or right click to move them to the hotbar. Use the number keys **1-5** to use hotbar items. Both the inventory and crafting windows can be dragged by their top bars and will remember their last position when closed.
+Inventory and hotbar slots now display the item icons found in the `assets` folder. If an icon is missing for an item, a `?` will appear instead.
 
 ## Zombie Drops
 

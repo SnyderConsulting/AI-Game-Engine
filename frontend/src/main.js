@@ -21,6 +21,8 @@ import {
   addItem,
   moveItem,
   moveToHotbar,
+  moveFromHotbar,
+  swapHotbar,
   consumeHotbarItem,
   countItem,
   removeItem,
@@ -44,6 +46,18 @@ const craftingDiv = document.getElementById("craftingMenu");
 const craftingList = document.getElementById("craftingList");
 const craftingBar = document.getElementById("craftingBar");
 const craftingClose = document.getElementById("craftingClose");
+
+// Mapping from item ids to icon paths. If an item is missing, a
+// question mark will be shown instead of an image.
+const ITEM_ICONS = {
+  core: "assets/zombie_core.png",
+  flesh: "assets/zombie_flesh.png",
+  teeth: "assets/zombie_teeth.png",
+  zombie_essence: "assets/zombie_essence.png",
+  elemental_potion: "assets/elemental_potion.png",
+  transformation_syringe: "assets/transformation_syringe.png",
+  baseball_bat: "assets/baseball_bat.png",
+};
 
 const player = {
   x: 0,
@@ -78,6 +92,8 @@ const ZOMBIE_DROPS = [
   { type: "teeth", chance: 0.4 },
 ];
 
+// When managing inventory/hotbar the user can select a slot.
+// The structure is { type: "inventory" | "hotbar", index: number }.
 let selectedSlot = null;
 
 function renderInventory() {
@@ -94,16 +110,46 @@ function renderInventory() {
       display: "flex",
       justifyContent: "center",
       alignItems: "center",
+      position: "relative",
     });
-    if (selectedSlot === i) div.style.outline = "2px solid yellow";
-    div.textContent = slot.item
-      ? `${slot.item[0].toUpperCase()}:${slot.count}`
-      : "";
-    div.addEventListener("click", () => {
-      if (selectedSlot === null) {
-        selectedSlot = i;
+    if (
+      selectedSlot &&
+      selectedSlot.type === "inventory" &&
+      selectedSlot.index === i
+    )
+      div.style.outline = "2px solid yellow";
+    if (slot.item) {
+      if (ITEM_ICONS[slot.item]) {
+        const img = document.createElement("img");
+        img.src = ITEM_ICONS[slot.item];
+        img.style.width = "32px";
+        img.style.height = "32px";
+        div.appendChild(img);
       } else {
-        moveItem(inventory, selectedSlot, i);
+        div.textContent = "?";
+      }
+      if (slot.count > 1) {
+        const count = document.createElement("span");
+        count.textContent = slot.count;
+        Object.assign(count.style, {
+          position: "absolute",
+          bottom: "0",
+          right: "2px",
+          fontSize: "10px",
+        });
+        div.appendChild(count);
+      }
+    }
+    div.addEventListener("click", () => {
+      if (!selectedSlot) {
+        selectedSlot = { type: "inventory", index: i };
+      } else {
+        if (selectedSlot.type === "inventory") {
+          moveItem(inventory, selectedSlot.index, i);
+        } else {
+          // moving from hotbar to inventory
+          moveFromHotbar(inventory, selectedSlot.index, i);
+        }
         selectedSlot = null;
       }
       renderInventory();
@@ -123,7 +169,7 @@ function renderInventory() {
 
 function renderHotbar() {
   hotbarDiv.innerHTML = "";
-  inventory.hotbar.forEach((slot) => {
+  inventory.hotbar.forEach((slot, i) => {
     const div = document.createElement("div");
     Object.assign(div.style, {
       width: "40px",
@@ -133,10 +179,63 @@ function renderHotbar() {
       display: "flex",
       justifyContent: "center",
       alignItems: "center",
+      position: "relative",
     });
-    div.textContent = slot.item
-      ? `${slot.item[0].toUpperCase()}:${slot.count}`
-      : "";
+    if (
+      selectedSlot &&
+      selectedSlot.type === "hotbar" &&
+      selectedSlot.index === i
+    )
+      div.style.outline = "2px solid yellow";
+    if (slot.item) {
+      if (ITEM_ICONS[slot.item]) {
+        const img = document.createElement("img");
+        img.src = ITEM_ICONS[slot.item];
+        img.style.width = "32px";
+        img.style.height = "32px";
+        div.appendChild(img);
+      } else {
+        div.textContent = "?";
+      }
+      if (slot.count > 1) {
+        const count = document.createElement("span");
+        count.textContent = slot.count;
+        Object.assign(count.style, {
+          position: "absolute",
+          bottom: "0",
+          right: "2px",
+          fontSize: "10px",
+        });
+        div.appendChild(count);
+      }
+    }
+    if (slot.item === (player.weapon && player.weapon.type)) {
+      div.style.borderColor = "yellow";
+    }
+    div.addEventListener("click", () => {
+      if (!selectedSlot) {
+        selectedSlot = { type: "hotbar", index: i };
+      } else {
+        if (selectedSlot.type === "hotbar") {
+          swapHotbar(inventory, selectedSlot.index, i);
+        } else {
+          moveToHotbar(inventory, selectedSlot.index, i);
+        }
+        selectedSlot = null;
+      }
+      renderInventory();
+      renderHotbar();
+    });
+    div.addEventListener("contextmenu", (e) => {
+      e.preventDefault();
+      const idx = inventory.slots.findIndex((s) => !s.item);
+      if (idx !== -1) {
+        moveFromHotbar(inventory, i, idx);
+        selectedSlot = null;
+        renderInventory();
+        renderHotbar();
+      }
+    });
     hotbarDiv.appendChild(div);
   });
 }
@@ -198,11 +297,11 @@ function toggleInventory(open) {
     inventoryDiv.style.display = "block";
     renderInventory();
   } else {
-    inventoryDiv.style.display = "none";
     inventoryPos = {
       left: inventoryDiv.offsetLeft,
       top: inventoryDiv.offsetTop,
     };
+    inventoryDiv.style.display = "none";
   }
 }
 
@@ -222,8 +321,8 @@ function toggleCrafting(open) {
     craftingDiv.style.display = "block";
     renderCrafting();
   } else {
-    craftingDiv.style.display = "none";
     craftingPos = { left: craftingDiv.offsetLeft, top: craftingDiv.offsetTop };
+    craftingDiv.style.display = "none";
   }
 }
 
@@ -285,7 +384,7 @@ function resetGame() {
   player.health = PLAYER_MAX_HEALTH;
   player.damageCooldown = 0;
   player.weapon = null;
-  weapon = spawnWeapon(canvas.width, canvas.height, walls);
+  weapon = spawnWeapon(canvas.width, canvas.height, walls, "baseball_bat", 1);
   spawnTimer = 0;
   gameOver = false;
   gameOverDiv.style.display = "none";
@@ -336,11 +435,20 @@ window.addEventListener("keydown", (e) => {
     toggleCrafting(!craftingOpen);
   }
   if (/^[1-5]$/.test(e.key)) {
-    const used = consumeHotbarItem(inventory, parseInt(e.key) - 1);
-    if (used) {
-      pickupMsg.textContent = `Used ${used}`;
-      pickupMessageTimer = 60;
+    const idx = parseInt(e.key) - 1;
+    const slot = inventory.hotbar[idx];
+    if (!slot.item) return;
+    if (slot.item === "baseball_bat") {
+      player.weapon = { type: "baseball_bat", damage: 1 };
       renderHotbar();
+    } else {
+      player.weapon = null;
+      const used = consumeHotbarItem(inventory, idx);
+      if (used) {
+        pickupMsg.textContent = `Used ${used}`;
+        pickupMessageTimer = 60;
+        renderHotbar();
+      }
     }
   }
 });
@@ -380,8 +488,13 @@ function update() {
   }
 
   if (weapon && isColliding(player, weapon, 10)) {
-    player.weapon = weapon;
+    addItem(inventory, weapon.type, 1);
+    const idx = inventory.slots.findIndex((s) => s.item === weapon.type);
+    if (idx !== -1) moveToHotbar(inventory, idx, 0);
+    player.weapon = { type: weapon.type, damage: weapon.damage };
     weapon = null;
+    renderInventory();
+    renderHotbar();
   }
 
   for (let i = worldItems.length - 1; i >= 0; i--) {
