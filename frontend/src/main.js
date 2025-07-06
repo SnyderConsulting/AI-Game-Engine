@@ -19,7 +19,10 @@ import {
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
-const restartBtn = document.getElementById("restartBtn");
+const mainMenu = document.getElementById("mainMenu");
+const startBtn = document.getElementById("startBtn");
+const gameOverDiv = document.getElementById("gameOver");
+const newGameBtn = document.getElementById("newGameBtn");
 
 const player = {
   x: 0,
@@ -39,6 +42,21 @@ let spawnTimer = 0;
 let spawnDoor = null;
 let gameOver = false;
 const keys = {};
+let loopStarted = false;
+
+function resizeCanvas() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+
+function startGame() {
+  resizeCanvas();
+  resetGame();
+  if (!loopStarted) {
+    loopStarted = true;
+    gameLoop();
+  }
+}
 
 function resetGame() {
   zombies = [];
@@ -54,10 +72,20 @@ function resetGame() {
   weapon = spawnWeapon(canvas.width, canvas.height, walls);
   spawnTimer = 0;
   gameOver = false;
-  restartBtn.style.display = "none";
+  gameOverDiv.style.display = "none";
 }
 
-restartBtn.addEventListener("click", resetGame);
+startBtn.addEventListener("click", () => {
+  mainMenu.style.display = "none";
+  startGame();
+});
+
+newGameBtn.addEventListener("click", () => {
+  gameOverDiv.style.display = "none";
+  startGame();
+});
+
+window.addEventListener("resize", resizeCanvas);
 
 window.addEventListener("keydown", (e) => {
   keys[e.key.toLowerCase()] = true;
@@ -141,7 +169,7 @@ function update() {
       z.attackCooldown = 30;
       if (player.health <= 0) {
         gameOver = true;
-        restartBtn.style.display = "block";
+        gameOverDiv.style.display = "block";
       }
     }
   });
@@ -211,7 +239,6 @@ function render() {
     ctx.font = "32px sans-serif";
     ctx.textAlign = "center";
     ctx.fillText("Game Over", canvas.width / 2, canvas.height / 2);
-    restartBtn.style.display = "block";
   }
 }
 
@@ -221,7 +248,4 @@ function gameLoop() {
   requestAnimationFrame(gameLoop);
 }
 
-window.addEventListener("load", () => {
-  resetGame();
-  gameLoop();
-});
+window.addEventListener("load", resizeCanvas);

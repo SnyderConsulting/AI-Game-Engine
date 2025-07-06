@@ -12,7 +12,9 @@ npm install
 npm run dev
 ```
 
-The game runs entirely in the browser. Open `http://localhost:3000` to play. Use the arrow keys or WASD to move the green player blob. The player still spawns randomly, but zombies now emerge from a single door placed along the outer edge of the arena. A new zombie steps through this door every 3–5 seconds. They roam toward random destinations so they naturally spread out but will pursue the player once spotted. Grey wall segments are scattered around the level and block both you and the zombies. If a zombie touches you, the game ends and a **Restart** button will appear so you can quickly try again without refreshing the page.
+The game runs entirely in the browser. Open `http://localhost:3000` and you will be greeted with a simple main menu. Click **Start Game** to jump into the action. Use the arrow keys or WASD to move the green player blob. The player still spawns randomly, but zombies now emerge from a single door placed along the outer edge of the arena. A new zombie steps through this door every 3–5 seconds. They roam toward random destinations so they naturally spread out but will pursue the player once spotted. Grey wall segments are scattered around the level and block both you and the zombies. If a zombie touches you, the game ends and a **New Game** button appears so you can immediately play again.
+
+The canvas now automatically resizes to fill the entire browser window so the action takes up all available space.
 
 Players now have a small health pool instead of dying instantly. A "Health" display shows the remaining points. Each zombie also has a simple green bar above its head to indicate remaining health.
 
