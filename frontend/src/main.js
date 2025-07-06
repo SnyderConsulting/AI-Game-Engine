@@ -61,7 +61,8 @@ function startGame() {
 function resetGame() {
   zombies = [];
   turrets = [];
-  walls = generateWalls(canvas.width, canvas.height, 4);
+  // Use more walls now that the canvas covers the full screen
+  walls = generateWalls(canvas.width, canvas.height, 20);
   spawnDoor = createSpawnDoor(canvas.width, canvas.height, walls);
   const spawn = spawnPlayer(canvas.width, canvas.height, walls);
   player.x = spawn.x;
@@ -234,12 +235,9 @@ function render() {
     ctx.fill();
   });
 
-  if (gameOver) {
-    ctx.fillStyle = "black";
-    ctx.font = "32px sans-serif";
-    ctx.textAlign = "center";
-    ctx.fillText("Game Over", canvas.width / 2, canvas.height / 2);
-  }
+  // The overlay div already shows the Game Over message
+  // and restart button, so nothing is drawn here when
+  // the player loses.
 }
 
 function gameLoop() {
