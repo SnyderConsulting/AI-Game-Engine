@@ -17,6 +17,7 @@ import {
   spawnZombieAtDoor,
   spawnContainers,
 } from "./game_logic.js";
+import { createPlayer, resetPlayerForNewGame } from "./player.js";
 import {
   createInventory,
   addItem,
@@ -97,17 +98,7 @@ function drawSprite(ctx, img, x, y, facing, size = 32) {
   ctx.restore();
 }
 
-const player = {
-  x: 0,
-  y: 0,
-  speed: 2,
-  health: PLAYER_MAX_HEALTH,
-  damageCooldown: 0,
-  weapon: null,
-  facing: { x: 1, y: 0 },
-  swingTimer: 0,
-  abilities: { fireball: false },
-};
+const player = createPlayer(PLAYER_MAX_HEALTH);
 let zombies = [];
 let turrets = [];
 let walls = [];
@@ -481,9 +472,7 @@ function resetGame() {
   const spawn = spawnPlayer(canvas.width, canvas.height, walls);
   player.x = spawn.x;
   player.y = spawn.y;
-  player.health = PLAYER_MAX_HEALTH;
-  player.damageCooldown = 0;
-  player.weapon = null;
+  resetPlayerForNewGame(player, PLAYER_MAX_HEALTH);
   weapon = spawnWeapon(canvas.width, canvas.height, walls, "baseball_bat", 1);
   spawnTimer = 0;
   containers = spawnContainers(

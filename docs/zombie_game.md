@@ -48,8 +48,9 @@ Some zombies emerge imbued with flame. These **Fire Zombies** appear with a red 
 
 Collecting Fire Cores unlocks a new recipe:
 
-- **Fire Mutation Serum** - Combine three Fire Cores to craft. Right-click the serum in your inventory or hotbar to inject it and permanently gain the Fireball ability.
+- **Fire Mutation Serum** - Combine three Fire Cores to craft. Right-click the serum in your inventory or hotbar to inject it and gain the Fireball ability for the rest of the current game.
 
 ## Fireball Ability
 
 Injecting the serum adds a new _Fireball_ entry to your hotbar. Equip it like any other item by selecting the slot with the number keys. While equipped press **Spacebar** to hurl a blazing projectile toward the mouse cursor. Each cast consumes one Fire Core from your inventory. The Fireball travels about eight tiles, damaging zombies it hits and dissipating on impact with walls or enemies. If you attempt to cast without any cores a brief "Out of Fire Cores!" message appears.
+Starting a new game resets this ability so you must craft the serum again in future runs.
