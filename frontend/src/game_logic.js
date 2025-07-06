@@ -280,7 +280,7 @@ export function moveZombie(zombie, player, walls, speed, width, height) {
   moveTowards(zombie, target, speed);
 }
 
-export function updateTurrets(turrets, zombies) {
+export function updateTurrets(turrets, zombies, onKill = () => {}) {
   turrets.forEach((t) => {
     if (t.cooldown > 0) {
       t.cooldown--;
@@ -290,7 +290,8 @@ export function updateTurrets(turrets, zombies) {
       (z) => Math.hypot(z.x - t.x, z.y - t.y) <= TURRET_RANGE,
     );
     if (idx !== -1) {
-      zombies.splice(idx, 1);
+      const dead = zombies.splice(idx, 1)[0];
+      onKill(dead);
       t.cooldown = TURRET_RELOAD;
     }
   });
@@ -354,4 +355,50 @@ export function attackZombies(
       }
     }
   }
+}
+
+export function attackZombiesWithKills(
+  player,
+  zombies,
+  damage = 1,
+  range = 30,
+  direction = null,
+  arc = Math.PI / 2,
+  knockback = 0,
+) {
+  const killed = [];
+  const cosHalf = Math.cos(arc / 2);
+  const dirNorm = direction
+    ? (() => {
+        const len = Math.hypot(direction.x, direction.y);
+        if (len === 0) return null;
+        return { x: direction.x / len, y: direction.y / len };
+      })()
+    : null;
+
+  for (let i = zombies.length - 1; i >= 0; i--) {
+    const z = zombies[i];
+    const dx = z.x - player.x;
+    const dy = z.y - player.y;
+    const dist = Math.hypot(dx, dy);
+    if (dist > range) continue;
+
+    let withinArc = true;
+    if (dirNorm) {
+      withinArc = (dx * dirNorm.x + dy * dirNorm.y) / dist >= cosHalf;
+    }
+
+    if (withinArc) {
+      z.health -= damage;
+      if (knockback && dist > 0) {
+        z.x += (dx / dist) * knockback;
+        z.y += (dy / dist) * knockback;
+      }
+      if (z.health <= 0) {
+        killed.push(z);
+        zombies.splice(i, 1);
+      }
+    }
+  }
+  return killed;
 }

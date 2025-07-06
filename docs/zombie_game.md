@@ -20,3 +20,11 @@ Players now have a small health pool instead of dying instantly. A "Health" disp
 The on-screen control instructions are fixed to the bottom-left corner so they never cover the health readout.
 
 The arena contains a single melee weapon that can be picked up. Press the spacebar to swing the weapon. The swing now follows the last direction you moved, creating a short arc in front of the player. Zombies hit by the swing take damage, are pushed back slightly, and can be struck from a small distance away. Turrets no longer spawn automatically; future updates will let players place them manually.
+
+## Inventory System
+
+Press **I** to open the 5x5 inventory grid. Items stack up to 10 per slot. A five slot hotbar sits at the bottom of the screen for quick use. Drag to rearrange items or right click to move them to the hotbar. Use the number keys **1-5** to use hotbar items.
+
+## Zombie Drops
+
+Zombies may drop **core**, **flesh**, or **teeth** when killed. Walk over a dropped icon to collect it if you have space. Items remain on the ground when the inventory is full and a brief pickup message appears when collecting or using items.

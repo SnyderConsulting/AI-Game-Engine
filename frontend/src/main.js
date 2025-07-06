@@ -10,11 +10,19 @@ import {
   updateTurrets,
   spawnWeapon,
   attackZombies,
+  attackZombiesWithKills,
   PLAYER_MAX_HEALTH,
   ZOMBIE_MAX_HEALTH,
   createSpawnDoor,
   spawnZombieAtDoor,
 } from "./game_logic.js";
+import {
+  createInventory,
+  addItem,
+  moveItem,
+  moveToHotbar,
+  consumeHotbarItem,
+} from "./inventory.js";
 
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
@@ -23,6 +31,10 @@ const mainMenu = document.getElementById("mainMenu");
 const startBtn = document.getElementById("startBtn");
 const gameOverDiv = document.getElementById("gameOver");
 const newGameBtn = document.getElementById("newGameBtn");
+const inventoryDiv = document.getElementById("inventory");
+const inventoryGrid = document.getElementById("inventoryGrid");
+const hotbarDiv = document.getElementById("hotbar");
+const pickupMsg = document.getElementById("pickupMessage");
 
 const player = {
   x: 0,
@@ -43,6 +55,87 @@ let spawnDoor = null;
 let gameOver = false;
 const keys = {};
 let loopStarted = false;
+let inventory = createInventory();
+let inventoryOpen = false;
+let worldItems = [];
+let pickupMessageTimer = 0;
+
+const ZOMBIE_DROPS = [
+  { type: "core", chance: 0.1 },
+  { type: "flesh", chance: 0.8 },
+  { type: "teeth", chance: 0.4 },
+];
+
+let selectedSlot = null;
+
+function renderInventory() {
+  inventoryGrid.innerHTML = "";
+  inventory.slots.forEach((slot, i) => {
+    const div = document.createElement("div");
+    div.dataset.index = i;
+    Object.assign(div.style, {
+      width: "40px",
+      height: "40px",
+      border: "1px solid white",
+      color: "white",
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+    });
+    if (selectedSlot === i) div.style.outline = "2px solid yellow";
+    div.textContent = slot.item
+      ? `${slot.item[0].toUpperCase()}:${slot.count}`
+      : "";
+    div.addEventListener("click", () => {
+      if (selectedSlot === null) {
+        selectedSlot = i;
+      } else {
+        moveItem(inventory, selectedSlot, i);
+        selectedSlot = null;
+      }
+      renderInventory();
+      renderHotbar();
+    });
+    div.addEventListener("contextmenu", (e) => {
+      e.preventDefault();
+      const idx = inventory.hotbar.findIndex((s) => !s.item);
+      moveToHotbar(inventory, i, idx === -1 ? 0 : idx);
+      selectedSlot = null;
+      renderInventory();
+      renderHotbar();
+    });
+    inventoryGrid.appendChild(div);
+  });
+}
+
+function renderHotbar() {
+  hotbarDiv.innerHTML = "";
+  inventory.hotbar.forEach((slot) => {
+    const div = document.createElement("div");
+    Object.assign(div.style, {
+      width: "40px",
+      height: "40px",
+      border: "1px solid white",
+      color: "white",
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+    });
+    div.textContent = slot.item
+      ? `${slot.item[0].toUpperCase()}:${slot.count}`
+      : "";
+    hotbarDiv.appendChild(div);
+  });
+}
+
+function dropLoot(zombie) {
+  if (!zombie) return;
+  ZOMBIE_DROPS.forEach((d) => {
+    if (Math.random() < d.chance) {
+      worldItems.push({ x: zombie.x, y: zombie.y, type: d.type, count: 1 });
+    }
+  });
+}
 
 function resizeCanvas() {
   canvas.width = window.innerWidth;
@@ -74,6 +167,14 @@ function resetGame() {
   spawnTimer = 0;
   gameOver = false;
   gameOverDiv.style.display = "none";
+  inventory = createInventory();
+  worldItems = [];
+  inventoryOpen = false;
+  pickupMessageTimer = 0;
+  inventoryDiv.style.display = "none";
+  pickupMsg.textContent = "";
+  renderInventory();
+  renderHotbar();
 }
 
 startBtn.addEventListener("click", () => {
@@ -90,6 +191,19 @@ window.addEventListener("resize", resizeCanvas);
 
 window.addEventListener("keydown", (e) => {
   keys[e.key.toLowerCase()] = true;
+  if (e.key === "i" || e.key === "e") {
+    inventoryOpen = !inventoryOpen;
+    inventoryDiv.style.display = inventoryOpen ? "block" : "none";
+    if (inventoryOpen) renderInventory();
+  }
+  if (/^[1-5]$/.test(e.key)) {
+    const used = consumeHotbarItem(inventory, parseInt(e.key) - 1);
+    if (used) {
+      pickupMsg.textContent = `Used ${used}`;
+      pickupMessageTimer = 60;
+      renderHotbar();
+    }
+  }
 });
 window.addEventListener("keyup", (e) => {
   keys[e.key.toLowerCase()] = false;
@@ -131,10 +245,23 @@ function update() {
     weapon = null;
   }
 
+  for (let i = worldItems.length - 1; i >= 0; i--) {
+    const it = worldItems[i];
+    if (isColliding(player, it, 10)) {
+      if (addItem(inventory, it.type, it.count)) {
+        worldItems.splice(i, 1);
+        pickupMsg.textContent = `Picked up ${it.type}`;
+        pickupMessageTimer = 60;
+        renderInventory();
+        renderHotbar();
+      }
+    }
+  }
+
   if (player.swingTimer > 0) player.swingTimer--;
 
   if (player.weapon && keys[" "] && player.swingTimer <= 0) {
-    attackZombies(
+    const killed = attackZombiesWithKills(
       player,
       zombies,
       player.weapon.damage,
@@ -143,6 +270,7 @@ function update() {
       Math.PI / 2,
       5,
     );
+    killed.forEach(dropLoot);
     player.swingTimer = 10;
   }
 
@@ -175,7 +303,12 @@ function update() {
     }
   });
 
-  updateTurrets(turrets, zombies);
+  updateTurrets(turrets, zombies, dropLoot);
+
+  if (pickupMessageTimer > 0) {
+    pickupMessageTimer--;
+    if (pickupMessageTimer === 0) pickupMsg.textContent = "";
+  }
 }
 
 function render() {
@@ -215,6 +348,13 @@ function render() {
     ctx.arc(weapon.x, weapon.y, 6, 0, Math.PI * 2);
     ctx.fill();
   }
+
+  ctx.fillStyle = "yellow";
+  worldItems.forEach((it) => {
+    ctx.beginPath();
+    ctx.arc(it.x, it.y, 5, 0, Math.PI * 2);
+    ctx.fill();
+  });
 
   ctx.fillStyle = "red";
   zombies.forEach((z) => {

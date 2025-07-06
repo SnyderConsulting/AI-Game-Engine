@@ -18,6 +18,7 @@ import {
   TURRET_RANGE,
   TURRET_RELOAD,
   attackZombies,
+  attackZombiesWithKills,
   ZOMBIE_MAX_HEALTH,
   spawnZombieAtDoor,
 } from "../src/game_logic.js";
@@ -183,4 +184,24 @@ test("attackZombies applies knockback", () => {
   attackZombies(player, zombies, 1, 15, dir, Math.PI / 2, 5);
   assert(zombies[0].x > 10);
   assert.strictEqual(zombies[0].health, 1);
+});
+
+test("attackZombiesWithKills returns dead zombies", () => {
+  const player = { x: 0, y: 0 };
+  const dir = { x: 1, y: 0 };
+  const zombies = [
+    { x: 5, y: 0, health: 1 },
+    { x: -5, y: 0, health: 2 },
+  ];
+  const killed = attackZombiesWithKills(
+    player,
+    zombies,
+    1,
+    10,
+    dir,
+    Math.PI,
+    0,
+  );
+  assert.strictEqual(killed.length, 1);
+  assert.strictEqual(zombies.length, 1);
 });
