@@ -10,10 +10,9 @@ test("craftRecipe consumes ingredients and adds item", () => {
   const recipe = RECIPES.find((r) => r.id === "zombie_essence");
   const success = craftRecipe(inv, recipe);
   assert.strictEqual(success, true);
-  assert.strictEqual(
-    inv.slots.some((s) => s.item === "zombie_essence"),
-    true,
-  );
+  const inInv = inv.slots.some((s) => s.item === "zombie_essence");
+  const inBar = inv.hotbar.some((s) => s.item === "zombie_essence");
+  assert.strictEqual(inInv || inBar, true);
 });
 
 test("craft fire mutation serum", () => {
@@ -22,6 +21,11 @@ test("craft fire mutation serum", () => {
   const recipe = RECIPES.find((r) => r.id === "mutation_serum_fire");
   const success = craftRecipe(inv, recipe);
   assert.strictEqual(success, true);
-  assert.strictEqual(inv.slots.some((s) => s.item === "mutation_serum_fire"), true);
-  assert.strictEqual(inv.slots.some((s) => s.item === "fire_core"), false);
+  const inInv = inv.slots.some((s) => s.item === "mutation_serum_fire");
+  const inBar = inv.hotbar.some((s) => s.item === "mutation_serum_fire");
+  assert.strictEqual(inInv || inBar, true);
+  const coresLeft = inv.slots
+    .concat(inv.hotbar)
+    .some((s) => s.item === "fire_core");
+  assert.strictEqual(coresLeft, false);
 });
