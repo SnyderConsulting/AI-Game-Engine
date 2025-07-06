@@ -65,6 +65,17 @@ const ITEM_ICONS = {
   medkit: "assets/medkit.png",
 };
 
+// Preload image objects for item icons so they can be drawn on the canvas
+const ITEM_IMAGES = {};
+for (const [id, path] of Object.entries(ITEM_ICONS)) {
+  const img = new Image();
+  img.src = path;
+  ITEM_IMAGES[id] = img;
+}
+
+const cardboardBoxImg = new Image();
+cardboardBoxImg.src = "assets/cardboard_box.png";
+
 const playerSprite = new Image();
 playerSprite.src = "assets/sprite_player.png";
 const zombieSprite = new Image();
@@ -685,10 +696,9 @@ function render() {
   walls.forEach((w) => {
     ctx.fillRect(w.x, w.y, SEGMENT_SIZE, SEGMENT_SIZE);
   });
-  ctx.fillStyle = "brown";
   containers.forEach((c) => {
     ctx.globalAlpha = c.opened ? 0.5 : 1;
-    ctx.fillRect(c.x - 10, c.y - 10, 20, 20);
+    ctx.drawImage(cardboardBoxImg, c.x - 10, c.y - 10, 20, 20);
     ctx.globalAlpha = 1;
   });
   if (spawnDoor) {
@@ -713,10 +723,15 @@ function render() {
   ctx.fillText(`Health: ${player.health}`, 10, 20);
 
   if (weapon) {
-    ctx.fillStyle = "orange";
-    ctx.beginPath();
-    ctx.arc(weapon.x, weapon.y, 6, 0, Math.PI * 2);
-    ctx.fill();
+    const img = ITEM_IMAGES[weapon.type];
+    if (img) {
+      ctx.drawImage(img, weapon.x - 8, weapon.y - 8, 16, 16);
+    } else {
+      ctx.fillStyle = "orange";
+      ctx.beginPath();
+      ctx.arc(weapon.x, weapon.y, 6, 0, Math.PI * 2);
+      ctx.fill();
+    }
   }
 
   ctx.fillStyle = "yellow";

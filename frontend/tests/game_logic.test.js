@@ -214,5 +214,6 @@ test("spawnContainers places non-colliding containers", () => {
   assert.strictEqual(containers.length, 3);
   containers.forEach((c) => {
     assert.strictEqual(circleRectColliding(c, walls[0], 10), false);
+    assert.strictEqual(c.type, "cardboard_box");
   });
 });
