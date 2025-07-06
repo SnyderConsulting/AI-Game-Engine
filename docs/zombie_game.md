@@ -56,3 +56,13 @@ Collecting Fire Cores unlocks a new recipe:
 ## Fireball Ability
 
 Spend **2 Fire Mutation Points** in the skill tree to unlock the _Fireball_ ability. Unlocking places a Fireball icon in your hotbar. Equip it like any other item by selecting the slot with the number keys. While equipped press **Space** or left mouse button to hurl a blazing projectile toward the mouse cursor. Each cast consumes one Fire Core from your inventory. The Fireball travels about eight tiles, damaging zombies it hits and dissipating on impact with walls or enemies. If you attempt to cast without any cores a brief "Out of Fire Cores!" message appears. Starting a new game resets points and skills so you must craft the serum again in future runs.
+
+### Fireball Upgrades
+
+After unlocking the ability you can spend more points to enhance it:
+
+| Level | Effect                                   | Cost     |
+| ----- | ---------------------------------------- | -------- |
+| **1** | Moderate damage, small explosion         | Included |
+| **2** | Increased damage & radius (+25%)         | 2 points |
+| **3** | Larger radius (+50%), pierces one zombie | 3 points |
