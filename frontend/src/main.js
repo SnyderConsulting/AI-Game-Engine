@@ -24,6 +24,7 @@ import {
   moveToHotbar,
   moveFromHotbar,
   swapHotbar,
+  swapInventoryHotbar,
   consumeHotbarItem,
   countItem,
   removeItem,
@@ -190,8 +191,7 @@ function renderInventory() {
         if (selectedSlot.type === "inventory") {
           moveItem(inventory, selectedSlot.index, i);
         } else {
-          // moving from hotbar to inventory
-          moveFromHotbar(inventory, selectedSlot.index, i);
+          swapInventoryHotbar(inventory, i, selectedSlot.index);
         }
         selectedSlot = null;
       }
@@ -263,7 +263,7 @@ function renderHotbar() {
         if (selectedSlot.type === "hotbar") {
           swapHotbar(inventory, selectedSlot.index, i);
         } else {
-          moveToHotbar(inventory, selectedSlot.index, i);
+          swapInventoryHotbar(inventory, selectedSlot.index, i);
         }
         selectedSlot = null;
       }
