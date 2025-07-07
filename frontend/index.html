@@ -11,6 +11,28 @@
           url("assets/cursor.png") 32 32,
           auto;
       }
+      #skillTree .skill-node {
+        width: 60px;
+        height: 60px;
+        border: 1px solid white;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+      }
+      #skillTree .locked {
+        opacity: 0.4;
+      }
+      #skillTree .available {
+        cursor: pointer;
+      }
+      #skillTree .unlocked {
+        background: rgba(255, 255, 255, 0.1);
+      }
+      #skillTree .maxed {
+        border-color: gold;
+        background: rgba(255, 255, 100, 0.1);
+      }
     </style>
   </head>
   <body>
@@ -206,14 +228,38 @@
       </div>
       <div style="padding: 8px">
         <div id="skillPoints" style="margin-bottom: 8px"></div>
-        <div
-          id="skillGrid"
-          style="
-            display: grid;
-            grid-template-columns: repeat(3, 60px);
-            gap: 8px;
-          "
-        ></div>
+        <div style="display: flex; gap: 16px; align-items: flex-start">
+          <div
+            id="skillGrid"
+            style="
+              display: grid;
+              grid-template-columns: repeat(3, 60px);
+              gap: 8px;
+            "
+          ></div>
+          <div
+            id="skillDetails"
+            style="
+              display: none;
+              width: 200px;
+              background: rgba(0, 0, 0, 0.7);
+              padding: 8px;
+              border: 1px solid white;
+            "
+          >
+            <div
+              id="skillName"
+              style="font-weight: bold; margin-bottom: 4px"
+            ></div>
+            <div
+              id="skillDesc"
+              style="font-size: 12px; margin-bottom: 4px"
+            ></div>
+            <div id="skillLevel" style="margin-bottom: 4px"></div>
+            <div id="skillCost" style="margin-bottom: 8px"></div>
+            <button id="skillUpgrade">Unlock</button>
+          </div>
+        </div>
       </div>
     </div>
     <script type="module" src="/src/main.js"></script>
