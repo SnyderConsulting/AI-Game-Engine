@@ -20,13 +20,22 @@ export function fireballStats(level) {
 }
 
 import { circleRectColliding, isColliding } from "./game_logic.js";
-export function createFireball(x, y, direction, level = 1) {
+export function createFireball(x, y, direction, level = 1, damageMult = 1) {
   const len = Math.hypot(direction.x, direction.y);
   if (len === 0) return null;
   const vx = (direction.x / len) * FIREBALL_SPEED;
   const vy = (direction.y / len) * FIREBALL_SPEED;
   const { damage, radius, pierce } = fireballStats(level);
-  return { x, y, vx, vy, traveled: 0, damage, radius, pierce };
+  return {
+    x,
+    y,
+    vx,
+    vy,
+    traveled: 0,
+    damage: damage * damageMult,
+    radius,
+    pierce,
+  };
 }
 
 export function predictFireballEndpoint(x, y, direction, walls, zombies = []) {

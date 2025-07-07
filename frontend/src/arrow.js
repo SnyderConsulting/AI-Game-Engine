@@ -26,12 +26,12 @@ export function predictArrowEndpoint(x, y, direction, walls, zombies = []) {
   return { x: cx, y: cy };
 }
 
-export function createArrow(x, y, direction) {
+export function createArrow(x, y, direction, damageMult = 1) {
   const len = Math.hypot(direction.x, direction.y);
   if (len === 0) return null;
   const vx = (direction.x / len) * ARROW_SPEED;
   const vy = (direction.y / len) * ARROW_SPEED;
-  return { x, y, vx, vy };
+  return { x, y, vx, vy, damage: ARROW_DAMAGE * damageMult };
 }
 
 export function updateArrows(arrows, zombies, walls, onKill = () => {}) {
@@ -46,7 +46,7 @@ export function updateArrows(arrows, zombies, walls, onKill = () => {}) {
       for (let j = zombies.length - 1; j >= 0; j--) {
         const z = zombies[j];
         if (isColliding(a, z, 2)) {
-          z.health -= ARROW_DAMAGE;
+          z.health -= a.damage;
           if (z.health <= 0) {
             zombies.splice(j, 1);
             onKill(z);
