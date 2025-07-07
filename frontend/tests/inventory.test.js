@@ -23,6 +23,14 @@ test("addItem prioritizes hotbar then stacks", () => {
   assert.strictEqual(inv.hotbar[1].count, 1);
 });
 
+test("wood stacks up to 20", () => {
+  const inv = createInventory();
+  addItem(inv, "wood", 20);
+  assert.strictEqual(inv.hotbar[0].count, 20);
+  addItem(inv, "wood", 5);
+  assert.strictEqual(countItem(inv, "wood"), 25);
+});
+
 test("consumeHotbarItem reduces count", () => {
   const inv = createInventory();
   addItem(inv, "flesh", 1);

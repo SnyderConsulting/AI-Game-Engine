@@ -34,6 +34,7 @@ import {
 import { RECIPES, canCraft, craftRecipe } from "./crafting.js";
 import { dropLoot } from "./loot.js";
 import { createFireball, updateFireballs } from "./spells.js";
+import { createArrow, updateArrows } from "./arrow.js";
 import { upgradeFireball } from "./skill_tree.js";
 import { makeDraggable } from "./ui.js";
 
@@ -78,6 +79,9 @@ const ITEM_ICONS = {
   fireball_spell: "assets/skill_fireball.png",
   baseball_bat: "assets/baseball_bat.png",
   medkit: "assets/medkit.png",
+  wood: "assets/wood.png",
+  bow: "assets/wooden_bow.png",
+  arrow: "assets/wooden_arrow.png",
 };
 
 // Preload image objects for item icons so they can be drawn on the canvas
@@ -125,7 +129,9 @@ let craftingOpen = false;
 let skillTreeOpen = false;
 let worldItems = [];
 let fireballs = [];
+let arrows = [];
 let fireballCooldown = 0;
+let bowAiming = false;
 let mousePos = { x: 0, y: 0 };
 let pickupMessageTimer = 0;
 let inventoryPos = { left: null, top: null };
@@ -133,9 +139,10 @@ let craftingPos = { left: null, top: null };
 let skillTreePos = { left: null, top: null };
 
 let prevUse = false;
+let prevAim = false;
 const LOOT_TIME = 180; // 3 seconds at 60fps
 const LOOT_DIST = 20;
-const MEDKIT_CHANCE = 0.64;
+const MEDKIT_CHANCE = 0.5;
 
 // When managing inventory/hotbar the user can select a slot.
 // The structure is { type: "inventory" | "hotbar", index: number }.
@@ -533,7 +540,7 @@ function resetGame() {
     canvas.width,
     canvas.height,
     walls,
-    3 + Math.floor(Math.random() * 3),
+    15 + Math.floor(Math.random() * 6),
   );
   looting = null;
   lootTimer = 0;
@@ -619,6 +626,8 @@ function update() {
   const activeSlot = getActiveHotbarItem(inventory);
   if (activeSlot && activeSlot.item === "baseball_bat") {
     player.weapon = { type: "baseball_bat", damage: 1 };
+  } else if (activeSlot && activeSlot.item === "bow") {
+    player.weapon = { type: "bow" };
   } else {
     player.weapon = null;
   }
@@ -626,6 +635,9 @@ function update() {
   const useHeld = keys[" "] || keys.mouse;
   const useTrigger = useHeld && !prevUse;
   prevUse = useHeld;
+  const aimHeld = keys[" "] || keys.mouse2;
+  const aimRelease = !aimHeld && prevAim;
+  prevAim = aimHeld;
 
   const prevX = player.x;
   const prevY = player.y;
@@ -691,25 +703,16 @@ function update() {
       if (lootTimer <= 0) {
         if (!looting.opened) {
           looting.opened = true;
-          if (Math.random() < MEDKIT_CHANCE) {
-            looting.item = "medkit";
-          } else {
-            looting.item = null;
-          }
+          looting.item = Math.random() < MEDKIT_CHANCE ? "medkit" : "wood";
         }
-        if (looting.item) {
-          if (addItem(inventory, "medkit", 1)) {
-            looting.item = null;
-            pickupMsg.textContent = "Picked up medkit";
-            pickupMessageTimer = 60;
-            renderInventory();
-            renderHotbar();
-          } else {
-            pickupMsg.textContent = "Inventory Full";
-            pickupMessageTimer = 60;
-          }
+        if (addItem(inventory, looting.item, 1)) {
+          pickupMsg.textContent = `Picked up ${looting.item}`;
+          looting.item = null;
+          pickupMessageTimer = 60;
+          renderInventory();
+          renderHotbar();
         } else {
-          pickupMsg.textContent = "Container Empty";
+          pickupMsg.textContent = "Inventory Full";
           pickupMessageTimer = 60;
         }
         looting = null;
@@ -761,7 +764,27 @@ function update() {
     }
   }
 
-  if (player.weapon && useHeld && player.swingTimer <= 0) {
+  if (player.weapon && player.weapon.type === "bow") {
+    bowAiming = aimHeld;
+    if (aimRelease) {
+      const arrowsLeft = countItem(inventory, "arrow");
+      if (arrowsLeft > 0) {
+        removeItem(inventory, "arrow", 1);
+        const dir = { x: mousePos.x - player.x, y: mousePos.y - player.y };
+        const a = createArrow(player.x, player.y, dir);
+        if (a) arrows.push(a);
+        renderInventory();
+        renderHotbar();
+      } else {
+        pickupMsg.textContent = "Out of Arrows!";
+        pickupMessageTimer = 60;
+      }
+    }
+  } else {
+    bowAiming = false;
+  }
+
+  if (player.weapon && player.weapon.type === "baseball_bat" && useHeld && player.swingTimer <= 0) {
     const killed = attackZombiesWithKills(
       player,
       zombies,
@@ -812,6 +835,7 @@ function update() {
   });
 
   updateFireballs(fireballs, zombies, walls, (z) => dropLoot(z, worldItems));
+  updateArrows(arrows, zombies, walls, (z) => dropLoot(z, worldItems));
   if (pickupMessageTimer > 0) {
     pickupMessageTimer--;
     if (pickupMessageTimer === 0) pickupMsg.textContent = "";
@@ -854,6 +878,9 @@ function render() {
   ctx.font = "16px sans-serif";
   ctx.textAlign = "left";
   ctx.fillText(`Health: ${player.health}`, 10, 20);
+  if (player.weapon && player.weapon.type === "bow") {
+    ctx.fillText(`Arrows: ${countItem(inventory, "arrow")}`, 10, 40);
+  }
 
   if (weapon) {
     const img = ITEM_IMAGES[weapon.type];
@@ -873,6 +900,19 @@ function render() {
     ctx.arc(it.x, it.y, 5, 0, Math.PI * 2);
     ctx.fill();
   });
+
+  ctx.fillStyle = "brown";
+  arrows.forEach((a) => {
+    ctx.beginPath();
+    ctx.arc(a.x, a.y, 2, 0, Math.PI * 2);
+    ctx.fill();
+  });
+  if (bowAiming) {
+    ctx.strokeStyle = "white";
+    ctx.beginPath();
+    ctx.arc(mousePos.x, mousePos.y, 5, 0, Math.PI * 2);
+    ctx.stroke();
+  }
 
   ctx.fillStyle = "orange";
   fireballs.forEach((fb) => {
@@ -918,7 +958,13 @@ canvas.addEventListener("mousemove", (e) => {
 
 canvas.addEventListener("mousedown", (e) => {
   if (e.button === 0) keys.mouse = true;
+  if (e.button === 2) {
+    keys.mouse2 = true;
+    e.preventDefault();
+  }
 });
 canvas.addEventListener("mouseup", (e) => {
   if (e.button === 0) keys.mouse = false;
+  if (e.button === 2) keys.mouse2 = false;
 });
+canvas.addEventListener("contextmenu", (e) => e.preventDefault());

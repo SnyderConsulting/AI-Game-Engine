@@ -23,6 +23,19 @@ export const RECIPES = [
     description: "Unlocks the Fireball ability.",
     ingredients: { fire_core: 3 },
   },
+  {
+    id: "bow",
+    title: "Bow",
+    description: "Simple wooden bow.",
+    ingredients: { wood: 3, teeth: 2, core: 1 },
+  },
+  {
+    id: "arrow",
+    title: "Arrows",
+    description: "Ammo for the bow.",
+    ingredients: { wood: 1, teeth: 1 },
+    output: { id: "arrow", qty: 5 },
+  },
 ];
 
 import { addItem, countItem, removeItem } from "./inventory.js";
@@ -38,5 +51,6 @@ export function craftRecipe(inv, recipe) {
   Object.entries(recipe.ingredients).forEach(([id, qty]) => {
     removeItem(inv, id, qty);
   });
-  return addItem(inv, recipe.id, 1);
+  const output = recipe.output || { id: recipe.id, qty: 1 };
+  return addItem(inv, output.id, output.qty);
 }
