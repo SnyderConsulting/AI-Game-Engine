@@ -28,7 +28,32 @@ export function createFireball(x, y, direction, level = 1) {
   return { x, y, vx, vy, traveled: 0, damage, radius, pierce };
 }
 
-export function updateFireballs(fireballs, zombies, walls, onKill = () => {}) {
+export function predictFireballEndpoint(x, y, direction, walls) {
+  const len = Math.hypot(direction.x, direction.y);
+  if (len === 0) return { x, y };
+  const stepX = (direction.x / len) * FIREBALL_SPEED;
+  const stepY = (direction.y / len) * FIREBALL_SPEED;
+  let cx = x;
+  let cy = y;
+  let traveled = 0;
+  while (traveled < FIREBALL_RANGE) {
+    cx += stepX;
+    cy += stepY;
+    traveled += Math.hypot(stepX, stepY);
+    if (walls.some((w) => circleRectColliding({ x: cx, y: cy }, w, 4))) {
+      break;
+    }
+  }
+  return { x: cx, y: cy };
+}
+
+export function updateFireballs(
+  fireballs,
+  zombies,
+  walls,
+  explosions = [],
+  onKill = () => {},
+) {
   for (let i = fireballs.length - 1; i >= 0; i--) {
     const fb = fireballs[i];
     fb.x += fb.vx;
@@ -68,7 +93,17 @@ export function updateFireballs(fireballs, zombies, walls, onKill = () => {}) {
           }
         }
       }
+      if (explosions) {
+        explosions.push({ x: fb.x, y: fb.y, radius: fb.radius, timer: 15 });
+      }
       fireballs.splice(i, 1);
     }
+  }
+}
+
+export function updateExplosions(explosions) {
+  for (let i = explosions.length - 1; i >= 0; i--) {
+    explosions[i].timer--;
+    if (explosions[i].timer <= 0) explosions.splice(i, 1);
   }
 }
