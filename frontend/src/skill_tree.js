@@ -47,3 +47,40 @@ export function upgradePhoenixRevival(player) {
   player.abilities.phoenixRevivalLevel = level + 1;
   return true;
 }
+
+export const SKILL_INFO = [
+  {
+    id: "fire_orb_skill",
+    name: "Fire Orbs",
+    description:
+      "Summon a flaming orb that circles you and damages zombies on contact.",
+    levelKey: "fireOrbLevel",
+    max: 3,
+    costs: [0, 1, 2, 3],
+  },
+  {
+    id: "fireball_spell",
+    name: "Fireball",
+    description:
+      "Hurl a blazing projectile that explodes when it hits a target.",
+    levelKey: "fireballLevel",
+    max: 3,
+    costs: [0, 2, 2, 3],
+  },
+  {
+    id: "phoenix_revival_skill",
+    name: "Phoenix Revival",
+    description:
+      "Cheat death and revive with a brief damage buff when you would die.",
+    levelKey: "phoenixRevivalLevel",
+    max: 3,
+    costs: [0, 4, 3, 4],
+  },
+];
+
+export const SKILL_UPGRADERS = {
+  fire_orb_skill: (player) => upgradeFireOrb(player),
+  fireball_spell: (player, inventory, addItem, moveToHotbar) =>
+    upgradeFireball(player, inventory, addItem, moveToHotbar),
+  phoenix_revival_skill: (player) => upgradePhoenixRevival(player),
+};

@@ -41,11 +41,7 @@ import {
   updateExplosions,
 } from "./spells.js";
 import { createArrow, updateArrows, predictArrowEndpoint } from "./arrow.js";
-import {
-  upgradeFireball,
-  upgradeFireOrb,
-  upgradePhoenixRevival,
-} from "./skill_tree.js";
+import { SKILL_INFO, SKILL_UPGRADERS } from "./skill_tree.js";
 import { createOrbs, updateOrbs } from "./orbs.js";
 import { makeDraggable } from "./ui.js";
 
@@ -75,6 +71,12 @@ const skillTreeBar = document.getElementById("skillTreeBar");
 const skillTreeClose = document.getElementById("skillTreeClose");
 const skillPointsDiv = document.getElementById("skillPoints");
 const skillGrid = document.getElementById("skillGrid");
+const skillDetails = document.getElementById("skillDetails");
+const skillNameDiv = document.getElementById("skillName");
+const skillDescDiv = document.getElementById("skillDesc");
+const skillLevelDiv = document.getElementById("skillLevel");
+const skillCostDiv = document.getElementById("skillCost");
+const skillUpgradeBtn = document.getElementById("skillUpgrade");
 
 // Mapping from item ids to icon paths. If an item is missing, a
 // question mark will be shown instead of an image.
@@ -152,6 +154,7 @@ let pickupMessageTimer = 0;
 let inventoryPos = { left: null, top: null };
 let craftingPos = { left: null, top: null };
 let skillTreePos = { left: null, top: null };
+let selectedSkill = null;
 
 let prevUse = false;
 let prevAim = false;
@@ -457,76 +460,57 @@ function toggleCrafting(open) {
 function renderSkillTree() {
   skillPointsDiv.textContent = `Fire Mutation Points Available: ${player.fireMutationPoints}`;
   skillGrid.innerHTML = "";
-  const skills = [
-    {
-      key: "fire_orb_skill",
-      level: player.abilities.fireOrbLevel,
-      max: 3,
-      costs: [0, 1, 2, 3],
-      upgrade: () => upgradeFireOrb(player),
-    },
-    {
-      key: "fireball_spell",
-      level: player.abilities.fireballLevel,
-      max: 3,
-      costs: [0, 2, 2, 3],
-      upgrade: () => upgradeFireball(player, inventory, addItem, moveToHotbar),
-    },
-    {
-      key: "phoenix_revival_skill",
-      level: player.abilities.phoenixRevivalLevel,
-      max: 3,
-      costs: [0, 4, 3, 4],
-      upgrade: () => upgradePhoenixRevival(player),
-    },
-  ];
+  const skills = SKILL_INFO.map((info) => ({
+    ...info,
+    level: player.abilities[info.levelKey] || 0,
+  }));
   skills.forEach((s) => {
     const tile = document.createElement("div");
     const nextCost = s.level < s.max ? s.costs[s.level + 1] : null;
-    Object.assign(tile.style, {
-      width: "60px",
-      height: "60px",
-      border: "1px solid white",
-      display: "flex",
-      flexDirection: "column",
-      justifyContent: "center",
-      alignItems: "center",
-      cursor:
-        nextCost && player.fireMutationPoints >= nextCost
-          ? "pointer"
-          : "default",
-      background: s.level > 0 ? "rgba(255,255,255,0.1)" : "none",
-    });
+    tile.className = "skill-node";
+    if (s.level >= s.max) tile.classList.add("maxed");
+    else if (s.level > 0) tile.classList.add("unlocked");
+    else tile.classList.add("locked");
+    if (nextCost && player.fireMutationPoints >= nextCost) {
+      tile.classList.add("available");
+    }
+    if (selectedSkill && selectedSkill.id === s.id) {
+      tile.style.outline = "2px solid yellow";
+    }
     const img = document.createElement("img");
-    img.src = ITEM_ICONS[s.key];
+    img.src = ITEM_ICONS[s.id];
     img.style.width = "48px";
     img.style.height = "48px";
     img.style.opacity = s.level > 0 ? 1 : 0.5;
     tile.appendChild(img);
     const label = document.createElement("div");
-    label.style.fontSize = "10px";
+    label.style.fontSize = "12px";
     label.textContent = `Lv ${s.level}/${s.max}`;
     tile.appendChild(label);
-    if (nextCost) {
-      const costDiv = document.createElement("div");
-      costDiv.style.fontSize = "10px";
-      costDiv.textContent = `Cost: ${nextCost}`;
-      tile.appendChild(costDiv);
-    }
-    if (nextCost && player.fireMutationPoints >= nextCost) {
-      tile.addEventListener("mousedown", () => {
-        if (s.upgrade()) {
-          if (s.key === "fire_orb_skill") {
-            fireOrbs = createOrbs(player.abilities.fireOrbLevel >= 2 ? 2 : 1);
-          }
-          renderInventory();
-          renderHotbar();
-          renderSkillTree();
-        }
-      });
-    }
+    tile.addEventListener("mousedown", () => {
+      selectedSkill = s;
+      updateSkillDetails();
+      renderSkillTree();
+    });
     skillGrid.appendChild(tile);
   });
+}
+
+function updateSkillDetails() {
+  if (!selectedSkill) {
+    skillDetails.style.display = "none";
+    return;
+  }
+  const level = selectedSkill.level;
+  const nextCost =
+    level < selectedSkill.max ? selectedSkill.costs[level + 1] : null;
+  skillNameDiv.textContent = selectedSkill.name;
+  skillDescDiv.textContent = selectedSkill.description;
+  skillLevelDiv.textContent = `Level ${level}/${selectedSkill.max}`;
+  skillCostDiv.textContent = nextCost ? `Cost: ${nextCost}` : "Max level";
+  skillUpgradeBtn.textContent = level === 0 ? "Unlock" : "Upgrade";
+  skillUpgradeBtn.disabled = !nextCost || player.fireMutationPoints < nextCost;
+  skillDetails.style.display = "block";
 }
 
 function toggleSkillTree(open) {
@@ -550,6 +534,8 @@ function toggleSkillTree(open) {
       top: skillTreeDiv.offsetTop,
     };
     skillTreeDiv.style.display = "none";
+    selectedSkill = null;
+    updateSkillDetails();
   }
 }
 
@@ -644,6 +630,24 @@ makeDraggable(
   skillTreePos,
   toggleSkillTree,
 );
+
+skillUpgradeBtn.addEventListener("click", () => {
+  if (!selectedSkill) return;
+  const upgrader = SKILL_UPGRADERS[selectedSkill.id];
+  if (upgrader && upgrader(player, inventory, addItem, moveToHotbar)) {
+    if (selectedSkill.id === "fire_orb_skill") {
+      fireOrbs = createOrbs(player.abilities.fireOrbLevel >= 2 ? 2 : 1);
+    }
+    renderInventory();
+    renderHotbar();
+    selectedSkill = {
+      ...selectedSkill,
+      level: player.abilities[selectedSkill.levelKey] || 0,
+    };
+    updateSkillDetails();
+    renderSkillTree();
+  }
+});
 
 window.addEventListener("keydown", (e) => {
   const key = e.key.toLowerCase();
