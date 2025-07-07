@@ -992,6 +992,7 @@ function render() {
     }
     const img = z.variant === "fire" ? fireZombieSprite : zombieSprite;
     drawSprite(ctx, img, z.x, z.y, z.facing);
+    ctx.fillStyle = "red";
     ctx.fillRect(z.x - 10, z.y - 16, 20, 4);
     ctx.fillStyle = "lime";
     ctx.fillRect(z.x - 10, z.y - 16, (z.health / ZOMBIE_MAX_HEALTH) * 20, 4);
