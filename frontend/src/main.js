@@ -997,7 +997,9 @@ function render() {
     ctx.arc(a.x, a.y, 2, 0, Math.PI * 2);
     ctx.fill();
   });
-  if (bowAiming) {
+  const aimingBow =
+    player.weapon && player.weapon.type === "bow" && (keys[" "] || keys.mouse2);
+  if (aimingBow) {
     const dir = { x: mousePos.x - player.x, y: mousePos.y - player.y };
     const end = predictArrowEndpoint(player.x, player.y, dir, walls, zombies);
     ctx.strokeStyle = "rgba(255,255,255,0.6)";

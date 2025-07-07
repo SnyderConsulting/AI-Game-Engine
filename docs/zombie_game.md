@@ -98,4 +98,4 @@ Wood collected from containers can be crafted into ranged equipment:
 - **Bow** – Requires 3 Wood, 2 Zombie Teeth and 1 Core.
 - **Arrows** – Crafted in batches of 5 using 1 Wood and 1 Zombie Tooth.
 
-Equip the Bow in your hotbar. Hold the right mouse button or **Space** to aim, then release to fire an arrow toward the cursor. A dashed line shows where the arrow will fly and stops when hitting a wall or zombie. Each shot consumes one Arrow. The current arrow count appears below the health display and an "Out of Arrows!" notification shows when empty.
+Equip the Bow in your hotbar. Hold the right mouse button or **Space** to aim, then release to fire an arrow toward the cursor. While aiming a dashed line previews the path and stops when hitting a wall or zombie. Each shot consumes one Arrow. The current arrow count appears below the health display and an "Out of Arrows!" notification shows when empty.
