@@ -1,7 +1,30 @@
 export const ARROW_SPEED = 3;
 export const ARROW_DAMAGE = 2;
+export const ARROW_PREVIEW_RANGE = 12 * 40;
 
 import { circleRectColliding, isColliding } from "./game_logic.js";
+
+export function predictArrowEndpoint(x, y, direction, walls, zombies = []) {
+  const len = Math.hypot(direction.x, direction.y);
+  if (len === 0) return { x, y };
+  const stepX = (direction.x / len) * ARROW_SPEED;
+  const stepY = (direction.y / len) * ARROW_SPEED;
+  let cx = x;
+  let cy = y;
+  let traveled = 0;
+  while (traveled < ARROW_PREVIEW_RANGE) {
+    cx += stepX;
+    cy += stepY;
+    traveled += Math.hypot(stepX, stepY);
+    if (walls.some((w) => circleRectColliding({ x: cx, y: cy }, w, 2))) {
+      break;
+    }
+    if (zombies.some((z) => isColliding({ x: cx, y: cy }, z, 2))) {
+      break;
+    }
+  }
+  return { x: cx, y: cy };
+}
 
 export function createArrow(x, y, direction) {
   const len = Math.hypot(direction.x, direction.y);

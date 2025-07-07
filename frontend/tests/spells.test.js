@@ -4,6 +4,8 @@ import {
   createFireball,
   updateFireballs,
   updateExplosions,
+  fireballStats,
+  predictFireballEndpoint,
 } from "../src/spells.js";
 
 // mocks for game_logic helpers
@@ -26,4 +28,28 @@ test("updateFireballs moves and hits zombie", () => {
   assert.strictEqual(fireballs.length, 0);
   assert.strictEqual(zombies.length === 0 || zombies[0].health < 3, true);
   assert(explosions.length > 0);
+});
+
+test("fireballStats scales with level", () => {
+  const l1 = fireballStats(1);
+  const l2 = fireballStats(2);
+  const l3 = fireballStats(3);
+  assert.strictEqual(l1.damage, 1);
+  assert.strictEqual(l1.radius, 40);
+  assert.strictEqual(l2.damage, 2);
+  assert.strictEqual(l2.radius, 60);
+  assert.strictEqual(l3.damage, 3);
+  assert.strictEqual(l3.radius, 80);
+  assert.strictEqual(l3.pierce, 1);
+});
+
+test("predictFireballEndpoint stops at zombie", () => {
+  const end = predictFireballEndpoint(
+    0,
+    0,
+    { x: 1, y: 0 },
+    [],
+    [{ x: 5, y: 0 }],
+  );
+  assert(end.x <= 5);
 });
