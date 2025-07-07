@@ -999,7 +999,7 @@ function render() {
   if (aimingBow) {
     const dir = { x: mousePos.x - player.x, y: mousePos.y - player.y };
     const end = predictArrowEndpoint(player.x, player.y, dir, walls, zombies);
-    ctx.strokeStyle = "rgba(255,255,255,0.6)";
+    ctx.strokeStyle = "rgba(255,0,0,0.6)";
     ctx.setLineDash([5, 5]);
     ctx.beginPath();
     ctx.moveTo(player.x, player.y);
