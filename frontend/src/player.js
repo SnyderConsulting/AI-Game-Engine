@@ -39,3 +39,22 @@ export function resetPlayerForNewGame(player, PLAYER_MAX_HEALTH) {
   player.damageBuffMult = 1;
   player.fireMutationPoints = 0;
 }
+
+export function tryPhoenixRevival(player, PLAYER_MAX_HEALTH) {
+  if (
+    player.abilities.phoenixRevival &&
+    player.phoenixCooldown <= 0 &&
+    player.health <= 0
+  ) {
+    const lvl = player.abilities.phoenixRevivalLevel;
+    const hpPerc = [0, 0.1, 0.3, 0.5][lvl];
+    const dmg = [0, 1.25, 1.35, 1.5][lvl];
+    const dur = [0, 300, 480, 720][lvl];
+    player.health = Math.max(1, Math.round(PLAYER_MAX_HEALTH * hpPerc));
+    player.phoenixCooldown = 7200;
+    player.damageBuffMult = dmg;
+    player.damageBuffTimer = dur;
+    return true;
+  }
+  return false;
+}

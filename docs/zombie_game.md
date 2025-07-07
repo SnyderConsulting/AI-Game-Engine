@@ -88,7 +88,9 @@ delay. Additional points add a second orb and shorten the respawn time.
 
 This ultimate skill costs **4 Fire Mutation Points** to unlock. If you would die
 with the ability ready, you instead revive with a portion of your health and a
-temporary damage boost. The skill then goes on cooldown for two minutes.
+temporary damage boost. The skill then goes on cooldown for two minutes. The
+revival check happens whenever your HP reaches zero, regardless of what caused
+the damage.
 
 | Level | Revive Health | Damage Buff | Duration | Cost |
 | ----- | ------------- | ----------- | -------- | ---- |

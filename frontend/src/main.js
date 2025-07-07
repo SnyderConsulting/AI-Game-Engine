@@ -16,7 +16,11 @@ import {
   spawnZombieAtDoor,
   spawnContainers,
 } from "./game_logic.js";
-import { createPlayer, resetPlayerForNewGame } from "./player.js";
+import {
+  createPlayer,
+  resetPlayerForNewGame,
+  tryPhoenixRevival,
+} from "./player.js";
 import {
   createInventory,
   addItem,
@@ -680,6 +684,14 @@ function update() {
     if (player.damageBuffTimer <= 0) player.damageBuffMult = 1;
   }
 
+  if (player.health <= 0) {
+    if (!tryPhoenixRevival(player, PLAYER_MAX_HEALTH)) {
+      gameOver = true;
+      gameOverDiv.style.display = "block";
+      return;
+    }
+  }
+
   const activeSlot = getActiveHotbarItem(inventory);
   if (activeSlot && activeSlot.item === "baseball_bat") {
     player.weapon = { type: "baseball_bat", damage: 1 };
@@ -891,16 +903,7 @@ function update() {
       player.damageCooldown = 30;
       z.attackCooldown = 30;
       if (player.health <= 0) {
-        if (player.abilities.phoenixRevival && player.phoenixCooldown <= 0) {
-          const lvl = player.abilities.phoenixRevivalLevel;
-          const hpPerc = [0, 0.1, 0.3, 0.5][lvl];
-          const dmg = [0, 1.25, 1.35, 1.5][lvl];
-          const dur = [0, 300, 480, 720][lvl];
-          player.health = Math.max(1, Math.round(PLAYER_MAX_HEALTH * hpPerc));
-          player.phoenixCooldown = 7200;
-          player.damageBuffMult = dmg;
-          player.damageBuffTimer = dur;
-        } else {
+        if (!tryPhoenixRevival(player, PLAYER_MAX_HEALTH)) {
           gameOver = true;
           gameOverDiv.style.display = "block";
         }
