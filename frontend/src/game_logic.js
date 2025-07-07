@@ -122,32 +122,6 @@ export const PLAYER_MAX_HEALTH = 10;
 export const SEGMENT_SIZE = 40;
 export const TRIGGER_DISTANCE = 60;
 
-export function generateWalls(width, height, count = 3) {
-  const walls = [];
-  const gridW = Math.floor(width / SEGMENT_SIZE);
-  const gridH = Math.floor(height / SEGMENT_SIZE);
-  for (let i = 0; i < count; i++) {
-    const pieces = 16 + Math.floor(Math.random() * 5); // 3-5
-    let gx = Math.floor(Math.random() * gridW);
-    let gy = Math.floor(Math.random() * gridH);
-    for (let p = 0; p < pieces; p++) {
-      walls.push({
-        x: gx * SEGMENT_SIZE,
-        y: gy * SEGMENT_SIZE,
-        size: SEGMENT_SIZE,
-      });
-      const dir = Math.random() < 0.5 ? "h" : "v";
-      if (dir === "h") {
-        gx += Math.random() < 0.5 ? -1 : 1;
-      } else {
-        gy += Math.random() < 0.5 ? -1 : 1;
-      }
-      gx = Math.max(0, Math.min(gridW - 1, gx));
-      gy = Math.max(0, Math.min(gridH - 1, gy));
-    }
-  }
-  return walls;
-}
 
 export function circleRectColliding(circle, rect, radius) {
   const closestX = Math.max(rect.x, Math.min(circle.x, rect.x + rect.size));

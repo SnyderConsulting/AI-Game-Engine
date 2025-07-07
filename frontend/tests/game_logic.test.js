@@ -4,7 +4,6 @@ import {
   createZombie,
   moveTowards,
   isColliding,
-  generateWalls,
   circleRectColliding,
   SEGMENT_SIZE,
   TRIGGER_DISTANCE,
@@ -20,6 +19,7 @@ import {
   createContainer,
   spawnContainers,
 } from "../src/game_logic.js";
+import { generateStoreWalls } from "../src/walls.js";
 
 test("moveTowards moves entity toward target", () => {
   const zombie = { x: 0, y: 0 };
@@ -37,12 +37,12 @@ test("isColliding detects overlap", () => {
   assert.strictEqual(isColliding(a, c, 3), false);
 });
 
-test("generateWalls creates segments within bounds", () => {
-  const walls = generateWalls(100, 100, 1);
+test("generateStoreWalls creates segments within bounds", () => {
+  const walls = generateStoreWalls(200, 200);
   assert(walls.length > 0);
   walls.forEach((w) => {
-    assert(w.x >= 0 && w.x + w.size <= 100);
-    assert(w.y >= 0 && w.y + w.size <= 100);
+    assert(w.x >= 0 && w.x + w.size <= 200);
+    assert(w.y >= 0 && w.y + w.size <= 200);
     assert.strictEqual(w.size, SEGMENT_SIZE);
   });
 });
