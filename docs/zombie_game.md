@@ -27,10 +27,10 @@ The arena contains a baseball bat that starts on the ground. It now appears usin
 Press **I** (or **E**) to open the 5x5 inventory grid. Keys are matched case-insensitively so holding Shift won't prevent the menus from toggling. Items stack up to 10 per slot. A five slot hotbar sits at the bottom of the screen for quick access and now appears on a dark background so it is easy to see. Newly picked up items fill the first empty hotbar slot before using inventory space. Drag to rearrange items or right click to move them to the hotbar. Quick move only works when a hotbar slot is free and does nothing on empty inventory slots. Clicking any inventory slot and then a hotbar slot (or vice versa) now swaps their contents even if one is empty. Use the number keys **1-5** to change the active slot. Both the inventory and crafting windows can be dragged by their top bars and will remember their last position when closed.
 Press **K** to open the skill tree and spend mutation points.
 The tree now highlights skills that are available to unlock. Clicking any node
-opens a panel describing the ability, its current level and the cost for the
-next upgrade. The upgrade button is disabled if you lack points so you can
-quickly see what to work toward without cluttering the screen with distant
-skills.
+opens a panel describing the ability and lists what each level does along with
+its cost. The panel also shows your current level and the cost for the next
+upgrade. The upgrade button is disabled if you lack points so you can quickly
+see what to work toward without cluttering the screen with distant skills.
 Inventory and hotbar slots now display the item icons found in the `assets` folder. If an icon is missing for an item, a `?` will appear instead.
 Hotbar items with an active cooldown display a gray, semi-transparent circle that recedes clockwise as the timer expires.
 
