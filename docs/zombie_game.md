@@ -16,7 +16,7 @@ The game runs entirely in the browser. Open `http://localhost:3000` and you will
 
 The canvas now automatically resizes to fill the entire browser window so the action takes up all available space.
 
-Players now have a small health pool instead of dying instantly. A "Health" display shows the remaining points. Each zombie also has a simple green bar above its head to indicate remaining health.
+Players now have a small health pool instead of dying instantly. A "Health" display shows the remaining points. Each zombie has a green health bar with a red background above its head so damage is immediately visible.
 The on-screen control instructions are fixed to the bottom-left corner so they never cover the health readout.
 The player character now always faces your mouse cursor. A custom cursor icon marks the target location so you can aim while moving in any direction.
 
