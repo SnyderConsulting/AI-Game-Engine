@@ -1,3 +1,12 @@
+export const STACK_LIMITS = {
+  wood: 20,
+  arrow: 20,
+};
+
+export function getStackLimit(itemId) {
+  return STACK_LIMITS[itemId] || 10;
+}
+
 export function createInventory(rows = 5, cols = 5) {
   const slots = Array.from({ length: rows * cols }, () => ({
     item: null,
@@ -8,10 +17,11 @@ export function createInventory(rows = 5, cols = 5) {
 }
 
 export function addItem(inv, itemId, amount = 1) {
+  const limit = getStackLimit(itemId);
   // First fill existing stacks across hotbar and inventory
   for (const slot of [...inv.hotbar, ...inv.slots]) {
-    if (slot.item === itemId && slot.count < 10) {
-      const add = Math.min(amount, 10 - slot.count);
+    if (slot.item === itemId && slot.count < limit) {
+      const add = Math.min(amount, limit - slot.count);
       slot.count += add;
       amount -= add;
       if (amount === 0) return true;
@@ -21,7 +31,7 @@ export function addItem(inv, itemId, amount = 1) {
   // Next place new stacks into open hotbar slots
   for (const slot of inv.hotbar) {
     if (!slot.item) {
-      const add = Math.min(amount, 10);
+      const add = Math.min(amount, limit);
       slot.item = itemId;
       slot.count = add;
       amount -= add;
@@ -32,7 +42,7 @@ export function addItem(inv, itemId, amount = 1) {
   // Finally fill empty inventory slots
   for (const slot of inv.slots) {
     if (!slot.item) {
-      const add = Math.min(amount, 10);
+      const add = Math.min(amount, limit);
       slot.item = itemId;
       slot.count = add;
       amount -= add;

@@ -41,7 +41,7 @@ Press **C** to open the crafting menu at any time. Only recipes for which you ow
 
 ## Containers
 
-Cardboard boxes are scattered around the arena. They are now rendered using a box icon instead of a brown square. Stand next to one and hold **F** to loot it. A progress bar appears in the center of the screen for three seconds while you search. When the bar completes the box opens. Each box can hold a single Medkit with a 64% chance. If found and there is room in your hotbar or inventory, the Medkit is automatically added. Otherwise, the box keeps the item and displays "Inventory Full". Empty boxes show "Container Empty" and cannot be looted again. Opened boxes appear faded so you know they have been searched.
+Cardboard boxes are scattered around the arena. They are now rendered using a box icon instead of a brown square. Stand next to one and hold **F** to loot it. A progress bar appears in the center of the screen for three seconds while you search. When the bar completes the box opens. Each box now contains either a **Medkit** or **Wood** with equal probability. If there is room in your hotbar or inventory the item is added automatically. Otherwise a brief "Inventory Full" message appears. Opened boxes appear faded so you know they have been searched.
 
 Equip a Medkit and press the **Space** key or left mouse button to restore up to 3 health without exceeding your maximum.
 
@@ -66,3 +66,12 @@ After unlocking the ability you can spend more points to enhance it:
 | **1** | Moderate damage, small explosion         | Included |
 | **2** | Increased damage & radius (+25%)         | 2 points |
 | **3** | Larger radius (+50%), pierces one zombie | 3 points |
+
+## Bow and Arrow
+
+Wood collected from containers can be crafted into ranged equipment:
+
+- **Bow** – Requires 3 Wood, 2 Zombie Teeth and 1 Core.
+- **Arrows** – Crafted in batches of 5 using 1 Wood and 1 Zombie Tooth.
+
+Equip the Bow in your hotbar. Hold the right mouse button or **Space** to aim, then release to fire an arrow toward the cursor. Each shot consumes one Arrow. The current arrow count appears below the health display and an "Out of Arrows!" notification shows when empty.
