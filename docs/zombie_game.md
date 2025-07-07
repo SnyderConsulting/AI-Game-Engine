@@ -12,7 +12,11 @@ npm install
 npm run dev
 ```
 
-The game runs entirely in the browser. Open `http://localhost:3000` and you will be greeted with a simple main menu. Click **Start Game** to jump into the action. Use the arrow keys or WASD to move the player character, now drawn using a full sprite rather than a green dot. Zombies also use sprites that rotate to match their movement direction. The player still spawns randomly, but zombies now emerge from a single door placed along the outer edge of the arena. A new zombie steps through this door every 3–5 seconds. They roam toward random destinations so they naturally spread out but will pursue the player once spotted. Grey wall segments are scattered around the level and block both you and the zombies. Zombies now reliably stop when they hit these walls instead of occasionally slipping through them. The fullscreen layout now uses about twenty segments instead of just four. If a zombie touches you, the game ends and a **New Game** button appears so you can immediately play again.
+The game runs entirely in the browser. Open `http://localhost:3000` and you will be greeted with a simple main menu. Click **Start Game** to jump into the action. Use the arrow keys or WASD to move the player character, now drawn using a full sprite rather than a green dot. Zombies also use sprites that rotate to match their movement direction. The player still spawns randomly, but zombies now emerge from a single door placed along the outer edge of the arena. A new zombie steps through this door every 3–5 seconds. They roam toward random destinations so they naturally spread out but will pursue the player once spotted.
+
+Shelving now forms organized aisles built from steel, wood, and plastic segments. These shelves are breakable, with steel being the hardest to destroy and plastic the weakest. Damaged shelves flash and briefly show a health bar before collapsing. The layout generator spaces aisles widely so there is plenty of room to maneuver while still providing clear paths and chokepoints.
+
+If a zombie touches you, the game ends and a **New Game** button appears so you can immediately play again.
 
 The canvas now automatically resizes to fill the entire browser window so the action takes up all available space.
 

@@ -3,6 +3,7 @@ export const ARROW_DAMAGE = 2;
 export const ARROW_PREVIEW_RANGE = 12 * 40;
 
 import { circleRectColliding, isColliding } from "./game_logic.js";
+import { damageWall } from "./walls.js";
 
 export function predictArrowEndpoint(x, y, direction, walls, zombies = []) {
   const len = Math.hypot(direction.x, direction.y);
@@ -40,9 +41,14 @@ export function updateArrows(arrows, zombies, walls, onKill = () => {}) {
     a.x += a.vx;
     a.y += a.vy;
     let remove = false;
-    if (walls.some((w) => circleRectColliding(a, w, 2))) {
-      remove = true;
-    } else {
+    for (const w of walls) {
+      if (circleRectColliding(a, w, 2)) {
+        damageWall(w, a.damage);
+        remove = true;
+        break;
+      }
+    }
+    if (!remove) {
       for (let j = zombies.length - 1; j >= 0; j--) {
         const z = zombies[j];
         if (isColliding(a, z, 2)) {

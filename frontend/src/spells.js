@@ -20,6 +20,7 @@ export function fireballStats(level) {
 }
 
 import { circleRectColliding, isColliding } from "./game_logic.js";
+import { damageWall } from "./walls.js";
 export function createFireball(x, y, direction, level = 1, damageMult = 1) {
   const len = Math.hypot(direction.x, direction.y);
   if (len === 0) return null;
@@ -75,9 +76,16 @@ export function updateFireballs(
     let explode = false;
     if (fb.traveled >= FIREBALL_RANGE) {
       explode = true;
-    } else if (walls.some((w) => circleRectColliding(fb, w, 4))) {
-      explode = true;
     } else {
+      for (const w of walls) {
+        if (circleRectColliding(fb, w, 4)) {
+          damageWall(w, fb.damage);
+          explode = true;
+          break;
+        }
+      }
+    }
+    if (!explode) {
       for (let j = zombies.length - 1; j >= 0; j--) {
         const z = zombies[j];
         if (isColliding(fb, z, 4)) {
@@ -104,6 +112,14 @@ export function updateFireballs(
             zombies.splice(j, 1);
             onKill(z);
           }
+        }
+      }
+      for (const w of walls) {
+        if (
+          Math.hypot(w.x + w.size / 2 - fb.x, w.y + w.size / 2 - fb.y) <=
+          fb.radius
+        ) {
+          damageWall(w, fb.damage);
         }
       }
       if (explosions) {

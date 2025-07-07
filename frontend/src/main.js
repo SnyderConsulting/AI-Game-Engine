@@ -4,7 +4,6 @@ import {
   moveZombie,
   moveTowards,
   isColliding,
-  generateWalls,
   circleRectColliding,
   SEGMENT_SIZE,
   spawnWeapon,
@@ -16,6 +15,12 @@ import {
   spawnZombieAtDoor,
   spawnContainers,
 } from "./game_logic.js";
+import {
+  generateStoreWalls,
+  WALL_IMAGES,
+  damageWall,
+  updateWalls,
+} from "./walls.js";
 import {
   createPlayer,
   resetPlayerForNewGame,
@@ -568,8 +573,8 @@ function startGame() {
 
 function resetGame() {
   zombies = [];
-  // Use more walls now that the canvas covers the full screen
-  walls = generateWalls(canvas.width, canvas.height, 20);
+  // Generate structured walls
+  walls = generateStoreWalls(canvas.width, canvas.height);
   spawnDoor = createSpawnDoor(canvas.width, canvas.height, walls);
   const spawn = spawnPlayer(canvas.width, canvas.height, walls);
   player.x = spawn.x;
@@ -686,6 +691,8 @@ window.addEventListener("keyup", (e) => {
 
 function update() {
   if (gameOver) return;
+
+  updateWalls(walls);
 
   if (player.phoenixCooldown > 0) player.phoenixCooldown--;
   if (player.damageBuffTimer > 0) {
@@ -878,6 +885,18 @@ function update() {
       Math.PI / 2,
       5,
     );
+    const dir = { x: player.facing.x, y: player.facing.y };
+    const len = Math.hypot(dir.x, dir.y);
+    const norm = len > 0 ? { x: dir.x / len, y: dir.y / len } : null;
+    const cosHalf = Math.cos(Math.PI / 4);
+    walls.forEach((w) => {
+      const wx = w.x + SEGMENT_SIZE / 2 - player.x;
+      const wy = w.y + SEGMENT_SIZE / 2 - player.y;
+      const dist = Math.hypot(wx, wy);
+      if (dist <= 30 && norm && wx * norm.x + wy * norm.y >= cosHalf * dist) {
+        damageWall(w, player.weapon.damage * player.damageBuffMult);
+      }
+    });
     killed.forEach((z) => dropLoot(z, worldItems));
     player.swingTimer = 10;
   }
@@ -944,9 +963,24 @@ function update() {
 function render() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  ctx.fillStyle = "gray";
   walls.forEach((w) => {
-    ctx.fillRect(w.x, w.y, SEGMENT_SIZE, SEGMENT_SIZE);
+    const img = WALL_IMAGES[w.material];
+    if (img && img.complete) {
+      ctx.drawImage(img, w.x, w.y, SEGMENT_SIZE, SEGMENT_SIZE);
+    } else {
+      ctx.fillStyle = "gray";
+      ctx.fillRect(w.x, w.y, SEGMENT_SIZE, SEGMENT_SIZE);
+    }
+    if (w.damageTimer > 0) {
+      ctx.fillStyle = "rgba(255,0,0,0.5)";
+      ctx.fillRect(w.x, w.y, SEGMENT_SIZE, SEGMENT_SIZE);
+    }
+    if (w.hp < w.maxHp) {
+      ctx.fillStyle = "red";
+      ctx.fillRect(w.x, w.y - 6, SEGMENT_SIZE, 4);
+      ctx.fillStyle = "lime";
+      ctx.fillRect(w.x, w.y - 6, (w.hp / w.maxHp) * SEGMENT_SIZE, 4);
+    }
   });
   containers.forEach((c) => {
     ctx.globalAlpha = c.opened ? 0.5 : 1;
