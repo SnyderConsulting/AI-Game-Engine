@@ -67,6 +67,30 @@ After unlocking the ability you can spend more points to enhance it:
 | **2** | +1 damage, +50% radius                            | 2 points |
 | **3** | +1 damage again, +100% radius, pierces one zombie | 3 points |
 
+## Fire Orb Passive
+
+Spend **1 Fire Mutation Point** to summon a flaming orb that circles your
+character. The orb vanishes on contact with a zombie and reforms after a short
+delay. Additional points add a second orb and shorten the respawn time.
+
+| Level | Effect                         | Cost |
+| ----- | ------------------------------ | ---- |
+| **1** | 1 orbiting orb                 | 1    |
+| **2** | Two orbs revolve around player | 2    |
+| **3** | Respawn time halved            | 3    |
+
+## Phoenix Revival Passive
+
+This ultimate skill costs **4 Fire Mutation Points** to unlock. If you would die
+with the ability ready, you instead revive with a portion of your health and a
+temporary damage boost. The skill then goes on cooldown for two minutes.
+
+| Level | Revive Health | Damage Buff | Duration | Cost |
+| ----- | ------------- | ----------- | -------- | ---- |
+| **1** | 10% HP        | +25%        | 5s       | 4    |
+| **2** | 30% HP        | +35%        | 8s       | 3    |
+| **3** | 50% HP        | +50%        | 12s      | 4    |
+
 ## Bow and Arrow
 
 Wood collected from containers can be crafted into ranged equipment:
