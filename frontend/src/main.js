@@ -74,6 +74,7 @@ const skillGrid = document.getElementById("skillGrid");
 const skillDetails = document.getElementById("skillDetails");
 const skillNameDiv = document.getElementById("skillName");
 const skillDescDiv = document.getElementById("skillDesc");
+const skillLevelsDiv = document.getElementById("skillLevels");
 const skillLevelDiv = document.getElementById("skillLevel");
 const skillCostDiv = document.getElementById("skillCost");
 const skillUpgradeBtn = document.getElementById("skillUpgrade");
@@ -506,6 +507,14 @@ function updateSkillDetails() {
     level < selectedSkill.max ? selectedSkill.costs[level + 1] : null;
   skillNameDiv.textContent = selectedSkill.name;
   skillDescDiv.textContent = selectedSkill.description;
+  skillLevelsDiv.innerHTML = "";
+  if (selectedSkill.levels) {
+    selectedSkill.levels.forEach((lv, idx) => {
+      const li = document.createElement("li");
+      li.textContent = `Lv ${idx + 1}: ${lv.effect} (Cost: ${lv.cost})`;
+      skillLevelsDiv.appendChild(li);
+    });
+  }
   skillLevelDiv.textContent = `Level ${level}/${selectedSkill.max}`;
   skillCostDiv.textContent = nextCost ? `Cost: ${nextCost}` : "Max level";
   skillUpgradeBtn.textContent = level === 0 ? "Unlock" : "Upgrade";
