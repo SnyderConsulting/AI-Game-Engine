@@ -4,6 +4,7 @@ import {
   upgradeFireball,
   upgradeFireOrb,
   upgradePhoenixRevival,
+  SKILL_INFO,
 } from "../src/skill_tree.js";
 import { createPlayer, resetPlayerForNewGame } from "../src/player.js";
 import { createInventory } from "../src/inventory.js";
@@ -66,4 +67,15 @@ test("upgradePhoenixRevival costs", () => {
   assert(upgradePhoenixRevival(player));
   assert.strictEqual(player.abilities.phoenixRevivalLevel, 3);
   assert.strictEqual(player.fireMutationPoints, 0);
+});
+
+test("skill info includes level details", () => {
+  for (const info of SKILL_INFO) {
+    assert(Array.isArray(info.levels));
+    assert.strictEqual(info.levels.length, info.max);
+    info.levels.forEach((lvl, i) => {
+      assert.strictEqual(lvl.cost, info.costs[i + 1]);
+      assert(typeof lvl.effect === "string");
+    });
+  }
 });

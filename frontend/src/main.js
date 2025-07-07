@@ -16,7 +16,11 @@ import {
   spawnZombieAtDoor,
   spawnContainers,
 } from "./game_logic.js";
-import { createPlayer, resetPlayerForNewGame } from "./player.js";
+import {
+  createPlayer,
+  resetPlayerForNewGame,
+  tryPhoenixRevival,
+} from "./player.js";
 import {
   createInventory,
   addItem,
@@ -74,6 +78,7 @@ const skillGrid = document.getElementById("skillGrid");
 const skillDetails = document.getElementById("skillDetails");
 const skillNameDiv = document.getElementById("skillName");
 const skillDescDiv = document.getElementById("skillDesc");
+const skillLevelsDiv = document.getElementById("skillLevels");
 const skillLevelDiv = document.getElementById("skillLevel");
 const skillCostDiv = document.getElementById("skillCost");
 const skillUpgradeBtn = document.getElementById("skillUpgrade");
@@ -506,6 +511,14 @@ function updateSkillDetails() {
     level < selectedSkill.max ? selectedSkill.costs[level + 1] : null;
   skillNameDiv.textContent = selectedSkill.name;
   skillDescDiv.textContent = selectedSkill.description;
+  skillLevelsDiv.innerHTML = "";
+  if (selectedSkill.levels) {
+    selectedSkill.levels.forEach((lv, idx) => {
+      const li = document.createElement("li");
+      li.textContent = `Lv ${idx + 1}: ${lv.effect} (Cost: ${lv.cost})`;
+      skillLevelsDiv.appendChild(li);
+    });
+  }
   skillLevelDiv.textContent = `Level ${level}/${selectedSkill.max}`;
   skillCostDiv.textContent = nextCost ? `Cost: ${nextCost}` : "Max level";
   skillUpgradeBtn.textContent = level === 0 ? "Unlock" : "Upgrade";
@@ -678,6 +691,14 @@ function update() {
   if (player.damageBuffTimer > 0) {
     player.damageBuffTimer--;
     if (player.damageBuffTimer <= 0) player.damageBuffMult = 1;
+  }
+
+  if (player.health <= 0) {
+    if (!tryPhoenixRevival(player, PLAYER_MAX_HEALTH)) {
+      gameOver = true;
+      gameOverDiv.style.display = "block";
+      return;
+    }
   }
 
   const activeSlot = getActiveHotbarItem(inventory);
@@ -891,16 +912,7 @@ function update() {
       player.damageCooldown = 30;
       z.attackCooldown = 30;
       if (player.health <= 0) {
-        if (player.abilities.phoenixRevival && player.phoenixCooldown <= 0) {
-          const lvl = player.abilities.phoenixRevivalLevel;
-          const hpPerc = [0, 0.1, 0.3, 0.5][lvl];
-          const dmg = [0, 1.25, 1.35, 1.5][lvl];
-          const dur = [0, 300, 480, 720][lvl];
-          player.health = Math.max(1, Math.round(PLAYER_MAX_HEALTH * hpPerc));
-          player.phoenixCooldown = 7200;
-          player.damageBuffMult = dmg;
-          player.damageBuffTimer = dur;
-        } else {
+        if (!tryPhoenixRevival(player, PLAYER_MAX_HEALTH)) {
           gameOver = true;
           gameOverDiv.style.display = "block";
         }

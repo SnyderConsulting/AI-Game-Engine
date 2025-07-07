@@ -57,6 +57,11 @@ export const SKILL_INFO = [
     levelKey: "fireOrbLevel",
     max: 3,
     costs: [0, 1, 2, 3],
+    levels: [
+      { effect: "1 orb circles player (base level)", cost: 1 },
+      { effect: "Adds a second orb", cost: 2 },
+      { effect: "Reduce orb respawn cooldown by 50%", cost: 3 },
+    ],
   },
   {
     id: "fireball_spell",
@@ -66,6 +71,11 @@ export const SKILL_INFO = [
     levelKey: "fireballLevel",
     max: 3,
     costs: [0, 2, 2, 3],
+    levels: [
+      { effect: "Moderate damage, small explosion", cost: 2 },
+      { effect: "Increased damage & explosion radius (+25%)", cost: 2 },
+      { effect: "Greatly increased radius (+50%), pierces 1 zombie", cost: 3 },
+    ],
   },
   {
     id: "phoenix_revival_skill",
@@ -75,6 +85,11 @@ export const SKILL_INFO = [
     levelKey: "phoenixRevivalLevel",
     max: 3,
     costs: [0, 4, 3, 4],
+    levels: [
+      { effect: "Revive at 10% HP, +25% dmg boost (5 sec)", cost: 4 },
+      { effect: "Revive at 30% HP, +35% dmg boost (8 sec)", cost: 3 },
+      { effect: "Revive at 50% HP, +50% dmg boost (12 sec)", cost: 4 },
+    ],
   },
 ];
 
