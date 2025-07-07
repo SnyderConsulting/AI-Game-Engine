@@ -55,17 +55,17 @@ Collecting Fire Cores unlocks a new recipe:
 
 ## Fireball Ability
 
-Spend **2 Fire Mutation Points** in the skill tree to unlock the _Fireball_ ability. Unlocking places a Fireball icon in your hotbar. Equip it like any other item by selecting the slot with the number keys. While equipped press **Space** or left mouse button to hurl a blazing projectile toward the mouse cursor. Each cast consumes one Fire Core from your inventory. The Fireball travels about eight tiles, damaging zombies it hits and dissipating on impact with walls or enemies. A dashed line preview displays the path and a dotted circle shows the blast radius before you cast. When the Fireball explodes a faint red circle briefly highlights the impact area. If you attempt to cast without any cores a brief "Out of Fire Cores!" message appears. Starting a new game resets points and skills so you must craft the serum again in future runs.
+Spend **2 Fire Mutation Points** in the skill tree to unlock the _Fireball_ ability. Unlocking places a Fireball icon in your hotbar. Equip it like any other item by selecting the slot with the number keys. While equipped press **Space** or left mouse button to hurl a blazing projectile toward the mouse cursor. Each cast consumes one Fire Core from your inventory. The Fireball travels about eight tiles, damaging zombies it hits and dissipating on impact with walls or enemies. A dashed line preview displays the path and a dotted circle shows the blast radius before you cast. The preview shortens when a wall or zombie blocks the shot. When the Fireball explodes a faint red circle briefly highlights the impact area. If you attempt to cast without any cores a brief "Out of Fire Cores!" message appears. Starting a new game resets points and skills so you must craft the serum again in future runs.
 
 ### Fireball Upgrades
 
 After unlocking the ability you can spend more points to enhance it:
 
-| Level | Effect                                   | Cost     |
-| ----- | ---------------------------------------- | -------- |
-| **1** | Moderate damage, small explosion         | Included |
-| **2** | Increased damage & radius (+25%)         | 2 points |
-| **3** | Larger radius (+50%), pierces one zombie | 3 points |
+| Level | Effect                                            | Cost     |
+| ----- | ------------------------------------------------- | -------- |
+| **1** | Low damage, large explosion                       | Included |
+| **2** | +1 damage, +50% radius                            | 2 points |
+| **3** | +1 damage again, +100% radius, pierces one zombie | 3 points |
 
 ## Bow and Arrow
 
@@ -74,4 +74,4 @@ Wood collected from containers can be crafted into ranged equipment:
 - **Bow** – Requires 3 Wood, 2 Zombie Teeth and 1 Core.
 - **Arrows** – Crafted in batches of 5 using 1 Wood and 1 Zombie Tooth.
 
-Equip the Bow in your hotbar. Hold the right mouse button or **Space** to aim, then release to fire an arrow toward the cursor. Each shot consumes one Arrow. The current arrow count appears below the health display and an "Out of Arrows!" notification shows when empty.
+Equip the Bow in your hotbar. Hold the right mouse button or **Space** to aim, then release to fire an arrow toward the cursor. A dashed line shows where the arrow will fly and stops when hitting a wall or zombie. Each shot consumes one Arrow. The current arrow count appears below the health display and an "Out of Arrows!" notification shows when empty.

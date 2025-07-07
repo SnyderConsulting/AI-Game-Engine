@@ -40,7 +40,7 @@ import {
   fireballStats,
   updateExplosions,
 } from "./spells.js";
-import { createArrow, updateArrows } from "./arrow.js";
+import { createArrow, updateArrows, predictArrowEndpoint } from "./arrow.js";
 import { upgradeFireball } from "./skill_tree.js";
 import { makeDraggable } from "./ui.js";
 
@@ -924,9 +924,17 @@ function render() {
     ctx.fill();
   });
   if (bowAiming) {
-    ctx.strokeStyle = "white";
+    const dir = { x: mousePos.x - player.x, y: mousePos.y - player.y };
+    const end = predictArrowEndpoint(player.x, player.y, dir, walls, zombies);
+    ctx.strokeStyle = "rgba(255,255,255,0.6)";
+    ctx.setLineDash([5, 5]);
     ctx.beginPath();
-    ctx.arc(mousePos.x, mousePos.y, 5, 0, Math.PI * 2);
+    ctx.moveTo(player.x, player.y);
+    ctx.lineTo(end.x, end.y);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.beginPath();
+    ctx.arc(end.x, end.y, 3, 0, Math.PI * 2);
     ctx.stroke();
   }
 
@@ -937,7 +945,13 @@ function render() {
     player.abilities.fireball
   ) {
     const dir = { x: mousePos.x - player.x, y: mousePos.y - player.y };
-    const end = predictFireballEndpoint(player.x, player.y, dir, walls);
+    const end = predictFireballEndpoint(
+      player.x,
+      player.y,
+      dir,
+      walls,
+      zombies,
+    );
     ctx.strokeStyle = "rgba(255,0,0,0.6)";
     ctx.setLineDash([5, 5]);
     ctx.beginPath();

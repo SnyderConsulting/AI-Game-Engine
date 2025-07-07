@@ -1,18 +1,19 @@
 export const FIREBALL_SPEED = 3;
 export const FIREBALL_RANGE = 8 * 40; // 8 tiles assuming SEGMENT_SIZE=40
-export const FIREBALL_BASE_DAMAGE = 3;
-export const FIREBALL_BASE_RADIUS = 20;
+export const FIREBALL_BASE_DAMAGE = 1;
+export const FIREBALL_BASE_RADIUS = 40;
 
 export function fireballStats(level) {
   let damage = FIREBALL_BASE_DAMAGE;
   let radius = FIREBALL_BASE_RADIUS;
   let pierce = 0;
   if (level >= 2) {
-    damage = Math.round(FIREBALL_BASE_DAMAGE * 1.25);
-    radius = Math.round(FIREBALL_BASE_RADIUS * 1.25);
+    damage = FIREBALL_BASE_DAMAGE * 2;
+    radius = Math.round(FIREBALL_BASE_RADIUS * 1.5);
   }
   if (level >= 3) {
-    radius = Math.round(FIREBALL_BASE_RADIUS * 1.5);
+    damage = FIREBALL_BASE_DAMAGE * 3;
+    radius = Math.round(FIREBALL_BASE_RADIUS * 2);
     pierce = 1;
   }
   return { damage, radius, pierce };
@@ -28,7 +29,7 @@ export function createFireball(x, y, direction, level = 1) {
   return { x, y, vx, vy, traveled: 0, damage, radius, pierce };
 }
 
-export function predictFireballEndpoint(x, y, direction, walls) {
+export function predictFireballEndpoint(x, y, direction, walls, zombies = []) {
   const len = Math.hypot(direction.x, direction.y);
   if (len === 0) return { x, y };
   const stepX = (direction.x / len) * FIREBALL_SPEED;
@@ -41,6 +42,9 @@ export function predictFireballEndpoint(x, y, direction, walls) {
     cy += stepY;
     traveled += Math.hypot(stepX, stepY);
     if (walls.some((w) => circleRectColliding({ x: cx, y: cy }, w, 4))) {
+      break;
+    }
+    if (zombies.some((z) => isColliding({ x: cx, y: cy }, z, 4))) {
       break;
     }
   }
