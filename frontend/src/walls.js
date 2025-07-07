@@ -38,47 +38,79 @@ export function generateStoreWalls(width, height) {
   const gridW = Math.floor(width / SEGMENT_SIZE);
   const gridH = Math.floor(height / SEGMENT_SIZE);
 
+  const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
   const addVertical = (gx, gy1, gy2) => {
+    gx = clamp(gx, 0, gridW - 1);
+    gy1 = clamp(gy1, 0, gridH - 1);
+    gy2 = clamp(gy2, 0, gridH - 1);
     for (let y = gy1; y <= gy2; y++) {
       walls.push(createWall(gx, y, randMaterial()));
     }
   };
   const addHorizontal = (gy, gx1, gx2) => {
+    gy = clamp(gy, 0, gridH - 1);
+    gx1 = clamp(gx1, 0, gridW - 1);
+    gx2 = clamp(gx2, 0, gridW - 1);
     for (let x = gx1; x <= gx2; x++) {
       walls.push(createWall(x, gy, randMaterial()));
     }
   };
 
-  // primary vertical aisles
-  const spacing = 4;
-  for (let gx = 2; gx < gridW - 1; gx += spacing) {
-    addVertical(gx, 1, gridH - 2);
-  }
+  const addRoom = (x, y, w, h) => {
+    for (let gx = x; gx < x + w; gx++) {
+      for (let gy = y; gy < y + h; gy++) {
+        if (gx === x + Math.floor(w / 2) && gy === y + h - 1) {
+          continue; // entrance
+        }
+        if (gx === x || gx === x + w - 1 || gy === y || gy === y + h - 1) {
+          walls.push(createWall(gx, gy, randMaterial()));
+        }
+      }
+    }
+  };
 
-  // secondary horizontal aisles
-  for (let gy = 3; gy < gridH - 1; gy += 6) {
-    addHorizontal(gy, 1, gridW - 2);
-  }
-
-  // u-shaped sections at top of vertical aisles
-  for (let gx = 2; gx < gridW - 1; gx += spacing) {
-    if (Math.random() < 0.5) {
-      addHorizontal(1, gx - 1, gx + 1);
-      addHorizontal(2, gx - 1, gx + 1);
+  // vertical aisle positions spaced widely
+  const vSpacing = Math.max(6, Math.floor(gridW / 4));
+  const vPositions = [];
+  for (let gx = 2; gx < gridW - 2; gx += vSpacing) {
+    vPositions.push(gx);
+    let y = 2;
+    while (y < gridH - 4) {
+      const len = 4 + Math.floor(Math.random() * 3); // 4-6 segments
+      addVertical(gx, y, Math.min(y + len - 1, gridH - 4));
+      y += len + 3 + Math.floor(Math.random() * 2); // gap 3-4
     }
   }
 
-  // simple enclosed room in bottom-right
-  const roomW = 4;
-  const roomH = 4;
-  const startX = Math.max(1, gridW - roomW - 2);
-  const startY = Math.max(1, gridH - roomH - 2);
-  for (let x = startX; x < Math.min(gridW - 1, startX + roomW); x++) {
-    for (let y = startY; y < Math.min(gridH - 1, startY + roomH); y++) {
-      if (y === startY + roomH - 1 && x === startX + Math.floor(roomW / 2))
-        continue;
-      walls.push(createWall(x, y, randMaterial()));
+  // horizontal aisles with generous gaps
+  const hSpacing = Math.max(8, Math.floor(gridH / 5));
+  for (let gy = 4; gy < gridH - 3; gy += hSpacing) {
+    let x = 2;
+    while (x < gridW - 4) {
+      const len = 4 + Math.floor(Math.random() * 3);
+      addHorizontal(gy, x, Math.min(x + len - 1, gridW - 4));
+      x += len + 4 + Math.floor(Math.random() * 3); // gap 4-6
     }
+  }
+
+  // occasional U-shaped sections
+  vPositions.forEach((gx) => {
+    if (Math.random() < 0.4) {
+      const y = 2 + Math.floor(Math.random() * Math.max(1, gridH - 8));
+      addHorizontal(y, gx - 1, gx + 1);
+      addHorizontal(y + 1, gx - 1, gx + 1);
+    }
+  });
+
+  // one or two enclosed rooms
+  const roomCount = 1 + Math.floor(Math.random() * 2);
+  for (let r = 0; r < roomCount; r++) {
+    const rw = Math.min(3 + Math.floor(Math.random() * 3), gridW - 2);
+    const rh = Math.min(3 + Math.floor(Math.random() * 3), gridH - 2);
+    if (rw < 3 || rh < 3) continue;
+    const startX = 1 + Math.floor(Math.random() * (gridW - rw - 1));
+    const startY = 1 + Math.floor(Math.random() * (gridH - rh - 1));
+    addRoom(startX, startY, rw, rh);
   }
 
   return walls;
