@@ -41,7 +41,12 @@ import {
   updateExplosions,
 } from "./spells.js";
 import { createArrow, updateArrows, predictArrowEndpoint } from "./arrow.js";
-import { upgradeFireball } from "./skill_tree.js";
+import {
+  upgradeFireball,
+  upgradeFireOrb,
+  upgradePhoenixRevival,
+} from "./skill_tree.js";
+import { createOrbs, updateOrbs } from "./orbs.js";
 import { makeDraggable } from "./ui.js";
 
 import { applyConsumableEffect, CONSUMABLE_ITEMS } from "./items.js";
@@ -83,6 +88,8 @@ const ITEM_ICONS = {
   fire_core: "assets/fire_core.png",
   mutation_serum_fire: "assets/mutation_serum_fire.png",
   fireball_spell: "assets/skill_fireball.png",
+  fire_orb_skill: "assets/skill_fire_orb.png",
+  phoenix_revival_skill: "assets/skill_phoenix_revival.png",
   baseball_bat: "assets/baseball_bat.png",
   medkit: "assets/medkit.png",
   wood: "assets/wood.png",
@@ -135,6 +142,7 @@ let craftingOpen = false;
 let skillTreeOpen = false;
 let worldItems = [];
 let fireballs = [];
+let fireOrbs = [];
 let arrows = [];
 let explosions = [];
 let fireballCooldown = 0;
@@ -449,49 +457,73 @@ function toggleCrafting(open) {
 function renderSkillTree() {
   skillPointsDiv.textContent = `Fire Mutation Points Available: ${player.fireMutationPoints}`;
   skillGrid.innerHTML = "";
-  const tile = document.createElement("div");
-  const level = player.abilities.fireballLevel;
-  const max = 3;
-  const costs = [0, 2, 2, 3];
-  const nextCost = level < max ? costs[level + 1] : null;
-  Object.assign(tile.style, {
-    width: "60px",
-    height: "60px",
-    border: "1px solid white",
-    display: "flex",
-    flexDirection: "column",
-    justifyContent: "center",
-    alignItems: "center",
-    cursor:
-      nextCost && player.fireMutationPoints >= nextCost ? "pointer" : "default",
-    background: level > 0 ? "rgba(255,255,255,0.1)" : "none",
-  });
-  const img = document.createElement("img");
-  img.src = ITEM_ICONS["fireball_spell"];
-  img.style.width = "48px";
-  img.style.height = "48px";
-  img.style.opacity = level > 0 ? 1 : 0.5;
-  tile.appendChild(img);
-  const label = document.createElement("div");
-  label.style.fontSize = "10px";
-  label.textContent = `Lv ${level}/${max}`;
-  tile.appendChild(label);
-  if (nextCost) {
-    const costDiv = document.createElement("div");
-    costDiv.style.fontSize = "10px";
-    costDiv.textContent = `Cost: ${nextCost}`;
-    tile.appendChild(costDiv);
-  }
-  if (nextCost && player.fireMutationPoints >= nextCost) {
-    tile.addEventListener("mousedown", () => {
-      if (upgradeFireball(player, inventory, addItem, moveToHotbar)) {
-        renderInventory();
-        renderHotbar();
-        renderSkillTree();
-      }
+  const skills = [
+    {
+      key: "fire_orb_skill",
+      level: player.abilities.fireOrbLevel,
+      max: 3,
+      costs: [0, 1, 2, 3],
+      upgrade: () => upgradeFireOrb(player),
+    },
+    {
+      key: "fireball_spell",
+      level: player.abilities.fireballLevel,
+      max: 3,
+      costs: [0, 2, 2, 3],
+      upgrade: () => upgradeFireball(player, inventory, addItem, moveToHotbar),
+    },
+    {
+      key: "phoenix_revival_skill",
+      level: player.abilities.phoenixRevivalLevel,
+      max: 3,
+      costs: [0, 4, 3, 4],
+      upgrade: () => upgradePhoenixRevival(player),
+    },
+  ];
+  skills.forEach((s) => {
+    const tile = document.createElement("div");
+    const nextCost = s.level < s.max ? s.costs[s.level + 1] : null;
+    Object.assign(tile.style, {
+      width: "60px",
+      height: "60px",
+      border: "1px solid white",
+      display: "flex",
+      flexDirection: "column",
+      justifyContent: "center",
+      alignItems: "center",
+      cursor:
+        nextCost && player.fireMutationPoints >= nextCost
+          ? "pointer"
+          : "default",
+      background: s.level > 0 ? "rgba(255,255,255,0.1)" : "none",
     });
-  }
-  skillGrid.appendChild(tile);
+    const img = document.createElement("img");
+    img.src = ITEM_ICONS[s.key];
+    img.style.width = "48px";
+    img.style.height = "48px";
+    img.style.opacity = s.level > 0 ? 1 : 0.5;
+    tile.appendChild(img);
+    const label = document.createElement("div");
+    label.style.fontSize = "10px";
+    label.textContent = `Lv ${s.level}/${s.max}`;
+    tile.appendChild(label);
+    if (nextCost) {
+      const costDiv = document.createElement("div");
+      costDiv.style.fontSize = "10px";
+      costDiv.textContent = `Cost: ${nextCost}`;
+      tile.appendChild(costDiv);
+    }
+    if (nextCost && player.fireMutationPoints >= nextCost) {
+      tile.addEventListener("mousedown", () => {
+        if (s.upgrade()) {
+          renderInventory();
+          renderHotbar();
+          renderSkillTree();
+        }
+      });
+    }
+    skillGrid.appendChild(tile);
+  });
 }
 
 function toggleSkillTree(open) {
@@ -556,12 +588,16 @@ function resetGame() {
   inventory = createInventory();
   worldItems = [];
   fireballs = [];
+  fireOrbs = [];
   explosions = [];
   fireballCooldown = 0;
   if (player.abilities.fireball) {
     addItem(inventory, "fireball_spell", 1);
     const idx = inventory.slots.findIndex((s) => s.item === "fireball_spell");
     if (idx !== -1) moveToHotbar(inventory, idx, 0);
+  }
+  if (player.abilities.fireOrb) {
+    fireOrbs = createOrbs(player.abilities.fireOrbLevel >= 2 ? 2 : 1);
   }
   inventoryOpen = false;
   craftingOpen = false;
@@ -630,6 +666,12 @@ window.addEventListener("keyup", (e) => {
 
 function update() {
   if (gameOver) return;
+
+  if (player.phoenixCooldown > 0) player.phoenixCooldown--;
+  if (player.damageBuffTimer > 0) {
+    player.damageBuffTimer--;
+    if (player.damageBuffTimer <= 0) player.damageBuffMult = 1;
+  }
 
   const activeSlot = getActiveHotbarItem(inventory);
   if (activeSlot && activeSlot.item === "baseball_bat") {
@@ -761,6 +803,7 @@ function update() {
         player.y,
         dir,
         player.abilities.fireballLevel,
+        player.damageBuffMult,
       );
       if (fb) fireballs.push(fb);
       fireballCooldown = 15;
@@ -779,7 +822,7 @@ function update() {
       if (arrowsLeft > 0) {
         removeItem(inventory, "arrow", 1);
         const dir = { x: mousePos.x - player.x, y: mousePos.y - player.y };
-        const a = createArrow(player.x, player.y, dir);
+        const a = createArrow(player.x, player.y, dir, player.damageBuffMult);
         if (a) arrows.push(a);
         renderInventory();
         renderHotbar();
@@ -801,7 +844,7 @@ function update() {
     const killed = attackZombiesWithKills(
       player,
       zombies,
-      player.weapon.damage,
+      player.weapon.damage * player.damageBuffMult,
       30,
       player.facing,
       Math.PI / 2,
@@ -841,11 +884,28 @@ function update() {
       player.damageCooldown = 30;
       z.attackCooldown = 30;
       if (player.health <= 0) {
-        gameOver = true;
-        gameOverDiv.style.display = "block";
+        if (player.abilities.phoenixRevival && player.phoenixCooldown <= 0) {
+          const lvl = player.abilities.phoenixRevivalLevel;
+          const hpPerc = [0, 0.1, 0.3, 0.5][lvl];
+          const dmg = [0, 1.25, 1.35, 1.5][lvl];
+          const dur = [0, 300, 480, 720][lvl];
+          player.health = Math.max(1, Math.round(PLAYER_MAX_HEALTH * hpPerc));
+          player.phoenixCooldown = 7200;
+          player.damageBuffMult = dmg;
+          player.damageBuffTimer = dur;
+        } else {
+          gameOver = true;
+          gameOverDiv.style.display = "block";
+        }
       }
     }
   });
+
+  if (player.abilities.fireOrb) {
+    updateOrbs(fireOrbs, player, zombies, player.abilities.fireOrbLevel, (z) =>
+      dropLoot(z, worldItems),
+    );
+  }
 
   updateFireballs(fireballs, zombies, walls, explosions, (z) =>
     dropLoot(z, worldItems),
@@ -880,6 +940,17 @@ function render() {
   }
 
   drawSprite(ctx, playerSprite, player.x, player.y, player.facing);
+
+  if (player.abilities.fireOrb) {
+    ctx.fillStyle = "orange";
+    fireOrbs.forEach((o) => {
+      if (o.cooldown <= 0) {
+        ctx.beginPath();
+        ctx.arc(o.x, o.y, 5, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    });
+  }
 
   if (player.swingTimer > 0) {
     ctx.strokeStyle = "orange";

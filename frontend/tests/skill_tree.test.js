@@ -1,6 +1,10 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { upgradeFireball } from "../src/skill_tree.js";
+import {
+  upgradeFireball,
+  upgradeFireOrb,
+  upgradePhoenixRevival,
+} from "../src/skill_tree.js";
 import { createPlayer, resetPlayerForNewGame } from "../src/player.js";
 import { createInventory } from "../src/inventory.js";
 import { PLAYER_MAX_HEALTH } from "../src/game_logic.js";
@@ -39,4 +43,27 @@ test("upgradeFireball upgrades levels with correct costs", () => {
     upgradeFireball(player, inv, addItem, moveToHotbar),
     false,
   );
+});
+
+test("upgradeFireOrb levels", () => {
+  const { player } = setup(6);
+  assert(upgradeFireOrb(player));
+  assert.strictEqual(player.abilities.fireOrbLevel, 1);
+  assert(upgradeFireOrb(player));
+  assert.strictEqual(player.abilities.fireOrbLevel, 2);
+  assert(upgradeFireOrb(player));
+  assert.strictEqual(player.abilities.fireOrbLevel, 3);
+  assert.strictEqual(player.fireMutationPoints, 0);
+  assert.strictEqual(upgradeFireOrb(player), false);
+});
+
+test("upgradePhoenixRevival costs", () => {
+  const { player } = setup(11);
+  assert(upgradePhoenixRevival(player));
+  assert.strictEqual(player.abilities.phoenixRevivalLevel, 1);
+  assert(upgradePhoenixRevival(player));
+  assert.strictEqual(player.abilities.phoenixRevivalLevel, 2);
+  assert(upgradePhoenixRevival(player));
+  assert.strictEqual(player.abilities.phoenixRevivalLevel, 3);
+  assert.strictEqual(player.fireMutationPoints, 0);
 });
