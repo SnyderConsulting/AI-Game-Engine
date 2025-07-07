@@ -23,3 +23,27 @@ export function upgradeFireball(player, inventory, addItem, moveToHotbar) {
   }
   return true;
 }
+
+export function upgradeFireOrb(player) {
+  const level = player.abilities.fireOrbLevel || 0;
+  const costs = [0, 1, 2, 3];
+  if (level >= 3) return false;
+  const cost = costs[level + 1];
+  if (player.fireMutationPoints < cost) return false;
+  player.fireMutationPoints -= cost;
+  player.abilities.fireOrb = true;
+  player.abilities.fireOrbLevel = level + 1;
+  return true;
+}
+
+export function upgradePhoenixRevival(player) {
+  const level = player.abilities.phoenixRevivalLevel || 0;
+  const costs = [0, 4, 3, 4];
+  if (level >= 3) return false;
+  const cost = costs[level + 1];
+  if (player.fireMutationPoints < cost) return false;
+  player.fireMutationPoints -= cost;
+  player.abilities.phoenixRevival = true;
+  player.abilities.phoenixRevivalLevel = level + 1;
+  return true;
+}
