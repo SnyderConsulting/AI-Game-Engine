@@ -516,6 +516,11 @@ function renderSkillTree() {
     if (nextCost && player.fireMutationPoints >= nextCost) {
       tile.addEventListener("mousedown", () => {
         if (s.upgrade()) {
+          if (s.key === "fire_orb_skill") {
+            fireOrbs = createOrbs(
+              player.abilities.fireOrbLevel >= 2 ? 2 : 1,
+            );
+          }
           renderInventory();
           renderHotbar();
           renderSkillTree();
