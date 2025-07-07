@@ -33,7 +33,13 @@ import {
 } from "./inventory.js";
 import { RECIPES, canCraft, craftRecipe } from "./crafting.js";
 import { dropLoot } from "./loot.js";
-import { createFireball, updateFireballs } from "./spells.js";
+import {
+  createFireball,
+  updateFireballs,
+  predictFireballEndpoint,
+  fireballStats,
+  updateExplosions,
+} from "./spells.js";
 import { createArrow, updateArrows } from "./arrow.js";
 import { upgradeFireball } from "./skill_tree.js";
 import { makeDraggable } from "./ui.js";
@@ -130,6 +136,7 @@ let skillTreeOpen = false;
 let worldItems = [];
 let fireballs = [];
 let arrows = [];
+let explosions = [];
 let fireballCooldown = 0;
 let bowAiming = false;
 let mousePos = { x: 0, y: 0 };
@@ -549,6 +556,7 @@ function resetGame() {
   inventory = createInventory();
   worldItems = [];
   fireballs = [];
+  explosions = [];
   fireballCooldown = 0;
   if (player.abilities.fireball) {
     addItem(inventory, "fireball_spell", 1);
@@ -784,7 +792,12 @@ function update() {
     bowAiming = false;
   }
 
-  if (player.weapon && player.weapon.type === "baseball_bat" && useHeld && player.swingTimer <= 0) {
+  if (
+    player.weapon &&
+    player.weapon.type === "baseball_bat" &&
+    useHeld &&
+    player.swingTimer <= 0
+  ) {
     const killed = attackZombiesWithKills(
       player,
       zombies,
@@ -834,7 +847,10 @@ function update() {
     }
   });
 
-  updateFireballs(fireballs, zombies, walls, (z) => dropLoot(z, worldItems));
+  updateFireballs(fireballs, zombies, walls, explosions, (z) =>
+    dropLoot(z, worldItems),
+  );
+  updateExplosions(explosions);
   updateArrows(arrows, zombies, walls, (z) => dropLoot(z, worldItems));
   if (pickupMessageTimer > 0) {
     pickupMessageTimer--;
@@ -914,10 +930,39 @@ function render() {
     ctx.stroke();
   }
 
+  const activeSlot = getActiveHotbarItem(inventory);
+  if (
+    activeSlot &&
+    activeSlot.item === "fireball_spell" &&
+    player.abilities.fireball
+  ) {
+    const dir = { x: mousePos.x - player.x, y: mousePos.y - player.y };
+    const end = predictFireballEndpoint(player.x, player.y, dir, walls);
+    ctx.strokeStyle = "rgba(255,0,0,0.6)";
+    ctx.setLineDash([5, 5]);
+    ctx.beginPath();
+    ctx.moveTo(player.x, player.y);
+    ctx.lineTo(end.x, end.y);
+    ctx.stroke();
+    ctx.setLineDash([2, 4]);
+    const { radius } = fireballStats(player.abilities.fireballLevel);
+    ctx.beginPath();
+    ctx.arc(end.x, end.y, radius, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.setLineDash([]);
+  }
+
   ctx.fillStyle = "orange";
   fireballs.forEach((fb) => {
     ctx.beginPath();
     ctx.arc(fb.x, fb.y, 4, 0, Math.PI * 2);
+    ctx.fill();
+  });
+
+  ctx.fillStyle = "rgba(255,0,0,0.5)";
+  explosions.forEach((ex) => {
+    ctx.beginPath();
+    ctx.arc(ex.x, ex.y, ex.radius, 0, Math.PI * 2);
     ctx.fill();
   });
 
