@@ -67,8 +67,8 @@ export const RECIPES = [
     ingredients: { steel_plates: 3, wood_planks: 2 },
   },
   {
-    id: "barricade",
-    title: "Barricade",
+    id: "wood_barricade",
+    title: "Wood Barricade",
     description: "Blocks zombies when placed.",
     ingredients: { wood_planks: 2, nails: 4 },
   },
