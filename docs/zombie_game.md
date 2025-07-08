@@ -94,8 +94,8 @@ delay. Additional points add a second orb and shorten the respawn time.
 
 This ultimate skill costs **4 Fire Mutation Points** to unlock. If you would die
 with the ability ready, you instead revive with **1 health** and a temporary
-damage boost. Nearby zombies are knocked away when this happens, giving you a
-moment to escape. The skill then goes on cooldown for two minutes. The revival
+damage boost. Nearby zombies are knocked away with much greater force when this
+happens, giving you a moment to escape. The skill then goes on cooldown for two minutes. The revival
 check happens whenever your HP reaches zero, regardless of what caused the
 damage.
 

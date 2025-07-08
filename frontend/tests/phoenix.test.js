@@ -1,6 +1,10 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { createPlayer, tryPhoenixRevival } from "../src/player.js";
+import {
+  createPlayer,
+  tryPhoenixRevival,
+  PHOENIX_KNOCKBACK_FORCE,
+} from "../src/player.js";
 import { PLAYER_MAX_HEALTH, createZombie } from "../src/game_logic.js";
 
 test("tryPhoenixRevival revives player", () => {
@@ -28,7 +32,7 @@ test("tryPhoenixRevival knocks back nearby zombies", () => {
   const zombie = createZombie(10, 0);
   const res = tryPhoenixRevival(player, PLAYER_MAX_HEALTH, [zombie]);
   assert.strictEqual(res, true);
-  assert(zombie.x > 10);
+  assert(zombie.x >= 10 + PHOENIX_KNOCKBACK_FORCE);
 });
 
 test("tryPhoenixRevival fails when on cooldown", () => {

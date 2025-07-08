@@ -1,7 +1,8 @@
 import { attackZombies } from "./game_logic.js";
 
 export const PHOENIX_KNOCKBACK_RADIUS = 40;
-export const PHOENIX_KNOCKBACK_FORCE = 20;
+// Increased so the revival blast sends zombies much farther away
+export const PHOENIX_KNOCKBACK_FORCE = 60;
 
 export function createPlayer(PLAYER_MAX_HEALTH) {
   return {
