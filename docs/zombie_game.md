@@ -92,16 +92,17 @@ delay. Additional points add a second orb and shorten the respawn time.
 ## Phoenix Revival Passive
 
 This ultimate skill costs **4 Fire Mutation Points** to unlock. If you would die
-with the ability ready, you instead revive with a portion of your health and a
-temporary damage boost. The skill then goes on cooldown for two minutes. The
-revival check happens whenever your HP reaches zero, regardless of what caused
-the damage.
+with the ability ready, you instead revive with **1 health** and a temporary
+damage boost. Nearby zombies are knocked away when this happens, giving you a
+moment to escape. The skill then goes on cooldown for two minutes. The revival
+check happens whenever your HP reaches zero, regardless of what caused the
+damage.
 
-| Level | Revive Health | Damage Buff | Duration | Cost |
-| ----- | ------------- | ----------- | -------- | ---- |
-| **1** | 10% HP        | +25%        | 5s       | 4    |
-| **2** | 30% HP        | +35%        | 8s       | 3    |
-| **3** | 50% HP        | +50%        | 12s      | 4    |
+| Level | Damage Buff | Duration | Cost |
+| ----- | ----------- | -------- | ---- |
+| **1** | +25%        | 5s       | 4    |
+| **2** | +35%        | 8s       | 3    |
+| **3** | +50%        | 12s      | 4    |
 
 ## Bow and Arrow
 

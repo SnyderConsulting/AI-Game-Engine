@@ -1,3 +1,8 @@
+import { attackZombies } from "./game_logic.js";
+
+export const PHOENIX_KNOCKBACK_RADIUS = 40;
+export const PHOENIX_KNOCKBACK_FORCE = 20;
+
 export function createPlayer(PLAYER_MAX_HEALTH) {
   return {
     x: 0,
@@ -40,20 +45,28 @@ export function resetPlayerForNewGame(player, PLAYER_MAX_HEALTH) {
   player.fireMutationPoints = 0;
 }
 
-export function tryPhoenixRevival(player, PLAYER_MAX_HEALTH) {
+export function tryPhoenixRevival(player, PLAYER_MAX_HEALTH, zombies = []) {
   if (
     player.abilities.phoenixRevival &&
     player.phoenixCooldown <= 0 &&
     player.health <= 0
   ) {
     const lvl = player.abilities.phoenixRevivalLevel;
-    const hpPerc = [0, 0.1, 0.3, 0.5][lvl];
     const dmg = [0, 1.25, 1.35, 1.5][lvl];
     const dur = [0, 300, 480, 720][lvl];
-    player.health = Math.max(1, Math.round(PLAYER_MAX_HEALTH * hpPerc));
+    player.health = 1;
     player.phoenixCooldown = 7200;
     player.damageBuffMult = dmg;
     player.damageBuffTimer = dur;
+    attackZombies(
+      player,
+      zombies,
+      0,
+      PHOENIX_KNOCKBACK_RADIUS,
+      null,
+      Math.PI * 2,
+      PHOENIX_KNOCKBACK_FORCE,
+    );
     return true;
   }
   return false;
