@@ -718,7 +718,7 @@ function update() {
   }
 
   if (player.health <= 0) {
-    if (!tryPhoenixRevival(player, PLAYER_MAX_HEALTH)) {
+    if (!tryPhoenixRevival(player, PLAYER_MAX_HEALTH, zombies)) {
       gameOver = true;
       gameOverDiv.style.display = "block";
       return;
@@ -973,7 +973,7 @@ function update() {
       player.damageCooldown = 30;
       z.attackCooldown = 30;
       if (player.health <= 0) {
-        if (!tryPhoenixRevival(player, PLAYER_MAX_HEALTH)) {
+        if (!tryPhoenixRevival(player, PLAYER_MAX_HEALTH, zombies)) {
           gameOver = true;
           gameOverDiv.style.display = "block";
         }
