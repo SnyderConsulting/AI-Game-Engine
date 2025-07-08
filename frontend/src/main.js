@@ -734,8 +734,14 @@ function update() {
         item,
       )
     ) {
-      const dmg = item === "reinforced_axe" ? 2 : 1;
-      player.weapon = { type: item, damage: dmg };
+      const dmgMap = {
+        hammer: 2,
+        crowbar: 3,
+        axe: 4,
+        reinforced_axe: 6,
+        baseball_bat: 2,
+      };
+      player.weapon = { type: item, damage: dmgMap[item] || 1 };
     } else {
       player.weapon = null;
     }

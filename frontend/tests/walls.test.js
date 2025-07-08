@@ -40,3 +40,16 @@ test("damageWall returns false when a wall survives", () => {
   updateWalls(arr);
   assert.strictEqual(arr.length, 1);
 });
+
+test("axe breaks wood wall in a few swings", () => {
+  const w = createWall(0, 0, "wood");
+  const dmg = 4; // axe damage defined in main.js
+  let destroyed = false;
+  for (let i = 0; i < 5 && !destroyed; i++) {
+    destroyed = damageWall(w, dmg);
+  }
+  assert.strictEqual(destroyed, true);
+  const arr = [w];
+  updateWalls(arr);
+  assert.strictEqual(arr.length, 0);
+});
