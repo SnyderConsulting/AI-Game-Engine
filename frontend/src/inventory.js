@@ -1,6 +1,12 @@
 export const STACK_LIMITS = {
   wood: 20,
   arrow: 20,
+  scrap_metal: 20,
+  duct_tape: 20,
+  nails: 20,
+  wood_planks: 20,
+  plastic_fragments: 20,
+  steel_plates: 20,
 };
 
 export function getStackLimit(itemId) {

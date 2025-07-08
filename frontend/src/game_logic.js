@@ -86,6 +86,17 @@ export function createContainer(x, y) {
   return { x, y, opened: false, item: null, type: "cardboard_box" };
 }
 
+export const CONTAINER_LOOT = ["scrap_metal", "duct_tape", "nails", "medkit"];
+
+export function openContainer(container) {
+  if (!container.opened) {
+    container.opened = true;
+    const idx = Math.floor(Math.random() * CONTAINER_LOOT.length);
+    container.item = CONTAINER_LOOT[idx];
+  }
+  return container.item;
+}
+
 export function spawnContainers(width, height, walls = [], count = 3) {
   const containers = [];
   for (let i = 0; i < count; i++) {
@@ -121,7 +132,6 @@ export const PLAYER_MAX_HEALTH = 10;
 
 export const SEGMENT_SIZE = 40;
 export const TRIGGER_DISTANCE = 60;
-
 
 export function circleRectColliding(circle, rect, radius) {
   const closestX = Math.max(rect.x, Math.min(circle.x, rect.x + rect.size));

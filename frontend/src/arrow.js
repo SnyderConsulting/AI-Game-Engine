@@ -35,7 +35,13 @@ export function createArrow(x, y, direction, damageMult = 1) {
   return { x, y, vx, vy, damage: ARROW_DAMAGE * damageMult };
 }
 
-export function updateArrows(arrows, zombies, walls, onKill = () => {}) {
+export function updateArrows(
+  arrows,
+  zombies,
+  walls,
+  onKill = () => {},
+  onBreak = () => {},
+) {
   for (let i = arrows.length - 1; i >= 0; i--) {
     const a = arrows[i];
     a.x += a.vx;
@@ -43,7 +49,8 @@ export function updateArrows(arrows, zombies, walls, onKill = () => {}) {
     let remove = false;
     for (const w of walls) {
       if (circleRectColliding(a, w, 2)) {
-        damageWall(w, a.damage);
+        const destroyed = damageWall(w, a.damage);
+        if (destroyed) onBreak(w);
         remove = true;
         break;
       }

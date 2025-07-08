@@ -29,3 +29,16 @@ test("craft fire mutation serum", () => {
     .some((s) => s.item === "fire_core");
   assert.strictEqual(coresLeft, false);
 });
+
+test("craft hammer recipe", () => {
+  const inv = createInventory();
+  addItem(inv, "scrap_metal", 2);
+  addItem(inv, "duct_tape", 1);
+  const recipe = RECIPES.find((r) => r.id === "hammer");
+  const success = craftRecipe(inv, recipe);
+  assert.strictEqual(success, true);
+  const hasHammer = inv.slots
+    .concat(inv.hotbar)
+    .some((s) => s.item === "hammer");
+  assert.strictEqual(hasHammer, true);
+});
