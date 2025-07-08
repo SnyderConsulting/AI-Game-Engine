@@ -117,6 +117,7 @@ const ITEM_ICONS = {
   crowbar: "assets/crowbar.png",
   axe: "assets/axe.png",
   reinforced_axe: "assets/reinforced_axe.png",
+  wood_barricade: "assets/wood_barricade.png",
 };
 
 // Preload image objects for item icons so they can be drawn on the canvas
