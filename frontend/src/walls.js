@@ -1,9 +1,10 @@
 import { SEGMENT_SIZE } from "./game_logic.js";
 
 export const WALL_MATERIALS = {
-  steel: { hp: 300, img: "assets/shelf_metal.png" },
-  wood: { hp: 150, img: "assets/shelf_wood.png" },
-  plastic: { hp: 75, img: "assets/shelf_plastic.png" },
+  // Lowered health so melee weapons can visibly damage shelves
+  steel: { hp: 30, img: "assets/shelf_metal.png" },
+  wood: { hp: 20, img: "assets/shelf_wood.png" },
+  plastic: { hp: 10, img: "assets/shelf_plastic.png" },
 };
 
 export const WALL_IMAGES = {};
@@ -119,6 +120,7 @@ export function generateStoreWalls(width, height) {
 export function damageWall(wall, dmg) {
   wall.hp -= dmg;
   wall.damageTimer = 5;
+  return wall.hp <= 0;
 }
 
 export function updateWalls(walls) {

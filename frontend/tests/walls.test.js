@@ -4,6 +4,8 @@ import {
   createWall,
   generateStoreWalls,
   WALL_MATERIALS,
+  damageWall,
+  updateWalls,
 } from "../src/walls.js";
 import { SEGMENT_SIZE } from "../src/game_logic.js";
 
@@ -19,4 +21,35 @@ test("generateStoreWalls returns walls with materials", () => {
   walls.forEach((w) => {
     assert.ok(WALL_MATERIALS[w.material]);
   });
+});
+
+test("damageWall returns true when a wall breaks", () => {
+  const w = createWall(0, 0, "plastic");
+  const destroyed = damageWall(w, WALL_MATERIALS.plastic.hp);
+  assert.strictEqual(destroyed, true);
+  const arr = [w];
+  updateWalls(arr);
+  assert.strictEqual(arr.length, 0);
+});
+
+test("damageWall returns false when a wall survives", () => {
+  const w = createWall(0, 0, "wood");
+  const destroyed = damageWall(w, 1);
+  assert.strictEqual(destroyed, false);
+  const arr = [w];
+  updateWalls(arr);
+  assert.strictEqual(arr.length, 1);
+});
+
+test("axe breaks wood wall in a few swings", () => {
+  const w = createWall(0, 0, "wood");
+  const dmg = 4; // axe damage defined in main.js
+  let destroyed = false;
+  for (let i = 0; i < 5 && !destroyed; i++) {
+    destroyed = damageWall(w, dmg);
+  }
+  assert.strictEqual(destroyed, true);
+  const arr = [w];
+  updateWalls(arr);
+  assert.strictEqual(arr.length, 0);
 });
