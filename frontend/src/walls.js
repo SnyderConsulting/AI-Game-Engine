@@ -123,6 +123,25 @@ export function damageWall(wall, dmg) {
   return wall.hp <= 0;
 }
 
+export function wallSwingHit(
+  player,
+  wall,
+  range,
+  direction,
+  arc = Math.PI / 2,
+) {
+  const len = Math.hypot(direction.x, direction.y);
+  if (len === 0) return false;
+  const dirNorm = { x: direction.x / len, y: direction.y / len };
+  const cosHalf = Math.cos(arc / 2);
+  const closestX = Math.max(wall.x, Math.min(player.x, wall.x + wall.size));
+  const closestY = Math.max(wall.y, Math.min(player.y, wall.y + wall.size));
+  const wx = closestX - player.x;
+  const wy = closestY - player.y;
+  const dist = Math.hypot(wx, wy);
+  return dist <= range && wx * dirNorm.x + wy * dirNorm.y >= cosHalf * dist;
+}
+
 export function updateWalls(walls) {
   for (let i = walls.length - 1; i >= 0; i--) {
     const w = walls[i];

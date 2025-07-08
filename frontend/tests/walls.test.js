@@ -6,6 +6,7 @@ import {
   WALL_MATERIALS,
   damageWall,
   updateWalls,
+  wallSwingHit,
 } from "../src/walls.js";
 import { SEGMENT_SIZE } from "../src/game_logic.js";
 
@@ -52,4 +53,11 @@ test("axe breaks wood wall in a few swings", () => {
   const arr = [w];
   updateWalls(arr);
   assert.strictEqual(arr.length, 0);
+});
+
+test("wallSwingHit detects melee contact at wall edge", () => {
+  const wall = createWall(0, 0, "wood");
+  const player = { x: SEGMENT_SIZE + 10, y: SEGMENT_SIZE / 2 };
+  const dir = { x: -1, y: 0 };
+  assert.strictEqual(wallSwingHit(player, wall, 30, dir, Math.PI / 2), true);
 });

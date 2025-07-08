@@ -16,6 +16,7 @@ The game runs entirely in the browser. Open `http://localhost:3000` and you will
 
 Shelving now forms organized aisles built from steel, wood, and plastic segments. These shelves are breakable, with steel being the hardest to destroy and plastic the weakest. Damaged shelves flash and briefly show a health bar before collapsing. The layout generator spaces aisles widely so there is plenty of room to maneuver while still providing clear paths and chokepoints.
 Use crafted tools like the **Hammer**, **Crowbar**, or **Axe** to chip away at shelves. Melee swings now deal more damage so only a handful are needed to break a shelf. Once its health reaches zero the shelf disappears, dropping building materials.
+Collision detection for melee swings uses the closest point on the shelf, so striking from the side reliably damages it.
 
 If a zombie touches you, the game ends and a **New Game** button appears so you can immediately play again.
 
