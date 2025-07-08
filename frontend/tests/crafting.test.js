@@ -42,3 +42,16 @@ test("craft hammer recipe", () => {
     .some((s) => s.item === "hammer");
   assert.strictEqual(hasHammer, true);
 });
+
+test("craft wood barricade", () => {
+  const inv = createInventory();
+  addItem(inv, "wood_planks", 2);
+  addItem(inv, "nails", 4);
+  const recipe = RECIPES.find((r) => r.id === "wood_barricade");
+  const success = craftRecipe(inv, recipe);
+  assert.strictEqual(success, true);
+  const hasItem = inv.slots
+    .concat(inv.hotbar)
+    .some((s) => s.item === "wood_barricade");
+  assert.strictEqual(hasItem, true);
+});

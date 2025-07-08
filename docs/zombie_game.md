@@ -119,4 +119,4 @@ Equip the Bow in your hotbar. Hold the right mouse button or **Space** to aim, t
 1. Loot cardboard boxes for Scrap Metal, Duct Tape and Nails.
 2. Combine these to craft a Hammer, Crowbar or Axe.
 3. Use those tools to destroy shelves and gather Plastic Fragments, Wood Planks and Steel Plates.
-4. Craft advanced gear like Baseball Bats, Bows, Reinforced Axes and Barricades using the harvested materials.
+4. Craft advanced gear like Baseball Bats, Bows, Reinforced Axes and Wood Barricades using the harvested materials.
