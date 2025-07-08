@@ -20,6 +20,7 @@ import {
   WALL_IMAGES,
   damageWall,
   updateWalls,
+  wallSwingHit,
 } from "./walls.js";
 import {
   createPlayer,
@@ -912,14 +913,8 @@ function update() {
       5,
     );
     const dir = { x: player.facing.x, y: player.facing.y };
-    const len = Math.hypot(dir.x, dir.y);
-    const norm = len > 0 ? { x: dir.x / len, y: dir.y / len } : null;
-    const cosHalf = Math.cos(Math.PI / 4);
     walls.forEach((w) => {
-      const wx = w.x + SEGMENT_SIZE / 2 - player.x;
-      const wy = w.y + SEGMENT_SIZE / 2 - player.y;
-      const dist = Math.hypot(wx, wy);
-      if (dist <= 30 && norm && wx * norm.x + wy * norm.y >= cosHalf * dist) {
+      if (wallSwingHit(player, w, 30, dir, Math.PI / 2)) {
         const allowed =
           {
             hammer: ["plastic"],
