@@ -119,6 +119,7 @@ export function generateStoreWalls(width, height) {
 export function damageWall(wall, dmg) {
   wall.hp -= dmg;
   wall.damageTimer = 5;
+  return wall.hp <= 0;
 }
 
 export function updateWalls(walls) {
