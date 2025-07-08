@@ -50,7 +50,7 @@ Press **C** to open the crafting menu at any time. Only recipes for which you ow
 
 ## Containers
 
-Cardboard boxes are scattered around the arena. They are now rendered using a box icon instead of a brown square. Stand next to one and hold **F** to loot it. A progress bar appears in the center of the screen for three seconds while you search. When the bar completes the box opens. Each box now contains either a **Medkit** or **Wood** with equal probability. If there is room in your hotbar or inventory the item is added automatically. Otherwise a brief "Inventory Full" message appears. Opened boxes appear faded so you know they have been searched.
+Cardboard boxes are scattered around the arena. They are now rendered using a box icon instead of a brown square. Stand next to one and hold **F** to loot it. A progress bar appears in the center of the screen for three seconds while you search. When the bar completes the box opens. Each box now contains **Scrap Metal**, **Duct Tape**, **Nails**, or a **Medkit** with equal probability. If there is room in your hotbar or inventory the item is added automatically. Otherwise a brief "Inventory Full" message appears. Opened boxes appear faded so you know they have been searched.
 
 Equip a Medkit and press the **Space** key or left mouse button to restore up to 3 health without exceeding your maximum.
 
@@ -104,9 +104,16 @@ the damage.
 
 ## Bow and Arrow
 
-Wood collected from containers can be crafted into ranged equipment:
+Wood planks harvested from wooden shelves enable ranged equipment:
 
-- **Bow** – Requires 3 Wood, 2 Zombie Teeth and 1 Core.
-- **Arrows** – Crafted in batches of 5 using 1 Wood and 1 Zombie Tooth.
+- **Bow** – Requires 3 Wood Planks and 2 Nails.
+- **Arrows** – Crafted in batches of 5 using 1 Wood Plank and 1 Nail.
 
 Equip the Bow in your hotbar. Hold the right mouse button or **Space** to aim, then release to fire an arrow toward the cursor. While aiming a dashed line previews the path and stops when hitting a wall or zombie. Each shot consumes one Arrow. The current arrow count appears below the health display and an "Out of Arrows!" notification shows when empty.
+
+## Breaking & Crafting Loop
+
+1. Loot cardboard boxes for Scrap Metal, Duct Tape and Nails.
+2. Combine these to craft a Hammer, Crowbar or Axe.
+3. Use those tools to destroy shelves and gather Plastic Fragments, Wood Planks and Steel Plates.
+4. Craft advanced gear like Baseball Bats, Bows, Reinforced Axes and Barricades using the harvested materials.

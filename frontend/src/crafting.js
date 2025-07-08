@@ -27,14 +27,50 @@ export const RECIPES = [
     id: "bow",
     title: "Bow",
     description: "Simple wooden bow.",
-    ingredients: { wood: 3, teeth: 2, core: 1 },
+    ingredients: { wood_planks: 3, nails: 2 },
   },
   {
     id: "arrow",
     title: "Arrows",
     description: "Ammo for the bow.",
-    ingredients: { wood: 1, teeth: 1 },
+    ingredients: { wood_planks: 1, nails: 1 },
     output: { id: "arrow", qty: 5 },
+  },
+  {
+    id: "hammer",
+    title: "Hammer",
+    description: "Basic tool for plastic shelves.",
+    ingredients: { scrap_metal: 2, duct_tape: 1 },
+  },
+  {
+    id: "crowbar",
+    title: "Crowbar",
+    description: "Can break plastic and wood shelves.",
+    ingredients: { scrap_metal: 3, duct_tape: 1 },
+  },
+  {
+    id: "axe",
+    title: "Axe",
+    description: "Breaks all shelf types.",
+    ingredients: { scrap_metal: 4, duct_tape: 2 },
+  },
+  {
+    id: "baseball_bat",
+    title: "Baseball Bat",
+    description: "Simple melee weapon.",
+    ingredients: { wood_planks: 2, duct_tape: 1 },
+  },
+  {
+    id: "reinforced_axe",
+    title: "Reinforced Axe",
+    description: "Faster at breaking shelves.",
+    ingredients: { steel_plates: 3, wood_planks: 2 },
+  },
+  {
+    id: "barricade",
+    title: "Barricade",
+    description: "Blocks zombies when placed.",
+    ingredients: { wood_planks: 2, nails: 4 },
   },
 ];
 

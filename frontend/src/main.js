@@ -6,7 +6,6 @@ import {
   isColliding,
   circleRectColliding,
   SEGMENT_SIZE,
-  spawnWeapon,
   attackZombies,
   attackZombiesWithKills,
   PLAYER_MAX_HEALTH,
@@ -14,6 +13,7 @@ import {
   createSpawnDoor,
   spawnZombieAtDoor,
   spawnContainers,
+  openContainer,
 } from "./game_logic.js";
 import {
   generateStoreWalls,
@@ -107,6 +107,16 @@ const ITEM_ICONS = {
   wood: "assets/wood.png",
   bow: "assets/wooden_bow.png",
   arrow: "assets/wooden_arrow.png",
+  scrap_metal: "assets/scrap_metal.png",
+  duct_tape: "assets/duct_tape.png",
+  nails: "assets/nails.png",
+  plastic_fragments: "assets/plastic_fragments.png",
+  wood_planks: "assets/wood_planks.png",
+  steel_plates: "assets/steel_plates.png",
+  hammer: "assets/hammer.png",
+  crowbar: "assets/crowbar.png",
+  axe: "assets/axe.png",
+  reinforced_axe: "assets/reinforced_axe.png",
 };
 
 // Preload image objects for item icons so they can be drawn on the canvas
@@ -116,6 +126,12 @@ for (const [id, path] of Object.entries(ITEM_ICONS)) {
   img.src = path;
   ITEM_IMAGES[id] = img;
 }
+
+const MATERIAL_DROPS = {
+  plastic: "plastic_fragments",
+  wood: "wood_planks",
+  steel: "steel_plates",
+};
 
 const cardboardBoxImg = new Image();
 cardboardBoxImg.src = "assets/cardboard_box.png";
@@ -170,7 +186,6 @@ let prevUse = false;
 let prevAim = false;
 const LOOT_TIME = 180; // 3 seconds at 60fps
 const LOOT_DIST = 20;
-const MEDKIT_CHANCE = 0.5;
 
 // When managing inventory/hotbar the user can select a slot.
 // The structure is { type: "inventory" | "hotbar", index: number }.
@@ -580,7 +595,7 @@ function resetGame() {
   player.x = spawn.x;
   player.y = spawn.y;
   resetPlayerForNewGame(player, PLAYER_MAX_HEALTH);
-  weapon = spawnWeapon(canvas.width, canvas.height, walls, "baseball_bat", 1);
+  weapon = null;
   spawnTimer = 0;
   containers = spawnContainers(
     canvas.width,
@@ -709,10 +724,20 @@ function update() {
   }
 
   const activeSlot = getActiveHotbarItem(inventory);
-  if (activeSlot && activeSlot.item === "baseball_bat") {
-    player.weapon = { type: "baseball_bat", damage: 1 };
-  } else if (activeSlot && activeSlot.item === "bow") {
-    player.weapon = { type: "bow" };
+  if (activeSlot) {
+    const item = activeSlot.item;
+    if (item === "bow") {
+      player.weapon = { type: "bow" };
+    } else if (
+      ["baseball_bat", "hammer", "crowbar", "axe", "reinforced_axe"].includes(
+        item,
+      )
+    ) {
+      const dmg = item === "reinforced_axe" ? 2 : 1;
+      player.weapon = { type: item, damage: dmg };
+    } else {
+      player.weapon = null;
+    }
   } else {
     player.weapon = null;
   }
@@ -787,8 +812,7 @@ function update() {
       lootFill.style.width = `${((LOOT_TIME - lootTimer) / LOOT_TIME) * 100}%`;
       if (lootTimer <= 0) {
         if (!looting.opened) {
-          looting.opened = true;
-          looting.item = Math.random() < MEDKIT_CHANCE ? "medkit" : "wood";
+          openContainer(looting);
         }
         if (addItem(inventory, looting.item, 1)) {
           pickupMsg.textContent = `Picked up ${looting.item}`;
@@ -870,12 +894,7 @@ function update() {
     bowAiming = false;
   }
 
-  if (
-    player.weapon &&
-    player.weapon.type === "baseball_bat" &&
-    useHeld &&
-    player.swingTimer <= 0
-  ) {
+  if (player.weapon && useHeld && player.swingTimer <= 0) {
     const killed = attackZombiesWithKills(
       player,
       zombies,
@@ -894,7 +913,28 @@ function update() {
       const wy = w.y + SEGMENT_SIZE / 2 - player.y;
       const dist = Math.hypot(wx, wy);
       if (dist <= 30 && norm && wx * norm.x + wy * norm.y >= cosHalf * dist) {
-        damageWall(w, player.weapon.damage * player.damageBuffMult);
+        const allowed =
+          {
+            hammer: ["plastic"],
+            crowbar: ["plastic", "wood"],
+            axe: ["plastic", "wood", "steel"],
+            reinforced_axe: ["plastic", "wood", "steel"],
+            baseball_bat: ["plastic", "wood", "steel"],
+          }[player.weapon.type] || [];
+        if (allowed.includes(w.material)) {
+          const destroyed = damageWall(
+            w,
+            player.weapon.damage * player.damageBuffMult,
+          );
+          if (destroyed) {
+            worldItems.push({
+              x: w.x + SEGMENT_SIZE / 2,
+              y: w.y + SEGMENT_SIZE / 2,
+              type: MATERIAL_DROPS[w.material],
+              count: 1,
+            });
+          }
+        }
       }
     });
     killed.forEach((z) => dropLoot(z, worldItems));
@@ -949,7 +989,19 @@ function update() {
     dropLoot(z, worldItems),
   );
   updateExplosions(explosions);
-  updateArrows(arrows, zombies, walls, (z) => dropLoot(z, worldItems));
+  updateArrows(
+    arrows,
+    zombies,
+    walls,
+    (z) => dropLoot(z, worldItems),
+    (w) =>
+      worldItems.push({
+        x: w.x + SEGMENT_SIZE / 2,
+        y: w.y + SEGMENT_SIZE / 2,
+        type: MATERIAL_DROPS[w.material],
+        count: 1,
+      }),
+  );
   if (pickupMessageTimer > 0) {
     pickupMessageTimer--;
     if (pickupMessageTimer === 0) pickupMsg.textContent = "";
