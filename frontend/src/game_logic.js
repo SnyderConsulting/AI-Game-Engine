@@ -128,6 +128,14 @@ export function spawnZombieAtDoor(door) {
   return createZombie(door.x, door.y, variant);
 }
 
+export function spawnZombieWave(count, door, variant = "normal") {
+  const zombies = [];
+  for (let i = 0; i < count; i++) {
+    zombies.push(createZombie(door.x, door.y, variant));
+  }
+  return zombies;
+}
+
 export const PLAYER_MAX_HEALTH = 10;
 
 export const SEGMENT_SIZE = 40;

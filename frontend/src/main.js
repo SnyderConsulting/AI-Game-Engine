@@ -1,5 +1,4 @@
 import {
-  spawnZombie,
   spawnPlayer,
   moveZombie,
   moveTowards,
@@ -12,6 +11,7 @@ import {
   ZOMBIE_MAX_HEALTH,
   createSpawnDoor,
   spawnZombieAtDoor,
+  spawnZombieWave,
   spawnContainers,
   openContainer,
 } from "./game_logic.js";
@@ -70,6 +70,9 @@ const mainMenu = document.getElementById("mainMenu");
 const startBtn = document.getElementById("startBtn");
 const gameOverDiv = document.getElementById("gameOver");
 const newGameBtn = document.getElementById("newGameBtn");
+const victoryDiv = document.getElementById("victory");
+const victoryBtn = document.getElementById("victoryBtn");
+const waveCounterDiv = document.getElementById("waveCounter");
 const inventoryDiv = document.getElementById("inventory");
 const inventoryGrid = document.getElementById("inventoryGrid");
 const inventoryBar = document.getElementById("inventoryBar");
@@ -134,12 +137,13 @@ const player = createPlayer(PLAYER_MAX_HEALTH);
 let zombies = [];
 let walls = [];
 let weapon = null;
-let spawnTimer = 0;
 let spawnDoor = null;
 let containers = [];
 let looting = null;
 let lootTimer = 0;
 let gameOver = false;
+let victory = false;
+let currentWave = 1;
 const keys = {};
 let loopStarted = false;
 let inventory = createInventory();
@@ -572,9 +576,14 @@ function resetGame() {
   const spawn = spawnPlayer(canvas.width, canvas.height, walls);
   player.x = spawn.x;
   player.y = spawn.y;
+  zombies = spawnZombieWave(5, spawnDoor, "normal");
+  currentWave = 1;
+  victory = false;
+  waveCounterDiv.textContent = `Wave ${currentWave}`;
+  waveCounterDiv.style.display = "block";
+  victoryDiv.style.display = "none";
   resetPlayerForNewGame(player, PLAYER_MAX_HEALTH);
   weapon = null;
-  spawnTimer = 0;
   containers = spawnContainers(
     canvas.width,
     canvas.height,
@@ -616,6 +625,11 @@ startBtn.addEventListener("click", () => {
 
 newGameBtn.addEventListener("click", () => {
   gameOverDiv.style.display = "none";
+  startGame();
+});
+
+victoryBtn.addEventListener("click", () => {
+  victoryDiv.style.display = "none";
   startGame();
 });
 
@@ -683,7 +697,7 @@ window.addEventListener("keyup", (e) => {
 });
 
 function update() {
-  if (gameOver) return;
+  if (gameOver || victory) return;
 
   updateWalls(walls);
 
@@ -966,7 +980,7 @@ function update() {
   } else {
     spawnTimer--;
   }
-
+  
   zombies.forEach((z) => {
     moveZombie(z, player, walls, 1, canvas.width, canvas.height, zombies);
     if (z.attackCooldown > 0) z.attackCooldown--;
@@ -1013,6 +1027,11 @@ function update() {
   if (pickupMessageTimer > 0) {
     pickupMessageTimer--;
     if (pickupMessageTimer === 0) pickupMsg.textContent = "";
+  }
+
+  if (!victory && zombies.length === 0) {
+    victory = true;
+    victoryDiv.style.display = "block";
   }
 
   if (skillTreeOpen) renderSkillTree();

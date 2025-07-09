@@ -16,6 +16,7 @@ import {
   attackZombiesWithKills,
   ZOMBIE_MAX_HEALTH,
   spawnZombieAtDoor,
+  spawnZombieWave,
   createContainer,
   spawnContainers,
 } from "../src/game_logic.js";
@@ -138,6 +139,17 @@ test("spawnZombieAtDoor uses random chance for fire variant", () => {
   Math.random = originalRandom;
   assert.strictEqual(fire.variant, "fire");
   assert.strictEqual(normal.variant, "normal");
+});
+
+test("spawnZombieWave creates multiple normal zombies at door", () => {
+  const door = { x: 5, y: 5 };
+  const zombies = spawnZombieWave(5, door);
+  assert.strictEqual(zombies.length, 5);
+  zombies.forEach((z) => {
+    assert.strictEqual(z.x, door.x);
+    assert.strictEqual(z.y, door.y);
+    assert.strictEqual(z.variant, "normal");
+  });
 });
 
 test("moveZombie goes straight when unobstructed", () => {
