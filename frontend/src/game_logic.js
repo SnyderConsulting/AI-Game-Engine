@@ -134,13 +134,29 @@ export function spawnZombieWave(
   width,
   height,
   variant = "normal",
+  walls = [],
 ) {
   // Clamp the spawn location slightly inside the arena so pathfinding works
   const spawnX = Math.min(Math.max(door.x, 1), width - 1);
   const spawnY = Math.min(Math.max(door.y, 1), height - 1);
   const zombies = [];
   for (let i = 0; i < count; i++) {
-    zombies.push(createZombie(spawnX, spawnY, variant));
+    let pos;
+    let attempts = 0;
+    do {
+      const angle = Math.random() * Math.PI * 2;
+      const dist = Math.random() * (SEGMENT_SIZE / 2);
+      pos = {
+        x: Math.min(Math.max(spawnX + Math.cos(angle) * dist, 1), width - 1),
+        y: Math.min(Math.max(spawnY + Math.sin(angle) * dist, 1), height - 1),
+      };
+      attempts++;
+    } while (
+      attempts < 20 &&
+      (walls.some((w) => circleRectColliding(pos, w, 10)) ||
+        zombies.some((z) => isColliding(z, pos, 10)))
+    );
+    zombies.push(createZombie(pos.x, pos.y, variant));
   }
   return zombies;
 }
