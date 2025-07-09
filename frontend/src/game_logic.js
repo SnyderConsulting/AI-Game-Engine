@@ -182,7 +182,7 @@ export function circleRectColliding(circle, rect, radius) {
   return dx * dx + dy * dy < radius * radius;
 }
 
-export function findPath(start, goal, walls, width, height, blockers = []) {
+export function findPath(start, goal, walls, width, height, _blockers = []) {
   const gridW = Math.floor(width / SEGMENT_SIZE);
   const gridH = Math.floor(height / SEGMENT_SIZE);
   const sx = Math.floor(start.x / SEGMENT_SIZE);
@@ -192,12 +192,6 @@ export function findPath(start, goal, walls, width, height, blockers = []) {
   const blocked = new Set(
     walls.map((w) => `${w.x / SEGMENT_SIZE},${w.y / SEGMENT_SIZE}`),
   );
-  for (const b of blockers) {
-    const bx = Math.floor(b.x / SEGMENT_SIZE);
-    const by = Math.floor(b.y / SEGMENT_SIZE);
-    if (bx === sx && by === sy) continue;
-    blocked.add(`${bx},${by}`);
-  }
   const queue = [[sx, sy]];
   const key = (x, y) => `${x},${y}`;
   const cameFrom = new Map([[key(sx, sy), null]]);

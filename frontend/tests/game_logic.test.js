@@ -87,7 +87,7 @@ test("findPath navigates around walls", () => {
   });
 });
 
-test("findPath treats zombies as blocked spaces", () => {
+test("findPath ignores other zombies when searching", () => {
   const start = { x: 10, y: 10 };
   const end = { x: 90, y: 10 };
   const zombieBlock = { x: 50, y: 10 };
@@ -95,7 +95,7 @@ test("findPath treats zombies as blocked spaces", () => {
   assert(path.length > 0);
   const blockedCell = `${Math.floor(zombieBlock.x / SEGMENT_SIZE)},${Math.floor(zombieBlock.y / SEGMENT_SIZE)}`;
   const cells = path.map((c) => `${c[0]},${c[1]}`);
-  assert.strictEqual(cells.includes(blockedCell), false);
+  assert.strictEqual(cells.includes(blockedCell), true);
 });
 
 test("hasLineOfSight detects blockage", () => {
