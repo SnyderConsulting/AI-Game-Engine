@@ -42,6 +42,18 @@
     ></canvas>
 
     <div
+      id="waveCounter"
+      style="
+        position: absolute;
+        top: 0;
+        right: 0;
+        margin: 8px;
+        color: white;
+        display: none;
+      "
+    ></div>
+
+    <div
       id="mainMenu"
       style="
         position: absolute;
@@ -69,6 +81,21 @@
     >
       <p style="font-size: 32px; margin-bottom: 10px">Game Over</p>
       <button id="newGameBtn">New Game</button>
+    </div>
+
+    <div
+      id="victory"
+      style="
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        display: none;
+        text-align: center;
+      "
+    >
+      <p style="font-size: 32px; margin-bottom: 10px">VICTORY</p>
+      <button id="victoryBtn">Play Again</button>
     </div>
 
     <p
