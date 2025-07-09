@@ -54,6 +54,8 @@ Press **C** to open the crafting menu at any time. Only recipes for which you ow
 
 Cardboard boxes are scattered around the arena. They are now rendered using a box icon instead of a brown square. Stand next to one and hold **F** to loot it. A progress bar appears in the center of the screen for three seconds while you search. When the bar completes the box opens. Each box now contains **Scrap Metal**, **Duct Tape**, **Nails**, or a **Medkit** with equal probability. If there is room in your hotbar or inventory the item is added automatically. Otherwise a brief "Inventory Full" message appears. Opened boxes appear faded so you know they have been searched.
 
+Shelves can now be searched the same way. Hold **F** while standing near a shelf segment to rummage through it. Searching takes time and each shelf can only be looted once. Looted shelves fade just like opened boxes. Shelves usually contain nothing, but occasionally you might find any random item tucked away.
+
 Equip a Medkit and press the **Space** key or left mouse button to restore up to 3 health without exceeding your maximum.
 
 ## Fire Zombies
