@@ -141,22 +141,25 @@ test("spawnZombieAtDoor uses random chance for fire variant", () => {
   assert.strictEqual(normal.variant, "normal");
 });
 
-test("spawnZombieWave creates multiple normal zombies at door", () => {
+test("spawnZombieWave creates multiple normal zombies near door", () => {
   const door = { x: 5, y: 5 };
   const zombies = spawnZombieWave(5, door, 100, 100);
   assert.strictEqual(zombies.length, 5);
+  const unique = new Set();
   zombies.forEach((z) => {
-    assert.strictEqual(z.x, door.x);
-    assert.strictEqual(z.y, door.y);
+    const dist = Math.hypot(z.x - door.x, z.y - door.y);
+    assert(dist <= SEGMENT_SIZE / 2);
     assert.strictEqual(z.variant, "normal");
+    unique.add(`${Math.round(z.x)}:${Math.round(z.y)}`);
   });
+  assert(unique.size > 1);
 });
 
 test("spawnZombieWave clamps spawn inside arena", () => {
   const door = { x: 100, y: 50 };
   const [z] = spawnZombieWave(1, door, 100, 100);
-  assert.strictEqual(z.x, 99);
-  assert.strictEqual(z.y, 50);
+  assert(z.x >= 1 && z.x <= 99);
+  assert(z.y >= 1 && z.y <= 99);
 });
 
 test("moveZombie goes straight when unobstructed", () => {

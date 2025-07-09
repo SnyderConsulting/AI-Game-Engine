@@ -582,6 +582,7 @@ function resetGame() {
     canvas.width,
     canvas.height,
     "normal",
+    walls,
   );
   currentWave = 1;
   victory = false;
@@ -987,7 +988,7 @@ function update() {
       renderHotbar();
     }
   }
-  
+
   zombies.forEach((z) => {
     moveZombie(z, player, walls, 1, canvas.width, canvas.height, zombies);
     if (z.attackCooldown > 0) z.attackCooldown--;
