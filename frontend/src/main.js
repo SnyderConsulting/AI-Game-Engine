@@ -576,7 +576,13 @@ function resetGame() {
   const spawn = spawnPlayer(canvas.width, canvas.height, walls);
   player.x = spawn.x;
   player.y = spawn.y;
-  zombies = spawnZombieWave(5, spawnDoor, "normal");
+  zombies = spawnZombieWave(
+    5,
+    spawnDoor,
+    canvas.width,
+    canvas.height,
+    "normal",
+  );
   currentWave = 1;
   victory = false;
   waveCounterDiv.textContent = `Wave ${currentWave}`;
@@ -997,6 +1003,7 @@ function update() {
         if (!tryPhoenixRevival(player, PLAYER_MAX_HEALTH, zombies)) {
           gameOver = true;
           gameOverDiv.style.display = "block";
+          waveCounterDiv.style.display = "none";
         }
       }
     }
@@ -1033,6 +1040,7 @@ function update() {
   if (!victory && zombies.length === 0) {
     victory = true;
     victoryDiv.style.display = "block";
+    waveCounterDiv.style.display = "none";
   }
 
   if (skillTreeOpen) renderSkillTree();
