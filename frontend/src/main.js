@@ -963,23 +963,6 @@ function update() {
       renderHotbar();
     }
   }
-
-  if (spawnTimer <= 0) {
-    const candidate = spawnZombieAtDoor(spawnDoor);
-    const cellX = Math.floor(candidate.x / SEGMENT_SIZE);
-    const cellY = Math.floor(candidate.y / SEGMENT_SIZE);
-    const occupied = zombies.some(
-      (z) =>
-        Math.floor(z.x / SEGMENT_SIZE) === cellX &&
-        Math.floor(z.y / SEGMENT_SIZE) === cellY,
-    );
-    if (!occupied) {
-      zombies.push(candidate);
-    }
-    spawnTimer = 180 + Math.random() * 120;
-  } else {
-    spawnTimer--;
-  }
   
   zombies.forEach((z) => {
     moveZombie(z, player, walls, 1, canvas.width, canvas.height, zombies);
