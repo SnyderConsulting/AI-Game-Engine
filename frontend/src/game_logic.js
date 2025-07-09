@@ -158,7 +158,7 @@ export function circleRectColliding(circle, rect, radius) {
   return dx * dx + dy * dy < radius * radius;
 }
 
-export function findPath(start, goal, walls, width, height) {
+export function findPath(start, goal, walls, width, height, blockers = []) {
   const gridW = Math.floor(width / SEGMENT_SIZE);
   const gridH = Math.floor(height / SEGMENT_SIZE);
   const sx = Math.floor(start.x / SEGMENT_SIZE);
@@ -168,6 +168,12 @@ export function findPath(start, goal, walls, width, height) {
   const blocked = new Set(
     walls.map((w) => `${w.x / SEGMENT_SIZE},${w.y / SEGMENT_SIZE}`),
   );
+  for (const b of blockers) {
+    const bx = Math.floor(b.x / SEGMENT_SIZE);
+    const by = Math.floor(b.y / SEGMENT_SIZE);
+    if (bx === sx && by === sy) continue;
+    blocked.add(`${bx},${by}`);
+  }
   const queue = [[sx, sy]];
   const key = (x, y) => `${x},${y}`;
   const cameFrom = new Map([[key(sx, sy), null]]);
@@ -230,7 +236,14 @@ export function hasLineOfSight(start, end, walls, radius = 0) {
   return !walls.some((w) => lineIntersectsRect(start, end, w, radius));
 }
 
-export function wanderZombie(zombie, walls, width, height, speed = 0.2) {
+export function wanderZombie(
+  zombie,
+  walls,
+  width,
+  height,
+  speed = 0.2,
+  zombies = [],
+) {
   if (zombie.idleTimer > 0) {
     zombie.idleTimer--;
     return;
@@ -247,49 +260,15 @@ export function wanderZombie(zombie, walls, width, height, speed = 0.2) {
     return;
   }
 
-  const path = findPath(zombie, zombie.dest, walls, width, height);
+  const path = findPath(zombie, zombie.dest, walls, width, height, zombies);
   if (path.length < 2) {
+    const prevX = zombie.x;
+    const prevY = zombie.y;
     moveTowards(zombie, zombie.dest, speed);
-    return;
-  }
-
-  const [nx, ny] = path[1];
-  const target = {
-    x: nx * SEGMENT_SIZE + SEGMENT_SIZE / 2,
-    y: ny * SEGMENT_SIZE + SEGMENT_SIZE / 2,
-  };
-  moveTowards(zombie, target, speed);
-}
-
-export function moveZombie(zombie, player, walls, speed, width, height) {
-  const dist = Math.hypot(player.x - zombie.x, player.y - zombie.y);
-  if (!zombie.triggered) {
-    if (dist <= TRIGGER_DISTANCE && hasLineOfSight(zombie, player, walls, 10)) {
-      zombie.triggered = true;
-    } else {
-      wanderZombie(zombie, walls, width, height);
-      return;
-    }
-  }
-
-  if (hasLineOfSight(zombie, player, walls, 10)) {
-    const prevX = zombie.x;
-    const prevY = zombie.y;
-    moveTowards(zombie, player, speed);
-    if (walls.some((w) => circleRectColliding(zombie, w, 10))) {
-      zombie.x = prevX;
-      zombie.y = prevY;
-    }
-    return;
-  }
-
-  const path = findPath(zombie, player, walls, width, height);
-  if (path.length < 2) {
-    // Fallback to direct movement when no path is found
-    const prevX = zombie.x;
-    const prevY = zombie.y;
-    moveTowards(zombie, player, speed);
-    if (walls.some((w) => circleRectColliding(zombie, w, 10))) {
+    if (
+      walls.some((w) => circleRectColliding(zombie, w, 10)) ||
+      zombies.some((z) => z !== zombie && isColliding(zombie, z, 10))
+    ) {
       zombie.x = prevX;
       zombie.y = prevY;
     }
@@ -304,7 +283,76 @@ export function moveZombie(zombie, player, walls, speed, width, height) {
   const prevX = zombie.x;
   const prevY = zombie.y;
   moveTowards(zombie, target, speed);
-  if (walls.some((w) => circleRectColliding(zombie, w, 10))) {
+  if (
+    walls.some((w) => circleRectColliding(zombie, w, 10)) ||
+    zombies.some((z) => z !== zombie && isColliding(zombie, z, 10))
+  ) {
+    zombie.x = prevX;
+    zombie.y = prevY;
+  }
+}
+
+export function moveZombie(
+  zombie,
+  player,
+  walls,
+  speed,
+  width,
+  height,
+  zombies = [],
+) {
+  const dist = Math.hypot(player.x - zombie.x, player.y - zombie.y);
+  if (!zombie.triggered) {
+    if (dist <= TRIGGER_DISTANCE && hasLineOfSight(zombie, player, walls, 10)) {
+      zombie.triggered = true;
+    } else {
+      wanderZombie(zombie, walls, width, height, 0.2, zombies);
+      return;
+    }
+  }
+
+  if (hasLineOfSight(zombie, player, walls, 10)) {
+    const prevX = zombie.x;
+    const prevY = zombie.y;
+    moveTowards(zombie, player, speed);
+    if (
+      walls.some((w) => circleRectColliding(zombie, w, 10)) ||
+      zombies.some((z) => z !== zombie && isColliding(zombie, z, 10))
+    ) {
+      zombie.x = prevX;
+      zombie.y = prevY;
+    }
+    return;
+  }
+
+  const path = findPath(zombie, player, walls, width, height, zombies);
+  if (path.length < 2) {
+    // Fallback to direct movement when no path is found
+    const prevX = zombie.x;
+    const prevY = zombie.y;
+    moveTowards(zombie, player, speed);
+    if (
+      walls.some((w) => circleRectColliding(zombie, w, 10)) ||
+      zombies.some((z) => z !== zombie && isColliding(zombie, z, 10))
+    ) {
+      zombie.x = prevX;
+      zombie.y = prevY;
+    }
+    return;
+  }
+
+  const [nx, ny] = path[1];
+  const target = {
+    x: nx * SEGMENT_SIZE + SEGMENT_SIZE / 2,
+    y: ny * SEGMENT_SIZE + SEGMENT_SIZE / 2,
+  };
+  const prevX = zombie.x;
+  const prevY = zombie.y;
+  moveTowards(zombie, target, speed);
+  if (
+    walls.some((w) => circleRectColliding(zombie, w, 10)) ||
+    zombies.some((z) => z !== zombie && isColliding(zombie, z, 10))
+  ) {
     zombie.x = prevX;
     zombie.y = prevY;
   }

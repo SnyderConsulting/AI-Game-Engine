@@ -86,6 +86,17 @@ test("findPath navigates around walls", () => {
   });
 });
 
+test("findPath treats zombies as blocked spaces", () => {
+  const start = { x: 10, y: 10 };
+  const end = { x: 90, y: 10 };
+  const zombieBlock = { x: 50, y: 10 };
+  const path = findPath(start, end, [], 120, 80, [zombieBlock]);
+  assert(path.length > 0);
+  const blockedCell = `${Math.floor(zombieBlock.x / SEGMENT_SIZE)},${Math.floor(zombieBlock.y / SEGMENT_SIZE)}`;
+  const cells = path.map((c) => `${c[0]},${c[1]}`);
+  assert.strictEqual(cells.includes(blockedCell), false);
+});
+
 test("hasLineOfSight detects blockage", () => {
   const wall = { x: 40, y: 0, size: SEGMENT_SIZE };
   const start = { x: 10, y: 10 };
@@ -166,6 +177,17 @@ test("moveZombie follows grid path when blocked", () => {
   // First path step keeps x ~20 but increases y toward open space
   assert(Math.abs(zombie.x - 20) < 1e-6);
   assert(zombie.y > 20);
+});
+
+test("moveZombie avoids occupied tiles", () => {
+  const zombieA = createZombie(10, 10);
+  zombieA.triggered = true;
+  const zombieB = createZombie(50, 10);
+  const player = { x: 90, y: 10 };
+  for (let i = 0; i < 50; i++) {
+    moveZombie(zombieA, player, [], 1, 120, 80, [zombieA, zombieB]);
+  }
+  assert.strictEqual(isColliding(zombieA, zombieB, 10), false);
 });
 
 test("attackZombies damages and removes zombies", () => {

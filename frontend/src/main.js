@@ -21,6 +21,7 @@ import {
   damageWall,
   updateWalls,
   wallSwingHit,
+  openShelf,
 } from "./walls.js";
 import {
   createPlayer,
@@ -55,7 +56,12 @@ import { SKILL_INFO, SKILL_UPGRADERS } from "./skill_tree.js";
 import { createOrbs, updateOrbs } from "./orbs.js";
 import { makeDraggable } from "./ui.js";
 
-import { applyConsumableEffect, CONSUMABLE_ITEMS } from "./items.js";
+import {
+  applyConsumableEffect,
+  CONSUMABLE_ITEMS,
+  ITEM_ICONS,
+  ITEM_IDS,
+} from "./items.js";
 import { getItemCooldown } from "./cooldowns.js";
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
@@ -92,37 +98,7 @@ const skillLevelDiv = document.getElementById("skillLevel");
 const skillCostDiv = document.getElementById("skillCost");
 const skillUpgradeBtn = document.getElementById("skillUpgrade");
 
-// Mapping from item ids to icon paths. If an item is missing, a
-// question mark will be shown instead of an image.
-const ITEM_ICONS = {
-  core: "assets/zombie_core.png",
-  flesh: "assets/zombie_flesh.png",
-  teeth: "assets/zombie_teeth.png",
-  zombie_essence: "assets/zombie_essence.png",
-  elemental_potion: "assets/elemental_potion.png",
-  transformation_syringe: "assets/transformation_syringe.png",
-  fire_core: "assets/fire_core.png",
-  mutation_serum_fire: "assets/mutation_serum_fire.png",
-  fireball_spell: "assets/skill_fireball.png",
-  fire_orb_skill: "assets/skill_fire_orb.png",
-  phoenix_revival_skill: "assets/skill_phoenix_revival.png",
-  baseball_bat: "assets/baseball_bat.png",
-  medkit: "assets/medkit.png",
-  wood: "assets/wood.png",
-  bow: "assets/wooden_bow.png",
-  arrow: "assets/wooden_arrow.png",
-  scrap_metal: "assets/scrap_metal.png",
-  duct_tape: "assets/duct_tape.png",
-  nails: "assets/nails.png",
-  plastic_fragments: "assets/plastic_fragments.png",
-  wood_planks: "assets/wood_planks.png",
-  steel_plates: "assets/steel_plates.png",
-  hammer: "assets/hammer.png",
-  crowbar: "assets/crowbar.png",
-  axe: "assets/axe.png",
-  reinforced_axe: "assets/reinforced_axe.png",
-  wood_barricade: "assets/wood_barricade.png",
-};
+// ITEM_ICONS is imported from items.js and maps item ids to icon paths.
 
 // Preload image objects for item icons so they can be drawn on the canvas
 const ITEM_IMAGES = {};
@@ -822,8 +798,18 @@ function update() {
         Math.hypot(c.x - player.x, c.y - player.y) <= LOOT_DIST &&
         (!c.opened || c.item),
     );
-    if (cont) {
-      looting = cont;
+    const shelf = walls.find((w) => {
+      const cx = Math.max(w.x, Math.min(player.x, w.x + SEGMENT_SIZE));
+      const cy = Math.max(w.y, Math.min(player.y, w.y + SEGMENT_SIZE));
+      const wx = cx - player.x;
+      const wy = cy - player.y;
+      const dist = Math.hypot(wx, wy);
+      const facingDot = wx * player.facing.x + wy * player.facing.y;
+      return dist <= LOOT_DIST && facingDot > 0 && (!w.opened || w.item);
+    });
+    const target = cont || shelf;
+    if (target) {
+      looting = target;
       lootTimer = LOOT_TIME;
       lootFill.style.width = "0%";
       lootDiv.style.display = "block";
@@ -831,8 +817,27 @@ function update() {
   }
 
   if (looting) {
-    const dist = Math.hypot(looting.x - player.x, looting.y - player.y);
-    if (dist > LOOT_DIST || !keys["f"]) {
+    let dist, facingDot;
+    if ("size" in looting) {
+      const cx = Math.max(
+        looting.x,
+        Math.min(player.x, looting.x + SEGMENT_SIZE),
+      );
+      const cy = Math.max(
+        looting.y,
+        Math.min(player.y, looting.y + SEGMENT_SIZE),
+      );
+      const wx = cx - player.x;
+      const wy = cy - player.y;
+      dist = Math.hypot(wx, wy);
+      facingDot = wx * player.facing.x + wy * player.facing.y;
+    } else {
+      const wx = looting.x - player.x;
+      const wy = looting.y - player.y;
+      dist = Math.hypot(wx, wy);
+      facingDot = wx * player.facing.x + wy * player.facing.y;
+    }
+    if (dist > LOOT_DIST || facingDot <= 0 || !keys["f"]) {
       looting = null;
       lootDiv.style.display = "none";
     } else {
@@ -840,16 +845,25 @@ function update() {
       lootFill.style.width = `${((LOOT_TIME - lootTimer) / LOOT_TIME) * 100}%`;
       if (lootTimer <= 0) {
         if (!looting.opened) {
-          openContainer(looting);
+          if ("size" in looting) {
+            openShelf(looting, ITEM_IDS);
+          } else {
+            openContainer(looting);
+          }
         }
-        if (addItem(inventory, looting.item, 1)) {
-          pickupMsg.textContent = `Picked up ${looting.item}`;
-          looting.item = null;
-          pickupMessageTimer = 60;
-          renderInventory();
-          renderHotbar();
+        if (looting.item) {
+          if (addItem(inventory, looting.item, 1)) {
+            pickupMsg.textContent = `Picked up ${looting.item}`;
+            looting.item = null;
+            pickupMessageTimer = 60;
+            renderInventory();
+            renderHotbar();
+          } else {
+            pickupMsg.textContent = "Inventory Full";
+            pickupMessageTimer = 60;
+          }
         } else {
-          pickupMsg.textContent = "Inventory Full";
+          pickupMsg.textContent = "Nothing found";
           pickupMessageTimer = 60;
         }
         looting = null;
@@ -973,9 +987,9 @@ function update() {
       renderHotbar();
     }
   }
-
+  
   zombies.forEach((z) => {
-    moveZombie(z, player, walls, 1, canvas.width, canvas.height);
+    moveZombie(z, player, walls, 1, canvas.width, canvas.height, zombies);
     if (z.attackCooldown > 0) z.attackCooldown--;
     if (
       isColliding(z, player, 10) &&
@@ -1040,7 +1054,9 @@ function render() {
   walls.forEach((w) => {
     const img = WALL_IMAGES[w.material];
     if (img && img.complete) {
+      ctx.globalAlpha = w.opened ? 0.5 : 1;
       ctx.drawImage(img, w.x, w.y, SEGMENT_SIZE, SEGMENT_SIZE);
+      ctx.globalAlpha = 1;
     } else {
       ctx.fillStyle = "gray";
       ctx.fillRect(w.x, w.y, SEGMENT_SIZE, SEGMENT_SIZE);
