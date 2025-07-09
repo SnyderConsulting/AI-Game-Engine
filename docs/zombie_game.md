@@ -14,6 +14,8 @@ npm run dev
 
 The game runs entirely in the browser. Open `http://localhost:3000` and you will be greeted with a simple main menu. Click **Start Game** to jump into the action. Use the arrow keys or WASD to move the player character, now drawn using a full sprite rather than a green dot. Zombies also use sprites that rotate to match their movement direction. The player still spawns randomly, but zombies now emerge from a single door placed along the outer edge of the arena. Five basic zombies enter through this door at the beginning of **Wave&nbsp;1**, shown in a counter at the top right which now uses black text for visibility. Once all five are defeated a Victory screen appears with a button to play again.
 Zombies now treat each other as obstacles, so only one can occupy a grid space at a time and new zombies won't spawn on top of existing ones.
+The spawn door is guaranteed to have an open space just inside the arena so
+fresh zombies are never trapped when they appear.
 
 Shelving now forms organized aisles built from steel, wood, and plastic segments. These shelves are breakable, with steel being the hardest to destroy and plastic the weakest. Damaged shelves flash and briefly show a health bar before collapsing. The layout generator spaces aisles widely so there is plenty of room to maneuver while still providing clear paths and chokepoints.
 Use crafted tools like the **Hammer**, **Crowbar**, or **Axe** to chip away at shelves. Melee swings now deal more damage so only a handful are needed to break a shelf. Once its health reaches zero the shelf disappears, dropping building materials.
