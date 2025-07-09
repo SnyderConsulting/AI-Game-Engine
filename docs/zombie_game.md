@@ -13,6 +13,7 @@ npm run dev
 ```
 
 The game runs entirely in the browser. Open `http://localhost:3000` and you will be greeted with a simple main menu. Click **Start Game** to jump into the action. Use the arrow keys or WASD to move the player character, now drawn using a full sprite rather than a green dot. Zombies also use sprites that rotate to match their movement direction. The player still spawns randomly, but zombies now emerge from a single door placed along the outer edge of the arena. Five basic zombies enter through this door at the beginning of **Wave&nbsp;1**, shown in a counter at the top right. Once all five are defeated a Victory screen appears with a button to play again.
+Zombies now treat each other as obstacles, so only one can occupy a grid space at a time and new zombies won't spawn on top of existing ones.
 
 Shelving now forms organized aisles built from steel, wood, and plastic segments. These shelves are breakable, with steel being the hardest to destroy and plastic the weakest. Damaged shelves flash and briefly show a health bar before collapsing. The layout generator spaces aisles widely so there is plenty of room to maneuver while still providing clear paths and chokepoints.
 Use crafted tools like the **Hammer**, **Crowbar**, or **Axe** to chip away at shelves. Melee swings now deal more damage so only a handful are needed to break a shelf. Once its health reaches zero the shelf disappears, dropping building materials.
@@ -53,6 +54,8 @@ Press **C** to open the crafting menu at any time. Only recipes for which you ow
 ## Containers
 
 Cardboard boxes are scattered around the arena. They are now rendered using a box icon instead of a brown square. Stand next to one and hold **F** to loot it. A progress bar appears in the center of the screen for three seconds while you search. When the bar completes the box opens. Each box now contains **Scrap Metal**, **Duct Tape**, **Nails**, or a **Medkit** with equal probability. If there is room in your hotbar or inventory the item is added automatically. Otherwise a brief "Inventory Full" message appears. Opened boxes appear faded so you know they have been searched.
+
+Shelves can now be searched the same way. Hold **F** while standing near a shelf segment to rummage through it. Searching takes time and each shelf can only be looted once. Looted shelves fade just like opened boxes. Shelves usually contain nothing, but occasionally you might find any random item tucked away.
 
 Equip a Medkit and press the **Space** key or left mouse button to restore up to 3 health without exceeding your maximum.
 
