@@ -26,6 +26,8 @@ export function createWall(gx, gy, material = "wood") {
     hp,
     maxHp: hp,
     damageTimer: 0,
+    opened: false,
+    item: null,
   };
 }
 
@@ -148,4 +150,17 @@ export function updateWalls(walls) {
     if (w.damageTimer > 0) w.damageTimer--;
     if (w.hp <= 0) walls.splice(i, 1);
   }
+}
+
+export const SHELF_LOOT_CHANCE = 0.2;
+
+export function openShelf(wall, itemPool = []) {
+  if (!wall.opened) {
+    wall.opened = true;
+    if (Math.random() < SHELF_LOOT_CHANCE && itemPool.length > 0) {
+      const idx = Math.floor(Math.random() * itemPool.length);
+      wall.item = itemPool[idx];
+    }
+  }
+  return wall.item;
 }
