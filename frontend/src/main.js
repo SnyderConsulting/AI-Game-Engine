@@ -792,14 +792,15 @@ function update() {
         Math.hypot(c.x - player.x, c.y - player.y) <= LOOT_DIST &&
         (!c.opened || c.item),
     );
-    const shelf = walls.find(
-      (w) =>
-        Math.hypot(
-          w.x + SEGMENT_SIZE / 2 - player.x,
-          w.y + SEGMENT_SIZE / 2 - player.y,
-        ) <= LOOT_DIST &&
-        (!w.opened || w.item),
-    );
+    const shelf = walls.find((w) => {
+      const cx = Math.max(w.x, Math.min(player.x, w.x + SEGMENT_SIZE));
+      const cy = Math.max(w.y, Math.min(player.y, w.y + SEGMENT_SIZE));
+      const wx = cx - player.x;
+      const wy = cy - player.y;
+      const dist = Math.hypot(wx, wy);
+      const facingDot = wx * player.facing.x + wy * player.facing.y;
+      return dist <= LOOT_DIST && facingDot > 0 && (!w.opened || w.item);
+    });
     const target = cont || shelf;
     if (target) {
       looting = target;
@@ -810,10 +811,27 @@ function update() {
   }
 
   if (looting) {
-    const lx = "size" in looting ? looting.x + SEGMENT_SIZE / 2 : looting.x;
-    const ly = "size" in looting ? looting.y + SEGMENT_SIZE / 2 : looting.y;
-    const dist = Math.hypot(lx - player.x, ly - player.y);
-    if (dist > LOOT_DIST || !keys["f"]) {
+    let dist, facingDot;
+    if ("size" in looting) {
+      const cx = Math.max(
+        looting.x,
+        Math.min(player.x, looting.x + SEGMENT_SIZE),
+      );
+      const cy = Math.max(
+        looting.y,
+        Math.min(player.y, looting.y + SEGMENT_SIZE),
+      );
+      const wx = cx - player.x;
+      const wy = cy - player.y;
+      dist = Math.hypot(wx, wy);
+      facingDot = wx * player.facing.x + wy * player.facing.y;
+    } else {
+      const wx = looting.x - player.x;
+      const wy = looting.y - player.y;
+      dist = Math.hypot(wx, wy);
+      facingDot = wx * player.facing.x + wy * player.facing.y;
+    }
+    if (dist > LOOT_DIST || facingDot <= 0 || !keys["f"]) {
       looting = null;
       lootDiv.style.display = "none";
     } else {
