@@ -61,6 +61,7 @@ import {
   CONSUMABLE_ITEMS,
   ITEM_ICONS,
   ITEM_IDS,
+  CRAFTING_MATERIALS,
 } from "./items.js";
 import { getItemCooldown } from "./cooldowns.js";
 const canvas = document.getElementById("gameCanvas");
@@ -846,7 +847,8 @@ function update() {
       if (lootTimer <= 0) {
         if (!looting.opened) {
           if ("size" in looting) {
-            openShelf(looting, ITEM_IDS);
+            // Shelves only contain basic crafting materials
+            openShelf(looting, CRAFTING_MATERIALS);
           } else {
             openContainer(looting);
           }
@@ -987,7 +989,7 @@ function update() {
       renderHotbar();
     }
   }
-  
+
   zombies.forEach((z) => {
     moveZombie(z, player, walls, 1, canvas.width, canvas.height, zombies);
     if (z.attackCooldown > 0) z.attackCooldown--;

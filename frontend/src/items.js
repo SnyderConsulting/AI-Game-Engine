@@ -32,6 +32,16 @@ export const ITEM_ICONS = {
 
 export const ITEM_IDS = Object.keys(ITEM_ICONS);
 
+// Items considered basic crafting materials for shelves and recipes
+export const CRAFTING_MATERIALS = [
+  "scrap_metal",
+  "duct_tape",
+  "nails",
+  "plastic_fragments",
+  "wood_planks",
+  "steel_plates",
+];
+
 import { PLAYER_MAX_HEALTH } from "./game_logic.js";
 
 export function applyConsumableEffect(player, itemId) {
