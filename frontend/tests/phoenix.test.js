@@ -4,7 +4,7 @@ import {
   createPlayer,
   tryPhoenixRevival,
   PHOENIX_KNOCKBACK_FORCE,
-} from "../src/player.js";
+} from "../src/entities/player.js";
 import { PLAYER_MAX_HEALTH, createZombie } from "../src/game_logic.js";
 
 test("tryPhoenixRevival revives player", () => {

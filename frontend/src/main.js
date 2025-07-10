@@ -27,7 +27,7 @@ import {
   createPlayer,
   resetPlayerForNewGame,
   tryPhoenixRevival,
-} from "./player.js";
+} from "./entities/player.js";
 import {
   createInventory,
   addItem,
@@ -51,9 +51,13 @@ import {
   fireballStats,
   updateExplosions,
 } from "./spells.js";
-import { createArrow, updateArrows, predictArrowEndpoint } from "./arrow.js";
+import {
+  createArrow,
+  updateArrows,
+  predictArrowEndpoint,
+} from "./entities/arrow.js";
 import { SKILL_INFO, SKILL_UPGRADERS } from "./skill_tree.js";
-import { createOrbs, updateOrbs } from "./orbs.js";
+import { createOrbs, updateOrbs } from "./entities/orbs.js";
 import { makeDraggable } from "./ui.js";
 
 import {
