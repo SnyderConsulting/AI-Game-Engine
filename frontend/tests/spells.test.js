@@ -9,7 +9,7 @@ import {
 } from "../src/spells.js";
 
 // mocks for game_logic helpers
-import { circleRectColliding } from "../src/game_logic.js";
+import { circleRectColliding } from "../src/systems/collision-system.js";
 import { isColliding } from "../src/utils/geometry.js";
 
 test("createFireball normalizes direction", () => {

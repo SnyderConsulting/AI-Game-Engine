@@ -1,4 +1,5 @@
 import { moveTowards, isColliding } from "./utils/geometry.js";
+import { circleRectColliding } from "./systems/collision-system.js";
 
 export function spawnPlayer(width, height, walls = []) {
   let player;
@@ -75,11 +76,3 @@ export function createSpawnDoor(width, height, walls = []) {
 export const PLAYER_MAX_HEALTH = 10;
 
 export const SEGMENT_SIZE = 40;
-
-export function circleRectColliding(circle, rect, radius) {
-  const closestX = Math.max(rect.x, Math.min(circle.x, rect.x + rect.size));
-  const closestY = Math.max(rect.y, Math.min(circle.y, rect.y + rect.size));
-  const dx = circle.x - closestX;
-  const dy = circle.y - closestY;
-  return dx * dx + dy * dy < radius * radius;
-}

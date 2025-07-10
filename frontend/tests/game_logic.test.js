@@ -1,13 +1,13 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
-  circleRectColliding,
   SEGMENT_SIZE,
   spawnPlayer,
   createSpawnDoor,
   createContainer,
   spawnContainers,
 } from "../src/game_logic.js";
+import { circleRectColliding } from "../src/systems/collision-system.js";
 import { moveTowards, isColliding } from "../src/utils/geometry.js";
 import {
   createZombie,

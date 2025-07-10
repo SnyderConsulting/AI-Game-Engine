@@ -19,7 +19,7 @@ export function fireballStats(level) {
   return { damage, radius, pierce };
 }
 
-import { circleRectColliding } from "./game_logic.js";
+import { circleRectColliding } from "./systems/collision-system.js";
 import { isColliding } from "./utils/geometry.js";
 import { damageWall } from "./walls.js";
 export function createFireball(x, y, direction, level = 1, damageMult = 1) {
