@@ -436,6 +436,230 @@ export class GameScene {
   update() {
     if (this.gameOver || this.victory) return;
     updateWalls(this.walls);
+    if (this.player.phoenixCooldown > 0) this.player.phoenixCooldown--;
+    if (this.player.damageBuffTimer > 0) {
+      this.player.damageBuffTimer--;
+      if (this.player.damageBuffTimer <= 0) this.player.damageBuffMult = 1;
+    }
+
+    if (this.player.health <= 0) {
+      if (!tryPhoenixRevival(this.player, PLAYER_MAX_HEALTH, this.zombies)) {
+        this.gameOver = true;
+        this.gameOverDiv.style.display = "block";
+        return;
+      }
+    }
+
+    const activeSlot = getActiveHotbarItem(this.inventory);
+    if (activeSlot) {
+      const item = activeSlot.item;
+      if (item === "bow") {
+        this.player.weapon = { type: "bow" };
+      } else if (
+        ["baseball_bat", "hammer", "crowbar", "axe", "reinforced_axe"].includes(
+          item,
+        )
+      ) {
+        const dmgMap = {
+          hammer: 2,
+          crowbar: 3,
+          axe: 4,
+          reinforced_axe: 6,
+          baseball_bat: 2,
+        };
+        this.player.weapon = { type: item, damage: dmgMap[item] || 1 };
+      } else {
+        this.player.weapon = null;
+      }
+    } else {
+      this.player.weapon = null;
+    }
+
+    const useHeld = this.keys[" "] || this.keys.mouse;
+    const useTrigger = useHeld && !this.prevUse;
+    this.prevUse = useHeld;
+    const aimHeld = this.keys[" "] || this.keys.mouse2;
+    const aimRelease = !aimHeld && this.prevAim;
+    this.prevAim = aimHeld;
+
+    const prevX = this.player.x;
+    const prevY = this.player.y;
+
+    let moveX = 0;
+    let moveY = 0;
+    if (this.keys["arrowup"] || this.keys["w"]) moveY -= this.player.speed;
+    if (this.keys["arrowdown"] || this.keys["s"]) moveY += this.player.speed;
+    if (this.keys["arrowleft"] || this.keys["a"]) moveX -= this.player.speed;
+    if (this.keys["arrowright"] || this.keys["d"]) moveX += this.player.speed;
+
+    this.player.x += moveX;
+    this.player.y += moveY;
+    const toMouseX = this.mousePos.x - this.player.x;
+    const toMouseY = this.mousePos.y - this.player.y;
+    const len = Math.hypot(toMouseX, toMouseY);
+    if (len > 0) {
+      this.player.facing.x = toMouseX / len;
+      this.player.facing.y = toMouseY / len;
+    }
+
+    if (this.player.damageCooldown > 0) this.player.damageCooldown--;
+
+    this.player.x = Math.max(
+      10,
+      Math.min(this.canvas.width - 10, this.player.x),
+    );
+    this.player.y = Math.max(
+      10,
+      Math.min(this.canvas.height - 10, this.player.y),
+    );
+
+    if (this.walls.some((w) => circleRectColliding(this.player, w, 10))) {
+      this.player.x = prevX;
+      this.player.y = prevY;
+    }
+
+    if (this.weapon && isColliding(this.player, this.weapon, 10)) {
+      addItem(this.inventory, this.weapon.type, 1);
+      const idx = this.inventory.slots.findIndex(
+        (s) => s.item === this.weapon.type,
+      );
+      if (idx !== -1) moveToHotbar(this.inventory, idx, 0);
+      this.weapon = null;
+      this.renderInventory();
+      this.renderHotbar();
+    }
+
+    if (!this.looting && this.keys["f"]) {
+      const cont = this.containers.find(
+        (c) =>
+          Math.hypot(c.x - this.player.x, c.y - this.player.y) <=
+            this.LOOT_DIST &&
+          (!c.opened || c.item),
+      );
+      const shelf = this.walls.find((w) => {
+        const cx = Math.max(w.x, Math.min(this.player.x, w.x + SEGMENT_SIZE));
+        const cy = Math.max(w.y, Math.min(this.player.y, w.y + SEGMENT_SIZE));
+        const wx = cx - this.player.x;
+        const wy = cy - this.player.y;
+        const dist = Math.hypot(wx, wy);
+        const facingDot = wx * this.player.facing.x + wy * this.player.facing.y;
+        return dist <= this.LOOT_DIST && facingDot > 0 && (!w.opened || w.item);
+      });
+      const target = cont || shelf;
+      if (target) {
+        this.looting = target;
+        this.lootTimer = this.LOOT_TIME;
+        this.lootFill.style.width = "0%";
+        this.lootDiv.style.display = "block";
+      }
+    }
+
+    if (this.looting) {
+      let dist, facingDot;
+      if ("size" in this.looting) {
+        const cx = Math.max(
+          this.looting.x,
+          Math.min(this.player.x, this.looting.x + SEGMENT_SIZE),
+        );
+        const cy = Math.max(
+          this.looting.y,
+          Math.min(this.player.y, this.looting.y + SEGMENT_SIZE),
+        );
+        const wx = cx - this.player.x;
+        const wy = cy - this.player.y;
+        dist = Math.hypot(wx, wy);
+        facingDot = wx * this.player.facing.x + wy * this.player.facing.y;
+      } else {
+        const wx = this.looting.x - this.player.x;
+        const wy = this.looting.y - this.player.y;
+        dist = Math.hypot(wx, wy);
+        facingDot = wx * this.player.facing.x + wy * this.player.facing.y;
+      }
+      if (dist > this.LOOT_DIST || facingDot <= 0 || !this.keys["f"]) {
+        this.looting = null;
+        this.lootDiv.style.display = "none";
+      } else {
+        this.lootTimer--;
+        this.lootFill.style.width = `${((this.LOOT_TIME - this.lootTimer) / this.LOOT_TIME) * 100}%`;
+        if (this.lootTimer <= 0) {
+          if (!this.looting.opened) {
+            if ("size" in this.looting) {
+              openShelf(this.looting, CRAFTING_MATERIALS);
+            } else {
+              openContainer(this.looting);
+            }
+          }
+          if (this.looting.item) {
+            if (addItem(this.inventory, this.looting.item, 1)) {
+              this.hud.showPickupMessage(`Picked up ${this.looting.item}`);
+              this.looting.item = null;
+              this.renderInventory();
+              this.renderHotbar();
+            } else {
+              this.hud.showPickupMessage("Inventory Full");
+            }
+          } else {
+            this.hud.showPickupMessage("Nothing found");
+          }
+          this.looting = null;
+          this.lootDiv.style.display = "none";
+        }
+      }
+    }
+
+    if (this.player.swingTimer > 0) this.player.swingTimer--;
+
+    if (this.player.weapon && useHeld && this.player.swingTimer <= 0) {
+      const killed = attackZombiesWithKills(
+        this.player,
+        this.zombies,
+        this.player.weapon.damage * this.player.damageBuffMult,
+        30,
+        this.player.facing,
+        Math.PI / 2,
+        5,
+      );
+      const dir = { x: this.player.facing.x, y: this.player.facing.y };
+      this.walls.forEach((w) => {
+        if (wallSwingHit(this.player, w, 30, dir, Math.PI / 2)) {
+          const allowed =
+            {
+              hammer: ["plastic"],
+              crowbar: ["plastic", "wood"],
+              axe: ["plastic", "wood", "steel"],
+              reinforced_axe: ["plastic", "wood", "steel"],
+              baseball_bat: ["plastic", "wood", "steel"],
+            }[this.player.weapon.type] || [];
+          if (allowed.includes(w.material)) {
+            const destroyed = damageWall(
+              w,
+              this.player.weapon.damage * this.player.damageBuffMult,
+            );
+            if (destroyed) {
+              this.worldItems.push({
+                x: w.x + SEGMENT_SIZE / 2,
+                y: w.y + SEGMENT_SIZE / 2,
+                type: this.MATERIAL_DROPS[w.material],
+                count: 1,
+              });
+            }
+          }
+        }
+      });
+      killed.forEach((z) => dropLoot(z, this.worldItems));
+      this.player.swingTimer = 10;
+    }
+
+    if (useTrigger && activeSlot && CONSUMABLE_ITEMS.has(activeSlot.item)) {
+      const used = consumeHotbarItem(this.inventory, this.inventory.active);
+      if (used) {
+        applyConsumableEffect(this.player, used);
+        this.hud.showPickupMessage(`Used ${used}`);
+        this.renderInventory();
+        this.renderHotbar();
+      }
+    }
+
     updateZombies(
       this.zombies,
       this.player,
@@ -443,9 +667,59 @@ export class GameScene {
       this.canvas.width,
       this.canvas.height,
     );
-    this.hud.update();
-  }
+    if (this.player.health <= 0) {
+      if (!tryPhoenixRevival(this.player, PLAYER_MAX_HEALTH, this.zombies)) {
+        this.gameOver = true;
+        this.gameOverDiv.style.display = "block";
+        this.hud.hideWaveCounter();
+      }
+    }
 
+    const abilityState = updateAbilities({
+      player: this.player,
+      inventory: this.inventory,
+      fireballs: this.fireballs,
+      fireOrbs: this.fireOrbs,
+      arrows: this.arrows,
+      zombies: this.zombies,
+      mousePos: this.mousePos,
+      worldItems: this.worldItems,
+      hud: this.hud,
+      renderInventory: () => this.renderInventory(),
+      renderHotbar: () => this.renderHotbar(),
+      useHeld,
+      aimHeld,
+      aimRelease,
+      fireballCooldown: { value: this.fireballCooldown },
+    });
+    this.bowAiming = abilityState.bowAiming;
+
+    checkAllCollisions({
+      player: this.player,
+      zombies: this.zombies,
+      arrows: this.arrows,
+      fireballs: this.fireballs,
+      walls: this.walls,
+      explosions: this.explosions,
+      worldItems: this.worldItems,
+      inventory: this.inventory,
+      hud: this.hud,
+      renderInventory: () => this.renderInventory(),
+      renderHotbar: () => this.renderHotbar(),
+      dropLoot,
+      materialDrops: this.MATERIAL_DROPS,
+    });
+    this.fireballCooldown = abilityState.fireballCooldown;
+    this.hud.update();
+
+    if (!this.victory && this.zombies.length === 0) {
+      this.victory = true;
+      this.victoryDiv.style.display = "block";
+      this.hud.hideWaveCounter();
+    }
+    if (this.skillTreeOpen) this.renderSkillTree();
+    this.renderHotbar();
+  }
   render() {
     renderScene(this.ctx, {
       walls: this.walls,
