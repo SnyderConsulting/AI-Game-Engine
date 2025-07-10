@@ -62,6 +62,9 @@ import {
 import { SKILL_INFO, SKILL_UPGRADERS } from "./skill_tree.js";
 import { createOrbs, updateOrbs } from "./entities/orbs.js";
 import { makeDraggable } from "./ui.js";
+import { createInventoryUI } from "./components/inventory-ui.js";
+import { createSkillTreeUI } from "./components/skill-tree-ui.js";
+import { createHUD } from "./components/hud.js";
 
 import {
   applyConsumableEffect,
@@ -125,6 +128,8 @@ const MATERIAL_DROPS = {
 const cardboardBoxImg = new Image();
 cardboardBoxImg.src = "assets/cardboard_box.png";
 
+const hud = createHUD({ pickupMsg, waveCounterDiv });
+
 const playerSprite = new Image();
 playerSprite.src = "assets/sprite_player.png";
 const zombieSprite = new Image();
@@ -166,202 +171,62 @@ let explosions = [];
 let fireballCooldown = 0;
 let bowAiming = false;
 let mousePos = { x: 0, y: 0 };
-let pickupMessageTimer = 0;
 let inventoryPos = { left: null, top: null };
 let craftingPos = { left: null, top: null };
 let skillTreePos = { left: null, top: null };
-let selectedSkill = null;
 
 let prevUse = false;
 let prevAim = false;
 const LOOT_TIME = 180; // 3 seconds at 60fps
 const LOOT_DIST = 20;
 
-// When managing inventory/hotbar the user can select a slot.
-// The structure is { type: "inventory" | "hotbar", index: number }.
-let selectedSlot = null;
+const inventoryUI = createInventoryUI({
+  inventoryDiv,
+  inventoryGrid,
+  hotbarDiv,
+  inventoryBar,
+  inventoryClose,
+  inventoryPos,
+});
+
+const skillTreeUI = createSkillTreeUI(
+  {
+    skillTreeDiv,
+    skillTreeBar,
+    skillTreeClose,
+    skillPointsDiv,
+    skillGrid,
+    skillDetails,
+    skillNameDiv,
+    skillDescDiv,
+    skillLevelsDiv,
+    skillLevelDiv,
+    skillCostDiv,
+    skillUpgradeBtn,
+    skillTreePos,
+  },
+  ITEM_ICONS,
+);
 
 function renderInventory() {
-  inventoryGrid.innerHTML = "";
-  inventory.slots.forEach((slot, i) => {
-    const div = document.createElement("div");
-    div.dataset.index = i;
-    Object.assign(div.style, {
-      width: "40px",
-      height: "40px",
-      border: "1px solid white",
-      color: "white",
-      background: "rgba(0,0,0,0.7)",
-      display: "flex",
-      justifyContent: "center",
-      alignItems: "center",
-      position: "relative",
-    });
-    if (
-      selectedSlot &&
-      selectedSlot.type === "inventory" &&
-      selectedSlot.index === i
-    )
-      div.style.outline = "2px solid yellow";
-    if (slot.item) {
-      if (ITEM_ICONS[slot.item]) {
-        const img = document.createElement("img");
-        img.src = ITEM_ICONS[slot.item];
-        img.style.width = "32px";
-        img.style.height = "32px";
-        div.appendChild(img);
-      } else {
-        div.textContent = "?";
-      }
-      if (slot.count > 1) {
-        const count = document.createElement("span");
-        count.textContent = slot.count;
-        Object.assign(count.style, {
-          position: "absolute",
-          bottom: "0",
-          right: "2px",
-          fontSize: "10px",
-        });
-        div.appendChild(count);
-      }
-
-      const { remaining, max } = getItemCooldown(
-        slot.item,
-        player,
-        fireballCooldown,
-      );
-      if (max > 0 && remaining > 0) {
-        const deg = (remaining / max) * 360;
-        const overlay = document.createElement("div");
-        Object.assign(overlay.style, {
-          position: "absolute",
-          inset: "0",
-          borderRadius: "2px",
-          pointerEvents: "none",
-          background: `conic-gradient(from -90deg, rgba(128,128,128,0.6) 0deg ${deg}deg, transparent ${deg}deg 360deg)`,
-        });
-        div.appendChild(overlay);
-      }
-    }
-    div.addEventListener("mousedown", () => {
-      if (!selectedSlot) {
-        selectedSlot = { type: "inventory", index: i };
-      } else {
-        if (selectedSlot.type === "inventory") {
-          moveItem(inventory, selectedSlot.index, i);
-        } else {
-          swapInventoryHotbar(inventory, i, selectedSlot.index);
-        }
-        selectedSlot = null;
-      }
-      renderInventory();
-      renderHotbar();
-    });
-    div.addEventListener("contextmenu", (e) => {
-      e.preventDefault();
-      const slot = inventory.slots[i];
-      if (!slot.item) return;
-      const idx = inventory.hotbar.findIndex((s) => !s.item);
-      if (idx !== -1) {
-        moveToHotbar(inventory, i, idx);
-        selectedSlot = null;
-        renderInventory();
-        renderHotbar();
-      }
-    });
-    inventoryGrid.appendChild(div);
-  });
+  inventoryUI.renderInventory(
+    inventory,
+    player,
+    fireballCooldown,
+    ITEM_ICONS,
+    getItemCooldown,
+  );
   if (craftingOpen) renderCrafting();
 }
 
 function renderHotbar() {
-  hotbarDiv.innerHTML = "";
-  inventory.hotbar.forEach((slot, i) => {
-    const div = document.createElement("div");
-    Object.assign(div.style, {
-      width: "40px",
-      height: "40px",
-      border: "1px solid white",
-      color: "white",
-      display: "flex",
-      justifyContent: "center",
-      alignItems: "center",
-      position: "relative",
-    });
-    if (
-      selectedSlot &&
-      selectedSlot.type === "hotbar" &&
-      selectedSlot.index === i
-    )
-      div.style.outline = "2px solid yellow";
-    if (slot.item) {
-      if (ITEM_ICONS[slot.item]) {
-        const img = document.createElement("img");
-        img.src = ITEM_ICONS[slot.item];
-        img.style.width = "32px";
-        img.style.height = "32px";
-        div.appendChild(img);
-      } else {
-        div.textContent = "?";
-      }
-      if (slot.count > 1) {
-        const count = document.createElement("span");
-        count.textContent = slot.count;
-        Object.assign(count.style, {
-          position: "absolute",
-          bottom: "0",
-          right: "2px",
-          fontSize: "10px",
-        });
-        div.appendChild(count);
-      }
-      const { remaining, max } = getItemCooldown(
-        slot.item,
-        player,
-        fireballCooldown,
-      );
-      if (max > 0 && remaining > 0) {
-        const deg = (remaining / max) * 360;
-        const overlay = document.createElement("div");
-        Object.assign(overlay.style, {
-          position: "absolute",
-          inset: "0",
-          borderRadius: "2px",
-          pointerEvents: "none",
-          background: `conic-gradient(from -90deg, rgba(128,128,128,0.6) 0deg ${deg}deg, transparent ${deg}deg 360deg)`,
-        });
-        div.appendChild(overlay);
-      }
-    }
-    if (i === inventory.active) {
-      div.style.borderColor = "yellow";
-    }
-    div.addEventListener("mousedown", () => {
-      if (!selectedSlot) {
-        selectedSlot = { type: "hotbar", index: i };
-      } else {
-        if (selectedSlot.type === "hotbar") {
-          swapHotbar(inventory, selectedSlot.index, i);
-        } else {
-          swapInventoryHotbar(inventory, selectedSlot.index, i);
-        }
-        selectedSlot = null;
-      }
-      renderInventory();
-      renderHotbar();
-    });
-    div.addEventListener("contextmenu", (e) => {
-      e.preventDefault();
-      const idx = inventory.slots.findIndex((s) => !s.item);
-      if (idx !== -1) {
-        moveFromHotbar(inventory, i, idx);
-        selectedSlot = null;
-        renderInventory();
-        renderHotbar();
-      }
-    });
-    hotbarDiv.appendChild(div);
-  });
+  inventoryUI.renderHotbar(
+    inventory,
+    player,
+    fireballCooldown,
+    ITEM_ICONS,
+    getItemCooldown,
+  );
 }
 
 function renderCrafting() {
@@ -430,24 +295,9 @@ function renderCrafting() {
 function toggleInventory(open) {
   if (open === inventoryOpen) return;
   inventoryOpen = open;
+  inventoryUI.toggleInventory(open);
   if (inventoryOpen) {
-    if (inventoryPos.left !== null) {
-      inventoryDiv.style.left = inventoryPos.left + "px";
-      inventoryDiv.style.top = inventoryPos.top + "px";
-      inventoryDiv.style.transform = "none";
-    } else {
-      inventoryDiv.style.left = "50%";
-      inventoryDiv.style.top = "50%";
-      inventoryDiv.style.transform = "translate(-50%, -50%)";
-    }
-    inventoryDiv.style.display = "block";
     renderInventory();
-  } else {
-    inventoryPos = {
-      left: inventoryDiv.offsetLeft,
-      top: inventoryDiv.offsetTop,
-    };
-    inventoryDiv.style.display = "none";
   }
 }
 
@@ -473,93 +323,17 @@ function toggleCrafting(open) {
 }
 
 function renderSkillTree() {
-  skillPointsDiv.textContent = `Fire Mutation Points Available: ${player.fireMutationPoints}`;
-  skillGrid.innerHTML = "";
-  const skills = SKILL_INFO.map((info) => ({
-    ...info,
-    level: player.abilities[info.levelKey] || 0,
-  }));
-  skills.forEach((s) => {
-    const tile = document.createElement("div");
-    const nextCost = s.level < s.max ? s.costs[s.level + 1] : null;
-    tile.className = "skill-node";
-    if (s.level >= s.max) tile.classList.add("maxed");
-    else if (s.level > 0) tile.classList.add("unlocked");
-    else tile.classList.add("locked");
-    if (nextCost && player.fireMutationPoints >= nextCost) {
-      tile.classList.add("available");
-    }
-    if (selectedSkill && selectedSkill.id === s.id) {
-      tile.style.outline = "2px solid yellow";
-    }
-    const img = document.createElement("img");
-    img.src = ITEM_ICONS[s.id];
-    img.style.width = "48px";
-    img.style.height = "48px";
-    img.style.opacity = s.level > 0 ? 1 : 0.5;
-    tile.appendChild(img);
-    const label = document.createElement("div");
-    label.style.fontSize = "12px";
-    label.textContent = `Lv ${s.level}/${s.max}`;
-    tile.appendChild(label);
-    tile.addEventListener("mousedown", () => {
-      selectedSkill = s;
-      updateSkillDetails();
-      renderSkillTree();
-    });
-    skillGrid.appendChild(tile);
-  });
+  skillTreeUI.renderSkillTree(player, SKILL_INFO);
 }
 
 function updateSkillDetails() {
-  if (!selectedSkill) {
-    skillDetails.style.display = "none";
-    return;
-  }
-  const level = selectedSkill.level;
-  const nextCost =
-    level < selectedSkill.max ? selectedSkill.costs[level + 1] : null;
-  skillNameDiv.textContent = selectedSkill.name;
-  skillDescDiv.textContent = selectedSkill.description;
-  skillLevelsDiv.innerHTML = "";
-  if (selectedSkill.levels) {
-    selectedSkill.levels.forEach((lv, idx) => {
-      const li = document.createElement("li");
-      li.textContent = `Lv ${idx + 1}: ${lv.effect} (Cost: ${lv.cost})`;
-      skillLevelsDiv.appendChild(li);
-    });
-  }
-  skillLevelDiv.textContent = `Level ${level}/${selectedSkill.max}`;
-  skillCostDiv.textContent = nextCost ? `Cost: ${nextCost}` : "Max level";
-  skillUpgradeBtn.textContent = level === 0 ? "Unlock" : "Upgrade";
-  skillUpgradeBtn.disabled = !nextCost || player.fireMutationPoints < nextCost;
-  skillDetails.style.display = "block";
+  skillTreeUI.updateSkillDetails(player);
 }
 
 function toggleSkillTree(open) {
   if (open === skillTreeOpen) return;
   skillTreeOpen = open;
-  if (skillTreeOpen) {
-    if (skillTreePos.left !== null) {
-      skillTreeDiv.style.left = skillTreePos.left + "px";
-      skillTreeDiv.style.top = skillTreePos.top + "px";
-      skillTreeDiv.style.transform = "none";
-    } else {
-      skillTreeDiv.style.left = "50%";
-      skillTreeDiv.style.top = "50%";
-      skillTreeDiv.style.transform = "translate(-50%, -50%)";
-    }
-    skillTreeDiv.style.display = "block";
-    renderSkillTree();
-  } else {
-    skillTreePos = {
-      left: skillTreeDiv.offsetLeft,
-      top: skillTreeDiv.offsetTop,
-    };
-    skillTreeDiv.style.display = "none";
-    selectedSkill = null;
-    updateSkillDetails();
-  }
+  skillTreeUI.toggleSkillTree(open, player, SKILL_INFO);
 }
 
 function resizeCanvas() {
@@ -594,8 +368,8 @@ function resetGame() {
   );
   currentWave = 1;
   victory = false;
-  waveCounterDiv.textContent = `Wave ${currentWave}`;
-  waveCounterDiv.style.display = "block";
+  hud.setWave(currentWave);
+  hud.showWaveCounter();
   victoryDiv.style.display = "none";
   resetPlayerForNewGame(player, PLAYER_MAX_HEALTH);
   weapon = null;
@@ -625,10 +399,11 @@ function resetGame() {
   }
   inventoryOpen = false;
   craftingOpen = false;
-  pickupMessageTimer = 0;
   inventoryDiv.style.display = "none";
   craftingDiv.style.display = "none";
-  pickupMsg.textContent = "";
+  hud.clearPickupMessage();
+  hud.setWave(currentWave);
+  hud.showWaveCounter();
   renderInventory();
   renderHotbar();
 }
@@ -672,20 +447,17 @@ makeDraggable(
 );
 
 skillUpgradeBtn.addEventListener("click", () => {
-  if (!selectedSkill) return;
-  const upgrader = SKILL_UPGRADERS[selectedSkill.id];
+  const sel = skillTreeUI.getSelectedSkill();
+  if (!sel) return;
+  const upgrader = SKILL_UPGRADERS[sel.id];
   if (upgrader && upgrader(player, inventory, addItem, moveToHotbar)) {
-    if (selectedSkill.id === "fire_orb_skill") {
+    if (sel.id === "fire_orb_skill") {
       fireOrbs = createOrbs(player.abilities.fireOrbLevel >= 2 ? 2 : 1);
     }
     renderInventory();
     renderHotbar();
-    selectedSkill = {
-      ...selectedSkill,
-      level: player.abilities[selectedSkill.levelKey] || 0,
-    };
-    updateSkillDetails();
-    renderSkillTree();
+    skillTreeUI.updateSkillDetails(player);
+    skillTreeUI.renderSkillTree(player, SKILL_INFO);
   }
 });
 
@@ -863,18 +635,15 @@ function update() {
         }
         if (looting.item) {
           if (addItem(inventory, looting.item, 1)) {
-            pickupMsg.textContent = `Picked up ${looting.item}`;
+            hud.showPickupMessage(`Picked up ${looting.item}`);
             looting.item = null;
-            pickupMessageTimer = 60;
             renderInventory();
             renderHotbar();
           } else {
-            pickupMsg.textContent = "Inventory Full";
-            pickupMessageTimer = 60;
+            hud.showPickupMessage("Inventory Full");
           }
         } else {
-          pickupMsg.textContent = "Nothing found";
-          pickupMessageTimer = 60;
+          hud.showPickupMessage("Nothing found");
         }
         looting = null;
         lootDiv.style.display = "none";
@@ -887,8 +656,7 @@ function update() {
     if (isColliding(player, it, 10)) {
       if (addItem(inventory, it.type, it.count)) {
         worldItems.splice(i, 1);
-        pickupMsg.textContent = `Picked up ${it.type}`;
-        pickupMessageTimer = 60;
+        hud.showPickupMessage(`Picked up ${it.type}`);
         renderInventory();
         renderHotbar();
       }
@@ -921,8 +689,7 @@ function update() {
       renderInventory();
       renderHotbar();
     } else {
-      pickupMsg.textContent = "Out of Fire Cores!";
-      pickupMessageTimer = 60;
+      hud.showPickupMessage("Out of Fire Cores!");
     }
   }
 
@@ -938,8 +705,7 @@ function update() {
         renderInventory();
         renderHotbar();
       } else {
-        pickupMsg.textContent = "Out of Arrows!";
-        pickupMessageTimer = 60;
+        hud.showPickupMessage("Out of Arrows!");
       }
     }
   } else {
@@ -991,8 +757,7 @@ function update() {
     const used = consumeHotbarItem(inventory, inventory.active);
     if (used) {
       applyConsumableEffect(player, used);
-      pickupMsg.textContent = `Used ${used}`;
-      pickupMessageTimer = 60;
+      hud.showPickupMessage(`Used ${used}`);
       renderInventory();
       renderHotbar();
     }
@@ -1003,7 +768,7 @@ function update() {
     if (!tryPhoenixRevival(player, PLAYER_MAX_HEALTH, zombies)) {
       gameOver = true;
       gameOverDiv.style.display = "block";
-      waveCounterDiv.style.display = "none";
+      hud.hideWaveCounter();
     }
   }
 
@@ -1030,15 +795,12 @@ function update() {
         count: 1,
       }),
   );
-  if (pickupMessageTimer > 0) {
-    pickupMessageTimer--;
-    if (pickupMessageTimer === 0) pickupMsg.textContent = "";
-  }
+  hud.update();
 
   if (!victory && zombies.length === 0) {
     victory = true;
     victoryDiv.style.display = "block";
-    waveCounterDiv.style.display = "none";
+    hud.hideWaveCounter();
   }
 
   if (skillTreeOpen) renderSkillTree();
@@ -1102,13 +864,7 @@ function render() {
     ctx.stroke();
     ctx.lineWidth = 1;
   }
-  ctx.fillStyle = "black";
-  ctx.font = "16px sans-serif";
-  ctx.textAlign = "left";
-  ctx.fillText(`Health: ${player.health}`, 10, 20);
-  if (player.weapon && player.weapon.type === "bow") {
-    ctx.fillText(`Arrows: ${countItem(inventory, "arrow")}`, 10, 40);
-  }
+  hud.render(ctx, player, inventory, countItem);
 
   if (weapon) {
     const img = ITEM_IMAGES[weapon.type];
