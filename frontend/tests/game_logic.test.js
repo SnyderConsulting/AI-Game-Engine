@@ -16,6 +16,7 @@ import {
   attackZombiesWithKills,
   ZOMBIE_MAX_HEALTH,
   spawnZombieAtDoor,
+  createSpawnDoor,
   spawnZombieWave,
   createContainer,
   spawnContainers,
@@ -86,7 +87,7 @@ test("findPath navigates around walls", () => {
   });
 });
 
-test("findPath treats zombies as blocked spaces", () => {
+test("findPath ignores other zombies when searching", () => {
   const start = { x: 10, y: 10 };
   const end = { x: 90, y: 10 };
   const zombieBlock = { x: 50, y: 10 };
@@ -94,7 +95,7 @@ test("findPath treats zombies as blocked spaces", () => {
   assert(path.length > 0);
   const blockedCell = `${Math.floor(zombieBlock.x / SEGMENT_SIZE)},${Math.floor(zombieBlock.y / SEGMENT_SIZE)}`;
   const cells = path.map((c) => `${c[0]},${c[1]}`);
-  assert.strictEqual(cells.includes(blockedCell), false);
+  assert.strictEqual(cells.includes(blockedCell), true);
 });
 
 test("hasLineOfSight detects blockage", () => {
@@ -139,6 +140,26 @@ test("spawnZombieAtDoor uses random chance for fire variant", () => {
   Math.random = originalRandom;
   assert.strictEqual(fire.variant, "fire");
   assert.strictEqual(normal.variant, "normal");
+});
+
+test("createSpawnDoor leaves an open interior space", () => {
+  const walls = [
+    { x: 0, y: 0, size: SEGMENT_SIZE },
+    { x: 0, y: SEGMENT_SIZE, size: SEGMENT_SIZE },
+  ];
+  for (let i = 0; i < 10; i++) {
+    const door = createSpawnDoor(120, 80, walls);
+    let inside;
+    if (door.x === 0) inside = { x: SEGMENT_SIZE, y: door.y };
+    else if (door.x === 120) inside = { x: 120 - SEGMENT_SIZE, y: door.y };
+    else if (door.y === 0) inside = { x: door.x, y: SEGMENT_SIZE };
+    else if (door.y === 80) inside = { x: door.x, y: 80 - SEGMENT_SIZE };
+    else continue;
+    assert.strictEqual(
+      walls.some((w) => circleRectColliding(inside, w, 10)),
+      false,
+    );
+  }
 });
 
 test("spawnZombieWave creates multiple normal zombies near door", () => {
