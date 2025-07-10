@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { createPlayer } from "../src/player.js";
+import { createPlayer } from "../src/entities/player.js";
 import { PLAYER_MAX_HEALTH } from "../src/game_logic.js";
 import { applyConsumableEffect } from "../src/items.js";
 

@@ -6,7 +6,7 @@ import {
   upgradePhoenixRevival,
   SKILL_INFO,
 } from "../src/skill_tree.js";
-import { createPlayer, resetPlayerForNewGame } from "../src/player.js";
+import { createPlayer, resetPlayerForNewGame } from "../src/entities/player.js";
 import { createInventory } from "../src/inventory.js";
 import { PLAYER_MAX_HEALTH } from "../src/game_logic.js";
 import { addItem, moveToHotbar } from "../src/inventory.js";

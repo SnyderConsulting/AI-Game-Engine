@@ -4,7 +4,7 @@ import {
   createArrow,
   updateArrows,
   predictArrowEndpoint,
-} from "../src/arrow.js";
+} from "../src/entities/arrow.js";
 
 // helper stubs
 import { circleRectColliding, isColliding } from "../src/game_logic.js";

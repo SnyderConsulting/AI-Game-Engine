@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { createPlayer, resetPlayerForNewGame } from "../src/player.js";
+import { createPlayer, resetPlayerForNewGame } from "../src/entities/player.js";
 import { PLAYER_MAX_HEALTH } from "../src/game_logic.js";
 
 test("resetPlayerForNewGame clears abilities and restores health", () => {
