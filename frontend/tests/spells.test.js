@@ -6,7 +6,7 @@ import {
   updateExplosions,
   fireballStats,
   predictFireballEndpoint,
-} from "../src/spells.js";
+} from "../src/entities/spells.js";
 
 // mocks for game_logic helpers
 import { circleRectColliding } from "../src/systems/collision-system.js";

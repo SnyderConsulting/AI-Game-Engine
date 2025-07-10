@@ -4,7 +4,7 @@ export const ARROW_PREVIEW_RANGE = 12 * 40;
 
 import { circleRectColliding } from "../systems/collision-system.js";
 import { isColliding } from "../utils/geometry.js";
-import { damageWall } from "../walls.js";
+import { damageWall } from "./walls.js";
 
 export function predictArrowEndpoint(x, y, direction, walls, zombies = []) {
   const len = Math.hypot(direction.x, direction.y);

@@ -74,7 +74,7 @@ export const RECIPES = [
   },
 ];
 
-import { addItem, countItem, removeItem } from "./inventory.js";
+import { addItem, countItem, removeItem } from "./inventory-system.js";
 
 export function canCraft(inv, recipe) {
   return Object.entries(recipe.ingredients).every(

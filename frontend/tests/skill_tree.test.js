@@ -5,11 +5,11 @@ import {
   upgradeFireOrb,
   upgradePhoenixRevival,
   SKILL_INFO,
-} from "../src/skill_tree.js";
+} from "../src/systems/skill-tree-system.js";
 import { createPlayer, resetPlayerForNewGame } from "../src/entities/player.js";
-import { createInventory } from "../src/inventory.js";
+import { createInventory } from "../src/systems/inventory-system.js";
 import { PLAYER_MAX_HEALTH } from "../src/game_logic.js";
-import { addItem, moveToHotbar } from "../src/inventory.js";
+import { addItem, moveToHotbar } from "../src/systems/inventory-system.js";
 
 function setup(points = 2) {
   const player = createPlayer(PLAYER_MAX_HEALTH);

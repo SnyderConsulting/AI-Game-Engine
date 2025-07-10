@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { createWall, openShelf } from "../src/walls.js";
+import { createWall, openShelf } from "../src/entities/walls.js";
 import { CRAFTING_MATERIALS } from "../src/items.js";
 
 function withRandomValues(values, fn) {

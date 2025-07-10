@@ -1,5 +1,5 @@
-import { countItem } from "../inventory.js";
-import { RECIPES, canCraft, craftRecipe } from "../crafting.js";
+import { countItem } from "../systems/inventory-system.js";
+import { RECIPES, canCraft, craftRecipe } from "../systems/crafting-system.js";
 
 export function createCraftingUI(
   { craftingDiv, craftingList, craftingBar, craftingClose, craftingPos },

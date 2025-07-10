@@ -1,7 +1,11 @@
-import { createFireball } from "../spells.js";
+import { createFireball } from "../entities/spells.js";
 import { createArrow } from "../entities/arrow.js";
 import { updateOrbs } from "../entities/orbs.js";
-import { getActiveHotbarItem, countItem, removeItem } from "../inventory.js";
+import {
+  getActiveHotbarItem,
+  countItem,
+  removeItem,
+} from "./inventory-system.js";
 import { dropLoot } from "../loot.js";
 
 export function updateAbilities({
