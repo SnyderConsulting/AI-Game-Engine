@@ -12,7 +12,7 @@ import {
   removeItem,
   setActiveHotbar,
   getActiveHotbarItem,
-} from "../src/inventory.js";
+} from "../src/systems/inventory-system.js";
 
 test("addItem prioritizes hotbar then stacks", () => {
   const inv = createInventory(1, 2);

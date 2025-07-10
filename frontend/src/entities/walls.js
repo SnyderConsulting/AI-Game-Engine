@@ -1,4 +1,4 @@
-import { SEGMENT_SIZE } from "./game_logic.js";
+import { SEGMENT_SIZE } from "../game_logic.js";
 
 export const WALL_MATERIALS = {
   // Lowered health so melee weapons can visibly damage shelves

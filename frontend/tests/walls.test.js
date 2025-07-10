@@ -7,7 +7,7 @@ import {
   damageWall,
   updateWalls,
   wallSwingHit,
-} from "../src/walls.js";
+} from "../src/entities/walls.js";
 import { SEGMENT_SIZE } from "../src/game_logic.js";
 
 test("createWall sets hp based on material", () => {

@@ -22,7 +22,7 @@ import {
   updateWalls,
   wallSwingHit,
   openShelf,
-} from "../walls.js";
+} from "../entities/walls.js";
 import {
   createPlayer,
   resetPlayerForNewGame,
@@ -35,10 +35,10 @@ import {
   consumeHotbarItem,
   getActiveHotbarItem,
   setActiveHotbar,
-} from "../inventory.js";
-import { RECIPES, canCraft, craftRecipe } from "../crafting.js";
+} from "../systems/inventory-system.js";
+import { RECIPES, canCraft, craftRecipe } from "../systems/crafting-system.js";
 import { dropLoot } from "../loot.js";
-import { SKILL_INFO, SKILL_UPGRADERS } from "../skill_tree.js";
+import { SKILL_INFO, SKILL_UPGRADERS } from "../systems/skill-tree-system.js";
 import { createOrbs } from "../entities/orbs.js";
 import { updateAbilities } from "../systems/ability-system.js";
 import { render as renderScene } from "../systems/rendering-system.js";

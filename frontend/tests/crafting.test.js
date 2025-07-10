@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { createInventory, addItem } from "../src/inventory.js";
-import { RECIPES, craftRecipe } from "../src/crafting.js";
+import { createInventory, addItem } from "../src/systems/inventory-system.js";
+import { RECIPES, craftRecipe } from "../src/systems/crafting-system.js";
 
 test("craftRecipe consumes ingredients and adds item", () => {
   const inv = createInventory();

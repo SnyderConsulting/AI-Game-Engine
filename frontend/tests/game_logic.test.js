@@ -22,7 +22,7 @@ import {
   spawnZombieAtDoor,
   spawnZombieWave,
 } from "../src/entities/zombie.js";
-import { generateStoreWalls } from "../src/walls.js";
+import { generateStoreWalls } from "../src/entities/walls.js";
 
 test("moveTowards moves entity toward target", () => {
   const zombie = { x: 0, y: 0 };

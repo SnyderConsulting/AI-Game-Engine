@@ -7,8 +7,8 @@ export function drawSprite(ctx, img, x, y, facing, size = 32) {
   ctx.restore();
 }
 
-import { WALL_IMAGES } from "../walls.js";
-import { fireballStats, predictFireballEndpoint } from "../spells.js";
+import { WALL_IMAGES } from "../entities/walls.js";
+import { fireballStats, predictFireballEndpoint } from "../entities/spells.js";
 import { predictArrowEndpoint } from "../entities/arrow.js";
 import { renderZombies } from "../entities/zombie.js";
 import { SEGMENT_SIZE } from "../game_logic.js";
