@@ -9,7 +9,8 @@ import {
 } from "../src/spells.js";
 
 // mocks for game_logic helpers
-import { circleRectColliding, isColliding } from "../src/game_logic.js";
+import { circleRectColliding } from "../src/game_logic.js";
+import { isColliding } from "../src/utils/geometry.js";
 
 test("createFireball normalizes direction", () => {
   const fb = createFireball(0, 0, { x: 3, y: 4 }, 1);

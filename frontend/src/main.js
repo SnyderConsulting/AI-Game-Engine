@@ -1,20 +1,23 @@
 import {
   spawnPlayer,
-  moveZombie,
-  moveTowards,
-  isColliding,
   circleRectColliding,
   SEGMENT_SIZE,
-  attackZombies,
-  attackZombiesWithKills,
   PLAYER_MAX_HEALTH,
-  ZOMBIE_MAX_HEALTH,
   createSpawnDoor,
-  spawnZombieAtDoor,
-  spawnZombieWave,
   spawnContainers,
   openContainer,
 } from "./game_logic.js";
+import { moveTowards, isColliding } from "./utils/geometry.js";
+import {
+  moveZombie,
+  attackZombies,
+  attackZombiesWithKills,
+  ZOMBIE_MAX_HEALTH,
+  spawnZombieAtDoor,
+  spawnZombieWave,
+  updateZombies,
+  renderZombies,
+} from "./entities/zombie.js";
 import {
   generateStoreWalls,
   WALL_IMAGES,
@@ -995,26 +998,14 @@ function update() {
     }
   }
 
-  zombies.forEach((z) => {
-    moveZombie(z, player, walls, 1, canvas.width, canvas.height, zombies);
-    if (z.attackCooldown > 0) z.attackCooldown--;
-    if (
-      isColliding(z, player, 10) &&
-      player.damageCooldown <= 0 &&
-      z.attackCooldown <= 0
-    ) {
-      player.health--;
-      player.damageCooldown = 30;
-      z.attackCooldown = 30;
-      if (player.health <= 0) {
-        if (!tryPhoenixRevival(player, PLAYER_MAX_HEALTH, zombies)) {
-          gameOver = true;
-          gameOverDiv.style.display = "block";
-          waveCounterDiv.style.display = "none";
-        }
-      }
+  updateZombies(zombies, player, walls, canvas.width, canvas.height);
+  if (player.health <= 0) {
+    if (!tryPhoenixRevival(player, PLAYER_MAX_HEALTH, zombies)) {
+      gameOver = true;
+      gameOverDiv.style.display = "block";
+      waveCounterDiv.style.display = "none";
     }
-  });
+  }
 
   if (player.abilities.fireOrb) {
     updateOrbs(fireOrbs, player, zombies, player.abilities.fireOrbLevel, (z) =>
@@ -1203,23 +1194,7 @@ function render() {
     ctx.fill();
   });
 
-  zombies.forEach((z) => {
-    if (z.variant === "fire") {
-      const grad = ctx.createRadialGradient(z.x, z.y, 0, z.x, z.y, 20);
-      grad.addColorStop(0, "rgba(255,100,0,0.8)");
-      grad.addColorStop(1, "rgba(255,0,0,0)");
-      ctx.fillStyle = grad;
-      ctx.beginPath();
-      ctx.arc(z.x, z.y, 20, 0, Math.PI * 2);
-      ctx.fill();
-    }
-    const img = z.variant === "fire" ? fireZombieSprite : zombieSprite;
-    drawSprite(ctx, img, z.x, z.y, z.facing);
-    ctx.fillStyle = "red";
-    ctx.fillRect(z.x - 10, z.y - 16, 20, 4);
-    ctx.fillStyle = "lime";
-    ctx.fillRect(z.x - 10, z.y - 16, (z.health / ZOMBIE_MAX_HEALTH) * 20, 4);
-  });
+  renderZombies(ctx, zombies, zombieSprite, fireZombieSprite);
 
   // The overlay div already shows the Game Over message
   // and restart button, so nothing is drawn here when
