@@ -1,4 +1,5 @@
-import { circleRectColliding, SEGMENT_SIZE } from "../game_logic.js";
+import { SEGMENT_SIZE } from "../game_logic.js";
+import { circleRectColliding } from "../systems/collision-system.js";
 import { moveTowards, isColliding } from "../utils/geometry.js";
 
 export const ZOMBIE_MAX_HEALTH = 2;
@@ -366,15 +367,6 @@ export function updateZombies(zombies, player, walls, width, height) {
   for (const z of zombies) {
     moveZombie(z, player, walls, 1, width, height, zombies);
     if (z.attackCooldown > 0) z.attackCooldown--;
-    if (
-      isColliding(z, player, 10) &&
-      player.damageCooldown <= 0 &&
-      z.attackCooldown <= 0
-    ) {
-      player.health--;
-      player.damageCooldown = 30;
-      z.attackCooldown = 30;
-    }
   }
 }
 

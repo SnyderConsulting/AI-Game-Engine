@@ -7,7 +7,7 @@ import {
 } from "../src/entities/arrow.js";
 
 // helper stubs
-import { circleRectColliding } from "../src/game_logic.js";
+import { circleRectColliding } from "../src/systems/collision-system.js";
 import { isColliding } from "../src/utils/geometry.js";
 
 test("createArrow normalizes direction", () => {
