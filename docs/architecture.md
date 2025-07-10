@@ -10,3 +10,4 @@ This project is split into separate frontend and backend components.
 - **Backend**: Python FastAPI service providing API endpoints. Initially exposes a simple health check and is prepared for future features like multiplayer or persistence.
 
 Both sides communicate via HTTP or WebSockets. The repository emphasizes clear separation of concerns and maintainable code.
+The gameplay state is managed by a `GameScene` class in `frontend/src/scenes/game-scene.js`. It owns the player, zombies and other world objects and exposes `update` and `render` methods used by `main.js`.
