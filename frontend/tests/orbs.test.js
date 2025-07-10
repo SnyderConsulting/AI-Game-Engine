@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { createOrbs, updateOrbs } from "../src/entities/orbs.js";
 
 // stub for collision
-import { isColliding } from "../src/game_logic.js";
+import { isColliding } from "../src/utils/geometry.js";
 
 // orbs.update uses isColliding; but we don't need to stub because function import uses real isColliding
 

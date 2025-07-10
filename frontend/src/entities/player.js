@@ -1,4 +1,4 @@
-import { attackZombies } from "../game_logic.js";
+import { attackZombies } from "./zombie.js";
 
 export const PHOENIX_KNOCKBACK_RADIUS = 40;
 // Increased so the revival blast sends zombies much farther away

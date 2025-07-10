@@ -1,14 +1,18 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
-  createZombie,
-  moveTowards,
-  isColliding,
   circleRectColliding,
   SEGMENT_SIZE,
+  spawnPlayer,
+  createSpawnDoor,
+  createContainer,
+  spawnContainers,
+} from "../src/game_logic.js";
+import { moveTowards, isColliding } from "../src/utils/geometry.js";
+import {
+  createZombie,
   TRIGGER_DISTANCE,
   spawnZombie,
-  spawnPlayer,
   findPath,
   hasLineOfSight,
   moveZombie,
@@ -16,11 +20,8 @@ import {
   attackZombiesWithKills,
   ZOMBIE_MAX_HEALTH,
   spawnZombieAtDoor,
-  createSpawnDoor,
   spawnZombieWave,
-  createContainer,
-  spawnContainers,
-} from "../src/game_logic.js";
+} from "../src/entities/zombie.js";
 import { generateStoreWalls } from "../src/walls.js";
 
 test("moveTowards moves entity toward target", () => {

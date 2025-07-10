@@ -12,7 +12,7 @@ export function createOrbs(count) {
   }));
 }
 
-import { isColliding } from "../game_logic.js";
+import { isColliding } from "../utils/geometry.js";
 export function updateOrbs(
   orbs,
   player,

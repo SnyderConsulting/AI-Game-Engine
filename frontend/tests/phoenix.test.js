@@ -5,7 +5,8 @@ import {
   tryPhoenixRevival,
   PHOENIX_KNOCKBACK_FORCE,
 } from "../src/entities/player.js";
-import { PLAYER_MAX_HEALTH, createZombie } from "../src/game_logic.js";
+import { PLAYER_MAX_HEALTH } from "../src/game_logic.js";
+import { createZombie } from "../src/entities/zombie.js";
 
 test("tryPhoenixRevival revives player", () => {
   const player = createPlayer(PLAYER_MAX_HEALTH);

@@ -2,7 +2,8 @@ export const ARROW_SPEED = 3;
 export const ARROW_DAMAGE = 2;
 export const ARROW_PREVIEW_RANGE = 12 * 40;
 
-import { circleRectColliding, isColliding } from "../game_logic.js";
+import { circleRectColliding } from "../game_logic.js";
+import { isColliding } from "../utils/geometry.js";
 import { damageWall } from "../walls.js";
 
 export function predictArrowEndpoint(x, y, direction, walls, zombies = []) {
