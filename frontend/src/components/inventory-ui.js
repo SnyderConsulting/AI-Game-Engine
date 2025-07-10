@@ -4,7 +4,7 @@ import {
   moveFromHotbar,
   swapHotbar,
   swapInventoryHotbar,
-} from "../inventory.js";
+} from "../systems/inventory-system.js";
 export function createInventoryUI({
   inventoryDiv,
   inventoryGrid,

@@ -1,8 +1,8 @@
-import { updateFireballs, updateExplosions } from "../spells.js";
+import { updateFireballs, updateExplosions } from "../entities/spells.js";
 import { updateArrows } from "../entities/arrow.js";
 import { SEGMENT_SIZE } from "../game_logic.js";
 import { isColliding } from "../utils/geometry.js";
-import { addItem } from "../inventory.js";
+import { addItem } from "./inventory-system.js";
 
 export function circleRectColliding(circle, rect, radius) {
   const closestX = Math.max(rect.x, Math.min(circle.x, rect.x + rect.size));
