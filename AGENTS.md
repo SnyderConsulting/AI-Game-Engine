@@ -2,7 +2,9 @@
 
 These rules apply to all contributions by AI agents and human developers.
 
-1. **Update Documentation**: Whenever code is added or changed, update the relevant files in `docs/` and in-code comments.
+1. Document Your Code: All new or modified code must be documented at two levels:
+High-Level Docs: Update the relevant markdown files in docs/ to reflect architectural changes.
+In-Code Docs: Use JSDoc for all exported functions. Each function must have a description, and every parameter (@param) and return value (@returns) must be documented. Use standard // comments to explain complex or non-obvious blocks of code internally.
 2. **Maintain Modularity**: Keep game logic, rendering, and backend services separated. Avoid large monolithic files.
 3. **Write Tests**: Provide or update unit tests for new functionality in `frontend/tests` or `backend/tests`.
 4. **Run Tests Before Commit**: Ensure all tests pass locally before submitting changes.
