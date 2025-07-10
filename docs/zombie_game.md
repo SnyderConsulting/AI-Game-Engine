@@ -13,8 +13,7 @@ npm run dev
 ```
 
 The game runs entirely in the browser. Open `http://localhost:3000` and you will be greeted with a simple main menu. Click **Start Game** to jump into the action. Use the arrow keys or WASD to move the player character, now drawn using a full sprite rather than a green dot. Zombies also use sprites that rotate to match their movement direction. The player still spawns randomly, but zombies now emerge from a single door placed along the outer edge of the arena. Five basic zombies enter through this door at the beginning of **Wave&nbsp;1**, shown in a counter at the top right which now uses black text for visibility. Once all five are defeated a Victory screen appears with a button to play again.
-Zombies avoid overlapping when they move, so only one can occupy a grid space at a time and new zombies won't spawn on top of existing ones.
-
+Zombies push away from each other as they move, so only one can occupy a grid space at a time and new zombies won't spawn on top of existing ones.
 The spawn door is guaranteed to have an open space just inside the arena so
 fresh zombies are never trapped when they appear.
 

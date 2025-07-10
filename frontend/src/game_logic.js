@@ -182,6 +182,20 @@ export function circleRectColliding(circle, rect, radius) {
   return dx * dx + dy * dy < radius * radius;
 }
 
+export function separateFromZombies(zombie, zombies, dist = 20) {
+  for (const z of zombies) {
+    if (z === zombie) continue;
+    const dx = zombie.x - z.x;
+    const dy = zombie.y - z.y;
+    const d = Math.hypot(dx, dy);
+    if (d > 0 && d < dist) {
+      const push = dist - d;
+      zombie.x += (dx / d) * push;
+      zombie.y += (dy / d) * push;
+    }
+  }
+}
+
 export function findPath(start, goal, walls, width, height, _blockers = []) {
   const gridW = Math.floor(width / SEGMENT_SIZE);
   const gridH = Math.floor(height / SEGMENT_SIZE);
@@ -283,12 +297,11 @@ export function wanderZombie(
     const prevX = zombie.x;
     const prevY = zombie.y;
     moveTowards(zombie, zombie.dest, speed);
-    if (
-      walls.some((w) => circleRectColliding(zombie, w, 10)) ||
-      zombies.some((z) => z !== zombie && isColliding(zombie, z, 10))
-    ) {
+    if (walls.some((w) => circleRectColliding(zombie, w, 10))) {
       zombie.x = prevX;
       zombie.y = prevY;
+    } else {
+      separateFromZombies(zombie, zombies);
     }
     return;
   }
@@ -301,12 +314,11 @@ export function wanderZombie(
   const prevX = zombie.x;
   const prevY = zombie.y;
   moveTowards(zombie, target, speed);
-  if (
-    walls.some((w) => circleRectColliding(zombie, w, 10)) ||
-    zombies.some((z) => z !== zombie && isColliding(zombie, z, 10))
-  ) {
+  if (walls.some((w) => circleRectColliding(zombie, w, 10))) {
     zombie.x = prevX;
     zombie.y = prevY;
+  } else {
+    separateFromZombies(zombie, zombies);
   }
 }
 
@@ -333,12 +345,11 @@ export function moveZombie(
     const prevX = zombie.x;
     const prevY = zombie.y;
     moveTowards(zombie, player, speed);
-    if (
-      walls.some((w) => circleRectColliding(zombie, w, 10)) ||
-      zombies.some((z) => z !== zombie && isColliding(zombie, z, 10))
-    ) {
+    if (walls.some((w) => circleRectColliding(zombie, w, 10))) {
       zombie.x = prevX;
       zombie.y = prevY;
+    } else {
+      separateFromZombies(zombie, zombies);
     }
     return;
   }
@@ -349,12 +360,11 @@ export function moveZombie(
     const prevX = zombie.x;
     const prevY = zombie.y;
     moveTowards(zombie, player, speed);
-    if (
-      walls.some((w) => circleRectColliding(zombie, w, 10)) ||
-      zombies.some((z) => z !== zombie && isColliding(zombie, z, 10))
-    ) {
+    if (walls.some((w) => circleRectColliding(zombie, w, 10))) {
       zombie.x = prevX;
       zombie.y = prevY;
+    } else {
+      separateFromZombies(zombie, zombies);
     }
     return;
   }
@@ -367,12 +377,11 @@ export function moveZombie(
   const prevX = zombie.x;
   const prevY = zombie.y;
   moveTowards(zombie, target, speed);
-  if (
-    walls.some((w) => circleRectColliding(zombie, w, 10)) ||
-    zombies.some((z) => z !== zombie && isColliding(zombie, z, 10))
-  ) {
+  if (walls.some((w) => circleRectColliding(zombie, w, 10))) {
     zombie.x = prevX;
     zombie.y = prevY;
+  } else {
+    separateFromZombies(zombie, zombies);
   }
 }
 
