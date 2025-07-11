@@ -7,7 +7,10 @@ This project is split into separate frontend and backend components.
   Reusable math helpers like `moveTowards` and `isColliding` live in `frontend/src/utils/geometry.js`.
   UI elements such as the inventory, skill tree and HUD are implemented in separate modules under `frontend/src/components/`.
   Game systems such as rendering, abilities and collisions reside in `frontend/src/systems/` to keep the main loop minimal. The collision system manages all projectile interactions as well as player contacts with zombies and world items.
-- **Backend**: Python FastAPI service providing API endpoints. Initially exposes a simple health check and is prepared for future features like multiplayer or persistence.
+- **Backend**: Python FastAPI service providing API endpoints. It now exposes a
+  WebSocket endpoint at `/ws/game` and includes a lightweight `GameManager`
+  responsible for tracking connected players. The service began with a simple
+  health check but is structured for future realtime features.
 
 Both sides communicate via HTTP or WebSockets. The repository emphasizes clear separation of concerns and maintainable code.
 The gameplay state is managed by a `GameScene` class in `frontend/src/scenes/game-scene.js`. It owns the player, zombies and other world objects and exposes `update` and `render` methods used by `main.js`.
