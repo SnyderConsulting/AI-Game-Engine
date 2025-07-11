@@ -40,6 +40,7 @@ export function createInventoryUI({
     inventoryGrid.innerHTML = "";
     inventory.slots.forEach((slot, i) => {
       const div = document.createElement("div");
+      div.draggable = true;
       div.dataset.index = i;
       Object.assign(div.style, {
         width: "40px",
@@ -124,6 +125,34 @@ export function createInventoryUI({
           getItemCooldown,
         );
       });
+      div.addEventListener("dragstart", () => {
+        selectedSlot = { type: "inventory", index: i };
+      });
+      div.addEventListener("dragover", (e) => e.preventDefault());
+      div.addEventListener("drop", (e) => {
+        e.preventDefault();
+        if (!selectedSlot) return;
+        if (selectedSlot.type === "inventory") {
+          moveItem(inventory, selectedSlot.index, i);
+        } else {
+          swapInventoryHotbar(inventory, i, selectedSlot.index);
+        }
+        selectedSlot = null;
+        renderInventory(
+          inventory,
+          player,
+          fireballCooldown,
+          itemIcons,
+          getItemCooldown,
+        );
+        renderHotbar(
+          inventory,
+          player,
+          fireballCooldown,
+          itemIcons,
+          getItemCooldown,
+        );
+      });
       div.addEventListener("contextmenu", (e) => {
         e.preventDefault();
         const slot = inventory.slots[i];
@@ -162,6 +191,7 @@ export function createInventoryUI({
     hotbarDiv.innerHTML = "";
     inventory.hotbar.forEach((slot, i) => {
       const div = document.createElement("div");
+      div.draggable = true;
       Object.assign(div.style, {
         width: "40px",
         height: "40px",
@@ -232,6 +262,34 @@ export function createInventoryUI({
           }
           selectedSlot = null;
         }
+        renderInventory(
+          inventory,
+          player,
+          fireballCooldown,
+          itemIcons,
+          getItemCooldown,
+        );
+        renderHotbar(
+          inventory,
+          player,
+          fireballCooldown,
+          itemIcons,
+          getItemCooldown,
+        );
+      });
+      div.addEventListener("dragstart", () => {
+        selectedSlot = { type: "hotbar", index: i };
+      });
+      div.addEventListener("dragover", (e) => e.preventDefault());
+      div.addEventListener("drop", (e) => {
+        e.preventDefault();
+        if (!selectedSlot) return;
+        if (selectedSlot.type === "hotbar") {
+          swapHotbar(inventory, selectedSlot.index, i);
+        } else {
+          swapInventoryHotbar(inventory, selectedSlot.index, i);
+        }
+        selectedSlot = null;
         renderInventory(
           inventory,
           player,
