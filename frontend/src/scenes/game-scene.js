@@ -56,6 +56,12 @@ import {
 import { getItemCooldown } from "../cooldowns.js";
 
 export class GameScene {
+  /**
+   * Create a new game scene and set up all DOM references and default state.
+   *
+   * This initializes player data, UI components and internal arrays so the
+   * scene is ready to start when the user begins a game.
+   */
   constructor() {
     this.canvas = document.getElementById("gameCanvas");
     this.ctx = this.canvas.getContext("2d");
@@ -236,16 +242,32 @@ export class GameScene {
     this.resizeCanvas();
   }
 
+  /**
+   * Resize the canvas element to match the current window dimensions.
+   *
+   * @returns {void}
+   */
   resizeCanvas() {
     this.canvas.width = window.innerWidth;
     this.canvas.height = window.innerHeight;
   }
 
+  /**
+   * Begin a new game by resizing the canvas and resetting all entities.
+   *
+   * @returns {void}
+   */
   startGame() {
     this.resizeCanvas();
     this.resetGame();
   }
 
+  /**
+   * Reset all game entities and state variables to their initial values.
+   *
+   * Called when starting a new game or restarting after game over.
+   * @returns {void}
+   */
   resetGame() {
     this.zombies = [];
     this.walls = generateStoreWalls(this.canvas.width, this.canvas.height);
@@ -315,6 +337,12 @@ export class GameScene {
     this.renderHotbar();
   }
 
+  /**
+   * Upgrade the currently selected skill if the player meets the requirements.
+   *
+   * Updates inventory and UI when a skill level increases.
+   * @returns {void}
+   */
   handleSkillUpgrade() {
     const sel = this.skillTreeUI.getSelectedSkill();
     if (!sel) return;
@@ -335,6 +363,12 @@ export class GameScene {
     }
   }
 
+  /**
+   * Respond to keyboard presses and toggle UI or hotbar slots.
+   *
+   * @param {KeyboardEvent} e - The keydown event.
+   * @returns {void}
+   */
   handleKeyDown(e) {
     const key = e.key.toLowerCase();
     this.keys[key] = true;
@@ -348,16 +382,34 @@ export class GameScene {
     }
   }
 
+  /**
+   * Stop tracking a key once it is released.
+   *
+   * @param {KeyboardEvent} e - The keyup event.
+   * @returns {void}
+   */
   handleKeyUp(e) {
     this.keys[e.key.toLowerCase()] = false;
   }
 
+  /**
+   * Update the cached mouse position relative to the canvas.
+   *
+   * @param {MouseEvent} e - The mousemove event.
+   * @returns {void}
+   */
   handleMouseMove(e) {
     const rect = this.canvas.getBoundingClientRect();
     this.mousePos.x = e.clientX - rect.left;
     this.mousePos.y = e.clientY - rect.top;
   }
 
+  /**
+   * Track mouse button presses for attacking or aiming actions.
+   *
+   * @param {MouseEvent} e - The mousedown event.
+   * @returns {void}
+   */
   handleMouseDown(e) {
     if (e.button === 0) this.keys.mouse = true;
     if (e.button === 2) {
@@ -366,11 +418,22 @@ export class GameScene {
     }
   }
 
+  /**
+   * Clear mouse button states when released.
+   *
+   * @param {MouseEvent} e - The mouseup event.
+   * @returns {void}
+   */
   handleMouseUp(e) {
     if (e.button === 0) this.keys.mouse = false;
     if (e.button === 2) this.keys.mouse2 = false;
   }
 
+  /**
+   * Render the inventory panel and crafting menu when open.
+   *
+   * @returns {void}
+   */
   renderInventory() {
     this.inventoryUI.renderInventory(
       this.inventory,
@@ -388,6 +451,11 @@ export class GameScene {
       );
   }
 
+  /**
+   * Render the player's hotbar slots.
+   *
+   * @returns {void}
+   */
   renderHotbar() {
     this.inventoryUI.renderHotbar(
       this.inventory,
@@ -398,6 +466,12 @@ export class GameScene {
     );
   }
 
+  /**
+   * Show or hide the inventory UI.
+   *
+   * @param {boolean} open - Whether the inventory should be visible.
+   * @returns {void}
+   */
   toggleInventory(open) {
     if (open === this.inventoryOpen) return;
     this.inventoryOpen = open;
@@ -407,6 +481,12 @@ export class GameScene {
     }
   }
 
+  /**
+   * Show or hide the crafting menu UI.
+   *
+   * @param {boolean} open - Whether the crafting menu should be visible.
+   * @returns {void}
+   */
   toggleCrafting(open) {
     if (open === this.craftingOpen) return;
     this.craftingOpen = open;
@@ -419,20 +499,42 @@ export class GameScene {
     );
   }
 
+  /**
+   * Render the skill tree UI based on the player's current skills.
+   *
+   * @returns {void}
+   */
   renderSkillTree() {
     this.skillTreeUI.renderSkillTree(this.player, SKILL_INFO);
   }
 
+  /**
+   * Refresh the details panel within the skill tree UI.
+   *
+   * @returns {void}
+   */
   updateSkillDetails() {
     this.skillTreeUI.updateSkillDetails(this.player);
   }
 
+  /**
+   * Show or hide the skill tree UI overlay.
+   *
+   * @param {boolean} open - Whether the skill tree should be visible.
+   * @returns {void}
+   */
   toggleSkillTree(open) {
     if (open === this.skillTreeOpen) return;
     this.skillTreeOpen = open;
     this.skillTreeUI.toggleSkillTree(open, this.player, SKILL_INFO);
   }
 
+  /**
+   * Advance the game simulation by one frame.
+   *
+   * Handles player actions, ability updates, collisions and win/loss logic.
+   * @returns {void}
+   */
   update() {
     if (this.gameOver || this.victory) return;
     updateWalls(this.walls);
@@ -720,6 +822,12 @@ export class GameScene {
     if (this.skillTreeOpen) this.renderSkillTree();
     this.renderHotbar();
   }
+
+  /**
+   * Draw the current world state to the canvas.
+   *
+   * @returns {void}
+   */
   render() {
     renderScene(this.ctx, {
       walls: this.walls,
