@@ -17,7 +17,8 @@ async def game_ws(websocket: WebSocket) -> None:
     print(f"Player {player_id} connected")
     try:
         while True:
-            await websocket.receive_text()
+            data = await websocket.receive_json()
+            manager.update_player_state(player_id, data)
     except WebSocketDisconnect:
         manager.remove_player(player_id)
         print(f"Player {player_id} disconnected")
