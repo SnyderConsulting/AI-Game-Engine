@@ -10,7 +10,9 @@ This project is split into separate frontend and backend components.
 - **Backend**: Python FastAPI service providing API endpoints. It now exposes a
   WebSocket endpoint at `/ws/game` and includes a lightweight `GameManager`
   responsible for tracking connected players. The service began with a simple
-  health check but is structured for future realtime features.
+  health check but is structured for future realtime features. The
+  **frontend** connects to this WebSocket when a `GameScene` is created and
+  forwards player input messages over the socket.
 
 Both sides communicate via HTTP or WebSockets. The repository emphasizes clear separation of concerns and maintainable code.
 The gameplay state is managed by a `GameScene` class in `frontend/src/scenes/game-scene.js`. It owns the player, zombies and other world objects and exposes `update` and `render` methods used by `main.js`.

@@ -240,6 +240,7 @@ export class GameScene {
       this.startGame();
     });
     this.resizeCanvas();
+    this.initWebSocket();
   }
 
   /**
@@ -250,6 +251,28 @@ export class GameScene {
   resizeCanvas() {
     this.canvas.width = window.innerWidth;
     this.canvas.height = window.innerHeight;
+  }
+
+  /**
+   * Establish a WebSocket connection to the backend.
+   *
+   * Logs connection lifecycle events for debugging.
+   * @returns {void}
+   */
+  initWebSocket() {
+    this.ws = new WebSocket("ws://localhost:8000/ws/game");
+    this.ws.addEventListener("open", () => {
+      console.log("Connected to game WebSocket");
+    });
+    this.ws.addEventListener("message", (e) => {
+      console.log("Received:", e.data);
+    });
+    this.ws.addEventListener("close", () => {
+      console.log("Game WebSocket closed");
+    });
+    this.ws.addEventListener("error", (err) => {
+      console.error("Game WebSocket error", err);
+    });
   }
 
   /**
@@ -594,18 +617,35 @@ export class GameScene {
     if (this.keys["arrowleft"] || this.keys["a"]) moveX -= this.player.speed;
     if (this.keys["arrowright"] || this.keys["d"]) moveX += this.player.speed;
 
-    this.player.x += moveX;
-    this.player.y += moveY;
     const toMouseX = this.mousePos.x - this.player.x;
     const toMouseY = this.mousePos.y - this.player.y;
     const len = Math.hypot(toMouseX, toMouseY);
-    if (len > 0) {
-      this.player.facing.x = toMouseX / len;
-      this.player.facing.y = toMouseY / len;
+    const facingX = len > 0 ? toMouseX / len : this.player.facing.x;
+    const facingY = len > 0 ? toMouseY / len : this.player.facing.y;
+
+    if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+      this.ws.send(
+        JSON.stringify({
+          type: "input",
+          action: "move",
+          moveX,
+          moveY,
+          facingX,
+          facingY,
+        }),
+      );
     }
+
+    // this.player.x += moveX;
+    // this.player.y += moveY;
+    // if (len > 0) {
+    //   this.player.facing.x = facingX;
+    //   this.player.facing.y = facingY;
+    // }
 
     if (this.player.damageCooldown > 0) this.player.damageCooldown--;
 
+    /*
     this.player.x = Math.max(
       10,
       Math.min(this.canvas.width - 10, this.player.x),
@@ -619,6 +659,7 @@ export class GameScene {
       this.player.x = prevX;
       this.player.y = prevY;
     }
+    */
 
     if (this.weapon && isColliding(this.player, this.weapon, 10)) {
       addItem(this.inventory, this.weapon.type, 1);
