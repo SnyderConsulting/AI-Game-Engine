@@ -135,6 +135,10 @@ export function createInventoryUI({
         e.preventDefault();
         e.dataTransfer.dropEffect = "move";
       });
+      div.addEventListener("dragenter", (e) => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = "move";
+      });
       div.addEventListener("drop", (e) => {
         e.preventDefault();
         if (!selectedSlot) return;
@@ -290,6 +294,10 @@ export function createInventoryUI({
         e.dataTransfer.setData("text/plain", "");
       });
       div.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = "move";
+      });
+      div.addEventListener("dragenter", (e) => {
         e.preventDefault();
         e.dataTransfer.dropEffect = "move";
       });
