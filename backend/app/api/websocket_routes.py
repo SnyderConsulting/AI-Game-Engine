@@ -13,7 +13,7 @@ async def game_ws(websocket: WebSocket) -> None:
 
     await websocket.accept()
     player_id = str(id(websocket))
-    manager.add_player(player_id)
+    manager.add_player(player_id, websocket)
     print(f"Player {player_id} connected")
     try:
         while True:

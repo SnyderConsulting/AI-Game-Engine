@@ -2,6 +2,8 @@
 
 from typing import Any, Dict
 
+from fastapi import WebSocket
+
 from .models import GameState, PlayerState
 
 
@@ -10,16 +12,20 @@ class GameManager:
 
     def __init__(self) -> None:
         self.state = GameState(players={})
+        # Track active WebSocket connections for broadcasting state
+        self.connections: Dict[str, WebSocket] = {}
 
-    def add_player(self, player_id: str) -> None:
-        """Add a new player to the game with default state."""
+    def add_player(self, player_id: str, websocket: WebSocket) -> None:
+        """Add a new player to the game with default state and store connection."""
 
         self.state.players[player_id] = PlayerState(x=0.0, y=0.0, facing="down")
+        self.connections[player_id] = websocket
 
     def remove_player(self, player_id: str) -> None:
-        """Remove a player from the game if present."""
+        """Remove a player from the game if present and drop connection."""
 
         self.state.players.pop(player_id, None)
+        self.connections.pop(player_id, None)
 
     def update_player_state(self, player_id: str, input_data: Dict[str, Any]) -> None:
         """Update the player's state using the received input."""
@@ -52,6 +58,11 @@ class GameManager:
         """Return the current game state."""
 
         return self.state
+
+    def get_connections(self) -> Dict[str, WebSocket]:
+        """Return the current active websocket connections."""
+
+        return self.connections
 
 
 # Single global instance used by API routes
