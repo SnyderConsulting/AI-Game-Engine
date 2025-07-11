@@ -125,8 +125,9 @@ export function createInventoryUI({
           getItemCooldown,
         );
       });
-      div.addEventListener("dragstart", () => {
+      div.addEventListener("dragstart", (e) => {
         selectedSlot = { type: "inventory", index: i };
+        e.dataTransfer.setData("text/plain", "");
       });
       div.addEventListener("dragover", (e) => e.preventDefault());
       div.addEventListener("drop", (e) => {
@@ -277,8 +278,9 @@ export function createInventoryUI({
           getItemCooldown,
         );
       });
-      div.addEventListener("dragstart", () => {
+      div.addEventListener("dragstart", (e) => {
         selectedSlot = { type: "hotbar", index: i };
+        e.dataTransfer.setData("text/plain", "");
       });
       div.addEventListener("dragover", (e) => e.preventDefault());
       div.addEventListener("drop", (e) => {
