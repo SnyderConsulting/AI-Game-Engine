@@ -64,6 +64,7 @@ export function createInventoryUI({
         if (itemIcons[slot.item]) {
           const img = document.createElement("img");
           img.src = itemIcons[slot.item];
+          img.draggable = false;
           img.style.width = "32px";
           img.style.height = "32px";
           div.appendChild(img);
@@ -214,6 +215,7 @@ export function createInventoryUI({
         if (itemIcons[slot.item]) {
           const img = document.createElement("img");
           img.src = itemIcons[slot.item];
+          img.draggable = false;
           img.style.width = "32px";
           img.style.height = "32px";
           div.appendChild(img);
