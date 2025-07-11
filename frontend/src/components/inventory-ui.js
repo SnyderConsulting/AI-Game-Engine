@@ -128,9 +128,13 @@ export function createInventoryUI({
       });
       div.addEventListener("dragstart", (e) => {
         selectedSlot = { type: "inventory", index: i };
+        e.dataTransfer.effectAllowed = "move";
         e.dataTransfer.setData("text/plain", "");
       });
-      div.addEventListener("dragover", (e) => e.preventDefault());
+      div.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = "move";
+      });
       div.addEventListener("drop", (e) => {
         e.preventDefault();
         if (!selectedSlot) return;
@@ -282,9 +286,13 @@ export function createInventoryUI({
       });
       div.addEventListener("dragstart", (e) => {
         selectedSlot = { type: "hotbar", index: i };
+        e.dataTransfer.effectAllowed = "move";
         e.dataTransfer.setData("text/plain", "");
       });
-      div.addEventListener("dragover", (e) => e.preventDefault());
+      div.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = "move";
+      });
       div.addEventListener("drop", (e) => {
         e.preventDefault();
         if (!selectedSlot) return;

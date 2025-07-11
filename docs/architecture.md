@@ -6,7 +6,9 @@ This project is split into separate frontend and backend components.
   Zombie behavior resides in `frontend/src/entities/zombie.js` to keep AI code modular.
   Reusable math helpers like `moveTowards` and `isColliding` live in `frontend/src/utils/geometry.js`.
   UI elements such as the inventory, skill tree and HUD are implemented in separate modules under `frontend/src/components/`.
-  Inventory and hotbar slots support drag-and-drop to swap or move items using the same logic as clicking.
+  Inventory and hotbar slots support drag-and-drop to swap or move items using the
+  same logic as clicking. Drag handlers set the `dropEffect` to `move` so the
+  cursor reliably shows that the slots accept drops.
   Game systems such as rendering, abilities and collisions reside in `frontend/src/systems/` to keep the main loop minimal. The collision system manages all projectile interactions as well as player contacts with zombies and world items.
 - **Backend**: Python FastAPI service providing API endpoints. It now exposes a
   WebSocket endpoint at `/ws/game` and includes a lightweight `GameManager`
