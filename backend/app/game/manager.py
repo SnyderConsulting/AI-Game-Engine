@@ -18,7 +18,9 @@ class GameManager:
     def add_player(self, player_id: str, websocket: WebSocket) -> None:
         """Add a new player to the game with default state and store connection."""
 
-        self.state.players[player_id] = PlayerState(x=0.0, y=0.0, facing="down")
+        self.state.players[player_id] = PlayerState(
+            x=0.0, y=0.0, facing_x=0.0, facing_y=1.0
+        )
         self.connections[player_id] = websocket
 
     def remove_player(self, player_id: str) -> None:
@@ -57,10 +59,8 @@ class GameManager:
         facing_x = input_data.get("facingX")
         facing_y = input_data.get("facingY")
         if facing_x is not None and facing_y is not None:
-            if abs(facing_x) > abs(facing_y):
-                player.facing = "right" if facing_x > 0 else "left"
-            else:
-                player.facing = "down" if facing_y > 0 else "up"
+            player.facing_x = float(facing_x)
+            player.facing_y = float(facing_y)
 
     def get_game_state(self) -> GameState:
         """Return the current game state."""

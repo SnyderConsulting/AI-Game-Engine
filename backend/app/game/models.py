@@ -7,7 +7,8 @@ class PlayerState(BaseModel):
 
     x: float
     y: float
-    facing: str
+    facing_x: float
+    facing_y: float
 
 
 class GameState(BaseModel):
