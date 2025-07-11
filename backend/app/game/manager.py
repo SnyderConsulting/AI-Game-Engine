@@ -34,17 +34,25 @@ class GameManager:
         if not player:
             return
 
-        speed = 5
+        # Movement can be expressed either as a single direction string or as
+        # explicit deltas. Support both formats so older clients continue to
+        # work while newer clients can send more granular values.
+        speed = 2
         if input_data.get("action") == "move":
-            direction = input_data.get("direction")
-            if direction == "left":
-                player.x -= speed
-            elif direction == "right":
-                player.x += speed
-            elif direction == "up":
-                player.y -= speed
-            elif direction == "down":
-                player.y += speed
+            if "moveX" in input_data or "moveY" in input_data:
+                # Client provided delta values. Use them directly.
+                player.x += float(input_data.get("moveX", 0))
+                player.y += float(input_data.get("moveY", 0))
+            else:
+                direction = input_data.get("direction")
+                if direction == "left":
+                    player.x -= speed
+                elif direction == "right":
+                    player.x += speed
+                elif direction == "up":
+                    player.y -= speed
+                elif direction == "down":
+                    player.y += speed
 
         facing_x = input_data.get("facingX")
         facing_y = input_data.get("facingY")

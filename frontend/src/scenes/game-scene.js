@@ -265,7 +265,7 @@ export class GameScene {
       console.log("Connected to game WebSocket");
     });
     this.ws.addEventListener("message", (e) => {
-      console.log("Received:", e.data);
+      this.handleServerMessage(e.data);
     });
     this.ws.addEventListener("close", () => {
       console.log("Game WebSocket closed");
@@ -273,6 +273,36 @@ export class GameScene {
     this.ws.addEventListener("error", (err) => {
       console.error("Game WebSocket error", err);
     });
+  }
+
+  /**
+   * Update local player state based on a WebSocket message.
+   *
+   * @param {string} data - JSON encoded game state from the server.
+   * @returns {void}
+   */
+  handleServerMessage(data) {
+    try {
+      const state = JSON.parse(data);
+      const ids = Object.keys(state.players || {});
+      if (ids.length === 0) return;
+      const serverPlayer = state.players[ids[0]];
+      if (!serverPlayer) return;
+      this.player.x = serverPlayer.x;
+      this.player.y = serverPlayer.y;
+      const map = {
+        up: { x: 0, y: -1 },
+        down: { x: 0, y: 1 },
+        left: { x: -1, y: 0 },
+        right: { x: 1, y: 0 },
+      };
+      if (map[serverPlayer.facing]) {
+        this.player.facing.x = map[serverPlayer.facing].x;
+        this.player.facing.y = map[serverPlayer.facing].y;
+      }
+    } catch (err) {
+      console.error("Failed to parse server state", err);
+    }
   }
 
   /**
