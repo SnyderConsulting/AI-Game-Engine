@@ -1,3 +1,14 @@
+/**
+ * Draw a sprite rotated toward its facing direction.
+ *
+ * @param {CanvasRenderingContext2D} ctx - Canvas rendering context.
+ * @param {HTMLImageElement} img - Image to draw.
+ * @param {number} x - X position on the canvas.
+ * @param {number} y - Y position on the canvas.
+ * @param {{x:number,y:number}} facing - Direction vector the sprite faces.
+ * @param {number} [size=32] - Render size in pixels.
+ * @returns {void}
+ */
 export function drawSprite(ctx, img, x, y, facing, size = 32) {
   const angle = Math.atan2(facing.y, facing.x) - Math.PI / 2;
   ctx.save();
@@ -13,6 +24,13 @@ import { predictArrowEndpoint } from "../entities/arrow.js";
 import { renderZombies } from "../entities/zombie.js";
 import { SEGMENT_SIZE } from "../game_logic.js";
 
+/**
+ * Render the entire game scene.
+ *
+ * @param {CanvasRenderingContext2D} ctx - Rendering context.
+ * @param {object} state - Current world state and assets.
+ * @returns {void}
+ */
 export function render(ctx, state) {
   const {
     walls,
