@@ -33,3 +33,42 @@ test("hotbar icons are not draggable", () => {
   const img = dom.window.document.querySelector("#hot img");
   assert.strictEqual(img.draggable, false);
 });
+
+test("dragover on hotbar sets move dropEffect", () => {
+  const dom = new JSDOM(
+    `<!DOCTYPE html><div id="grid"></div><div id="hot"></div>`,
+  );
+  global.document = dom.window.document;
+  global.window = dom.window;
+
+  const inv = createInventory();
+  addItem(inv, "core", 1);
+  const { renderInventory, renderHotbar } = createInventoryUI({
+    inventoryDiv: document.createElement("div"),
+    inventoryGrid: document.getElementById("grid"),
+    hotbarDiv: document.getElementById("hot"),
+    inventoryBar: document.createElement("div"),
+    inventoryClose: document.createElement("button"),
+    inventoryPos: { left: null, top: null },
+  });
+  renderInventory(inv, {}, {}, { core: "core.png" }, () => ({
+    remaining: 0,
+    max: 0,
+  }));
+  renderHotbar(inv, {}, {}, { core: "core.png" }, () => ({
+    remaining: 0,
+    max: 0,
+  }));
+
+  const slot = dom.window.document.querySelector("#hot div");
+  const evt = new dom.window.Event("dragover", { bubbles: true });
+  let prevented = false;
+  evt.preventDefault = () => {
+    prevented = true;
+  };
+  evt.dataTransfer = { dropEffect: "none" };
+  slot.dispatchEvent(evt);
+
+  assert.strictEqual(prevented, true);
+  assert.strictEqual(evt.dataTransfer.dropEffect, "move");
+});
