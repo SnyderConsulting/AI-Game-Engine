@@ -95,6 +95,16 @@ export function separateFromZombies(zombie, zombies, dist = 20) {
   }
 }
 
+/**
+ * Perform a simple breadth-first search to find a path from start to goal.
+ * @param {{x:number,y:number}} start - Starting position
+ * @param {{x:number,y:number}} goal - Destination position
+ * @param {Array<{x:number,y:number,size:number}>} walls - Impassable wall segments
+ * @param {number} width - Width of the level in pixels
+ * @param {number} height - Height of the level in pixels
+ * @param {Array<{x:number,y:number}>} [_blockers=[]] - Unused currently but kept for API parity
+ * @returns {Array<[number, number]>} Array of grid coordinates from start to goal
+ */
 export function findPath(start, goal, walls, width, height, _blockers = []) {
   const gridW = Math.floor(width / SEGMENT_SIZE);
   const gridH = Math.floor(height / SEGMENT_SIZE);
@@ -102,11 +112,14 @@ export function findPath(start, goal, walls, width, height, _blockers = []) {
   const sy = Math.floor(start.y / SEGMENT_SIZE);
   const gx = Math.floor(goal.x / SEGMENT_SIZE);
   const gy = Math.floor(goal.y / SEGMENT_SIZE);
+  // Cells occupied by walls are marked here so the search avoids them
   const blocked = new Set(
     walls.map((w) => `${w.x / SEGMENT_SIZE},${w.y / SEGMENT_SIZE}`),
   );
+  // Queue of grid coordinates to visit next in our breadth-first search
   const queue = [[sx, sy]];
   const key = (x, y) => `${x},${y}`;
+  // Record where each visited cell came from so we can rebuild the path later
   const cameFrom = new Map([[key(sx, sy), null]]);
   const dirs = [
     [1, 0],
@@ -114,6 +127,7 @@ export function findPath(start, goal, walls, width, height, _blockers = []) {
     [0, 1],
     [0, -1],
   ];
+  // Explore neighboring cells until we either reach the goal or run out of cells
   while (queue.length) {
     const [cx, cy] = queue.shift();
     if (cx === gx && cy === gy) break;
@@ -128,11 +142,13 @@ export function findPath(start, goal, walls, width, height, _blockers = []) {
     }
   }
 
+  // Rebuild the path by walking backwards from the goal using cameFrom
   const path = [];
   let cur = [gx, gy];
   while (cur) {
     path.unshift(cur);
     const parent = cameFrom.get(key(cur[0], cur[1]));
+    // Step to the preceding cell until we arrive back at the start
     cur = parent || null;
   }
   if (path[0][0] !== sx || path[0][1] !== sy) return [];
