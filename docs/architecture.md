@@ -12,8 +12,9 @@ This project is split into separate frontend and backend components.
   responsible for tracking connected players. The service began with a simple
   health check but is structured for future realtime features. The
   **frontend** connects to this WebSocket when a `GameScene` is created and
-  forwards player input messages over the socket. The server interprets these
-  messages using the `GameManager` to update each player's authoritative state.
+  forwards player input messages over the socket. Input includes `moveX` and
+  `moveY` deltas along with the mouse facing vector. The server interprets these
+  values using the `GameManager` to update each player's authoritative state.
   A background task started on application startup runs a server game loop that
   broadcasts the complete game state to all connected clients roughly 60 times
   per second.

@@ -19,13 +19,13 @@ def test_update_player_state_via_websocket():
         with client.websocket_connect("/ws/game") as ws:
             player_id = next(iter(manager.state.players))
             ws.send_json(
-                {"action": "move", "direction": "right", "facingX": 1, "facingY": 0}
+                {"action": "move", "moveX": 2, "moveY": 0, "facingX": 1, "facingY": 0}
             )
             import time
 
             time.sleep(0.05)
             player = manager.state.players[player_id]
-            assert player.x == 5
+            assert player.x == 2
             assert player.facing == "right"
 
 
