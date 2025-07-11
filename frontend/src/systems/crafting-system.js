@@ -76,12 +76,26 @@ export const RECIPES = [
 
 import { addItem, countItem, removeItem } from "./inventory-system.js";
 
+/**
+ * Check if the inventory contains all items required for a recipe.
+ *
+ * @param {object} inv - Player inventory.
+ * @param {object} recipe - Crafting recipe definition.
+ * @returns {boolean} True if crafting is possible.
+ */
 export function canCraft(inv, recipe) {
   return Object.entries(recipe.ingredients).every(
     ([id, qty]) => countItem(inv, id) >= qty,
   );
 }
 
+/**
+ * Craft a recipe, consuming ingredients and adding the result.
+ *
+ * @param {object} inv - Player inventory object.
+ * @param {object} recipe - Recipe to craft.
+ * @returns {boolean} True if the item was successfully crafted.
+ */
 export function craftRecipe(inv, recipe) {
   if (!canCraft(inv, recipe)) return false;
   Object.entries(recipe.ingredients).forEach(([id, qty]) => {

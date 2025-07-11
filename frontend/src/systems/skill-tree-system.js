@@ -1,3 +1,14 @@
+/**
+ * Upgrade the player's Fireball ability.
+ *
+ * Adds the fireball spell item on first unlock and deducts mutation points.
+ *
+ * @param {object} player - Player entity to modify.
+ * @param {object} inventory - Player inventory.
+ * @param {Function} addItem - Helper to insert items into the inventory.
+ * @param {Function} moveToHotbar - Helper to move items to the hotbar.
+ * @returns {boolean} True if the upgrade succeeded.
+ */
 export function upgradeFireball(player, inventory, addItem, moveToHotbar) {
   const level = player.abilities.fireballLevel || 0;
   const costs = [0, 2, 2, 3];
@@ -24,6 +35,12 @@ export function upgradeFireball(player, inventory, addItem, moveToHotbar) {
   return true;
 }
 
+/**
+ * Upgrade the Fire Orb passive ability.
+ *
+ * @param {object} player - Player entity to modify.
+ * @returns {boolean} True if the upgrade was applied.
+ */
 export function upgradeFireOrb(player) {
   const level = player.abilities.fireOrbLevel || 0;
   const costs = [0, 1, 2, 3];
@@ -36,6 +53,12 @@ export function upgradeFireOrb(player) {
   return true;
 }
 
+/**
+ * Upgrade the Phoenix Revival ultimate.
+ *
+ * @param {object} player - Player entity to modify.
+ * @returns {boolean} True if the upgrade was applied.
+ */
 export function upgradePhoenixRevival(player) {
   const level = player.abilities.phoenixRevivalLevel || 0;
   const costs = [0, 4, 3, 4];
