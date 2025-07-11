@@ -5,6 +5,20 @@ import {
   swapHotbar,
   swapInventoryHotbar,
 } from "../systems/inventory-system.js";
+
+/**
+ * Build the inventory and hotbar UI components.
+ *
+ * @param {object} opts - Options container.
+ * @param {HTMLElement} opts.inventoryDiv - Root inventory element.
+ * @param {HTMLElement} opts.inventoryGrid - Grid element for inventory slots.
+ * @param {HTMLElement} opts.hotbarDiv - Container for the hotbar slots.
+ * @param {HTMLElement} opts.inventoryBar - Draggable inventory header.
+ * @param {HTMLElement} opts.inventoryClose - Close button element.
+ * @param {{left:number|null,top:number|null}} opts.inventoryPos - Saved position.
+ * @returns {{renderInventory:Function,renderHotbar:Function,toggleInventory:Function,isOpen:Function}}
+ *   UI helpers for rendering and toggling the inventory.
+ */
 export function createInventoryUI({
   inventoryDiv,
   inventoryGrid,
@@ -91,7 +105,7 @@ export function createInventoryUI({
           if (selectedSlot.type === "inventory") {
             moveItem(inventory, selectedSlot.index, i);
           } else {
-            swapInventoryHotbar(i, selectedSlot.index);
+            swapInventoryHotbar(inventory, i, selectedSlot.index);
           }
           selectedSlot = null;
         }
@@ -116,7 +130,7 @@ export function createInventoryUI({
         if (!slot.item) return;
         const idx = inventory.hotbar.findIndex((s) => !s.item);
         if (idx !== -1) {
-          moveToHotbar(i, idx);
+          moveToHotbar(inventory, i, idx);
           selectedSlot = null;
           renderInventory(
             inventory,
@@ -212,9 +226,9 @@ export function createInventoryUI({
           selectedSlot = { type: "hotbar", index: i };
         } else {
           if (selectedSlot.type === "hotbar") {
-            swapHotbar(selectedSlot.index, i);
+            swapHotbar(inventory, selectedSlot.index, i);
           } else {
-            swapInventoryHotbar(selectedSlot.index, i);
+            swapInventoryHotbar(inventory, selectedSlot.index, i);
           }
           selectedSlot = null;
         }
@@ -237,7 +251,7 @@ export function createInventoryUI({
         e.preventDefault();
         const idx = inventory.slots.findIndex((s) => !s.item);
         if (idx !== -1) {
-          moveFromHotbar(i, idx);
+          moveFromHotbar(inventory, i, idx);
           selectedSlot = null;
           renderInventory(
             inventory,
