@@ -15,6 +15,8 @@ This project is split into separate frontend and backend components.
   forwards player input messages over the socket. Input includes `moveX` and
   `moveY` deltas along with the mouse facing vector. The server interprets these
   values using the `GameManager` to update each player's authoritative state.
+  Facing is kept as normalized `facing_x` and `facing_y` numbers so the player
+  can point in any direction.
   A background task started on application startup runs a server game loop that
   broadcasts the complete game state to all connected clients roughly 60 times
   per second.

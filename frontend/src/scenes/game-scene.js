@@ -290,15 +290,12 @@ export class GameScene {
       if (!serverPlayer) return;
       this.player.x = serverPlayer.x;
       this.player.y = serverPlayer.y;
-      const map = {
-        up: { x: 0, y: -1 },
-        down: { x: 0, y: 1 },
-        left: { x: -1, y: 0 },
-        right: { x: 1, y: 0 },
-      };
-      if (map[serverPlayer.facing]) {
-        this.player.facing.x = map[serverPlayer.facing].x;
-        this.player.facing.y = map[serverPlayer.facing].y;
+      if (
+        typeof serverPlayer.facing_x === "number" &&
+        typeof serverPlayer.facing_y === "number"
+      ) {
+        this.player.facing.x = serverPlayer.facing_x;
+        this.player.facing.y = serverPlayer.facing_y;
       }
     } catch (err) {
       console.error("Failed to parse server state", err);
@@ -646,6 +643,17 @@ export class GameScene {
     if (this.keys["arrowdown"] || this.keys["s"]) moveY += this.player.speed;
     if (this.keys["arrowleft"] || this.keys["a"]) moveX -= this.player.speed;
     if (this.keys["arrowright"] || this.keys["d"]) moveX += this.player.speed;
+
+    let newX = this.player.x + moveX;
+    let newY = this.player.y + moveY;
+    newX = Math.max(10, Math.min(this.canvas.width - 10, newX));
+    newY = Math.max(10, Math.min(this.canvas.height - 10, newY));
+    if (
+      this.walls.some((w) => circleRectColliding({ x: newX, y: newY }, w, 10))
+    ) {
+      moveX = 0;
+      moveY = 0;
+    }
 
     const toMouseX = this.mousePos.x - this.player.x;
     const toMouseY = this.mousePos.y - this.player.y;

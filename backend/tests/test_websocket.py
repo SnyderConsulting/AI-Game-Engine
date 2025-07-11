@@ -26,7 +26,8 @@ def test_update_player_state_via_websocket():
             time.sleep(0.05)
             player = manager.state.players[player_id]
             assert player.x == 2
-            assert player.facing == "right"
+            assert player.facing_x == 1
+            assert player.facing_y == 0
 
 
 def test_game_state_broadcast():
