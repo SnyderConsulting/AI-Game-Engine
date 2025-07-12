@@ -71,3 +71,8 @@ A small camera object keeps the player centered and clamps the view to the
 world bounds so wide screens simply reveal more of the arena instead of
 stretching the image. Rendering is performed with this transform to avoid the
 zoomed in appearance seen in earlier builds.
+
+UI panels such as the inventory, crafting menu and skill tree use a small helper
+`makeDraggable` so each window can be moved by its title bar and closed with the
+`x` button. The hotbar is refreshed whenever new state arrives from the server
+to keep counts and cooldowns in sync.

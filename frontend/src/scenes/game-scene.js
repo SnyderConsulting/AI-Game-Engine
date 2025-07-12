@@ -6,6 +6,11 @@ import { ITEM_ICONS } from "../items.js";
 import { loadImages } from "../utils/assets.js";
 import { WALL_IMAGES } from "../entities/walls.js";
 import { createInventoryUI } from "../components/inventory-ui.js";
+import { createCraftingUI } from "../components/crafting-ui.js";
+import { createSkillTreeUI } from "../components/skill-tree-ui.js";
+import { makeDraggable } from "../ui.js";
+import { createInventory } from "../systems/inventory-system.js";
+import { SKILL_INFO } from "../systems/skill-tree-system.js";
 
 export class GameScene {
   /**
@@ -33,6 +38,9 @@ export class GameScene {
     this.inventoryDiv = document.getElementById("inventory");
     this.craftingDiv = document.getElementById("craftingMenu");
     this.skillTreeDiv = document.getElementById("skillTree");
+    this.gameOverDiv = document.getElementById("gameOver");
+    this.newGameBtn = document.getElementById("newGameBtn");
+    this.newGameBtn?.addEventListener("click", () => window.location.reload());
     this.hud = createHUD({
       pickupMsg: document.getElementById("pickupMessage"),
       waveCounterDiv: document.getElementById("waveCounter"),
@@ -46,14 +54,102 @@ export class GameScene {
       f: "assets/sprite_fire_zombie.png",
     }).f;
     this.cardboardBoxImg = loadImages({ box: "assets/cardboard_box.png" }).box;
+
+    this.inventory = createInventory();
+
+    this.inventoryPos = { left: null, top: null };
     this.inventoryUI = createInventoryUI({
       inventoryDiv: this.inventoryDiv,
       inventoryGrid: document.getElementById("inventoryGrid"),
       hotbarDiv: document.getElementById("hotbar"),
       inventoryBar: document.getElementById("inventoryBar"),
       inventoryClose: document.getElementById("inventoryClose"),
-      inventoryPos: { left: null, top: null },
+      inventoryPos: this.inventoryPos,
     });
+
+    this.craftingPos = { left: null, top: null };
+    this.craftingUI = createCraftingUI(
+      {
+        craftingDiv: this.craftingDiv,
+        craftingList: document.getElementById("craftingList"),
+        craftingBar: document.getElementById("craftingBar"),
+        craftingClose: document.getElementById("craftingClose"),
+        craftingPos: this.craftingPos,
+      },
+      {
+        renderInventory: () =>
+          this.inventoryUI.renderInventory(
+            this.inventory,
+            this.state.players[this.playerId] || {},
+            {},
+            this.itemImages,
+            () => ({ remaining: 0, max: 0 }),
+          ),
+        renderHotbar: () =>
+          this.inventoryUI.renderHotbar(
+            this.inventory,
+            this.state.players[this.playerId] || {},
+            {},
+            this.itemImages,
+            () => ({ remaining: 0, max: 0 }),
+          ),
+      },
+    );
+
+    this.skillTreePos = { left: null, top: null };
+    this.skillTreeUI = createSkillTreeUI(
+      {
+        skillTreeDiv: this.skillTreeDiv,
+        skillTreeBar: document.getElementById("skillTreeBar"),
+        skillTreeClose: document.getElementById("skillTreeClose"),
+        skillPointsDiv: document.getElementById("skillPoints"),
+        skillGrid: document.getElementById("skillGrid"),
+        skillDetails: document.getElementById("skillDetails"),
+        skillNameDiv: document.getElementById("skillName"),
+        skillDescDiv: document.getElementById("skillDesc"),
+        skillLevelsDiv: document.getElementById("skillLevels"),
+        skillLevelDiv: document.getElementById("skillLevel"),
+        skillCostDiv: document.getElementById("skillCost"),
+        skillUpgradeBtn: document.getElementById("skillUpgrade"),
+        skillTreePos: this.skillTreePos,
+      },
+      this.itemImages,
+    );
+
+    makeDraggable(
+      this.inventoryDiv,
+      document.getElementById("inventoryBar"),
+      document.getElementById("inventoryClose"),
+      this.inventoryPos,
+      this.inventoryUI.toggleInventory,
+    );
+    makeDraggable(
+      this.craftingDiv,
+      document.getElementById("craftingBar"),
+      document.getElementById("craftingClose"),
+      this.craftingPos,
+      (open) =>
+        this.craftingUI.toggleCrafting(
+          open,
+          this.inventory,
+          this.state.players[this.playerId] || {},
+          this.itemImages,
+          [],
+        ),
+    );
+    makeDraggable(
+      this.skillTreeDiv,
+      document.getElementById("skillTreeBar"),
+      document.getElementById("skillTreeClose"),
+      this.skillTreePos,
+      (open) =>
+        this.skillTreeUI.toggleSkillTree(
+          open,
+          this.state.players[this.playerId] || {},
+          SKILL_INFO,
+        ),
+    );
+
     this.inventoryOpen = false;
     this.craftingOpen = false;
     this.skillTreeOpen = false;
@@ -90,22 +186,22 @@ export class GameScene {
     this.state = msg;
     this.resizeCanvas();
     const player = this.state.players[this.playerId];
-    if (player && player.inventory && this.inventoryOpen) {
+    if (this.inventoryOpen) {
       this.inventoryUI.renderInventory(
-        player.inventory,
-        player,
-        {},
-        this.itemImages,
-        () => ({ remaining: 0, max: 0 }),
-      );
-      this.inventoryUI.renderHotbar(
-        player.inventory,
-        player,
+        this.inventory,
+        player || {},
         {},
         this.itemImages,
         () => ({ remaining: 0, max: 0 }),
       );
     }
+    this.inventoryUI.renderHotbar(
+      this.inventory,
+      player || {},
+      {},
+      this.itemImages,
+      () => ({ remaining: 0, max: 0 }),
+    );
   }
 
   /**
@@ -190,6 +286,13 @@ export class GameScene {
     if (player) {
       ctx.setTransform(1, 0, 0, 1, 0, 0);
       this.hud.render(ctx, player, { slots: [], hotbar: [] }, () => 0);
+      if (player.health <= 0) {
+        this.gameOverDiv.style.display = "block";
+      } else {
+        this.gameOverDiv.style.display = "none";
+      }
+    } else {
+      this.gameOverDiv.style.display = "none";
     }
   }
 
@@ -199,37 +302,45 @@ export class GameScene {
   }
 
   toggleInventory() {
-    const player = this.state.players[this.playerId];
-    if (player && player.inventory) {
-      this.inventoryOpen = !this.inventoryOpen;
-      this.inventoryUI.toggleInventory(this.inventoryOpen);
-      if (this.inventoryOpen) {
-        this.inventoryUI.renderInventory(
-          player.inventory,
-          player,
-          {},
-          this.itemImages,
-          () => ({ remaining: 0, max: 0 }),
-        );
-        this.inventoryUI.renderHotbar(
-          player.inventory,
-          player,
-          {},
-          this.itemImages,
-          () => ({ remaining: 0, max: 0 }),
-        );
-      }
-    } else {
-      this.togglePanel(this.inventoryDiv, "inventoryOpen");
+    this.inventoryOpen = !this.inventoryOpen;
+    this.inventoryUI.toggleInventory(this.inventoryOpen);
+    if (this.inventoryOpen) {
+      const player = this.state.players[this.playerId] || {};
+      this.inventoryUI.renderInventory(
+        this.inventory,
+        player,
+        {},
+        this.itemImages,
+        () => ({ remaining: 0, max: 0 }),
+      );
+      this.inventoryUI.renderHotbar(
+        this.inventory,
+        player,
+        {},
+        this.itemImages,
+        () => ({ remaining: 0, max: 0 }),
+      );
     }
   }
 
   toggleCrafting() {
-    this.togglePanel(this.craftingDiv, "craftingOpen");
+    this.craftingOpen = !this.craftingOpen;
+    this.craftingUI.toggleCrafting(
+      this.craftingOpen,
+      this.inventory,
+      this.state.players[this.playerId] || {},
+      this.itemImages,
+      [],
+    );
   }
 
   toggleSkillTree() {
-    this.togglePanel(this.skillTreeDiv, "skillTreeOpen");
+    this.skillTreeOpen = !this.skillTreeOpen;
+    this.skillTreeUI.toggleSkillTree(
+      this.skillTreeOpen,
+      this.state.players[this.playerId] || {},
+      SKILL_INFO,
+    );
   }
 
   /**
