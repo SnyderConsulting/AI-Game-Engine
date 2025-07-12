@@ -13,7 +13,8 @@ export function setupLobby(startGame) {
 
   createBtn?.addEventListener("click", async () => {
     try {
-      const res = await fetch("/api/games", { method: "POST" });
+      const apiUrl = `http://${window.location.hostname}:8000/api/games`;
+      const res = await fetch(apiUrl, { method: "POST" });
       if (!res.ok) return;
       const data = await res.json();
       lobby.style.display = "none";
