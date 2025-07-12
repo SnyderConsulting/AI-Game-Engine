@@ -1,6 +1,8 @@
 import { GameScene } from "./scenes/game-scene.js";
+import { setupLobby } from "./components/lobby.js";
 
-const scene = new GameScene();
+let SceneClass = GameScene;
+let scene;
 
 function gameLoop() {
   scene.update();
@@ -8,13 +10,37 @@ function gameLoop() {
   requestAnimationFrame(gameLoop);
 }
 
-window.addEventListener("resize", () => scene.resizeCanvas());
-window.addEventListener("keydown", (e) => scene.handleKeyDown(e));
-window.addEventListener("keyup", (e) => scene.handleKeyUp(e));
-scene.canvas.addEventListener("mousemove", (e) => scene.handleMouseMove(e));
-scene.canvas.addEventListener("mousedown", (e) => scene.handleMouseDown(e));
-scene.canvas.addEventListener("mouseup", (e) => scene.handleMouseUp(e));
-scene.canvas.addEventListener("contextmenu", (e) => e.preventDefault());
+/**
+ * Start a new game connected to the given session.
+ *
+ * @param {string} gameId - Identifier of the game session.
+ * @returns {void}
+ */
+export function startGame(gameId) {
+  scene = new SceneClass();
+  const wsUrl = `ws://${window.location.hostname}:8000/ws/game/${gameId}`;
+  scene.initWebSocket(wsUrl);
 
-scene.startGame();
-requestAnimationFrame(gameLoop);
+  window.addEventListener("resize", () => scene.resizeCanvas());
+  window.addEventListener("keydown", (e) => scene.handleKeyDown(e));
+  window.addEventListener("keyup", (e) => scene.handleKeyUp(e));
+  scene.canvas.addEventListener("mousemove", (e) => scene.handleMouseMove(e));
+  scene.canvas.addEventListener("mousedown", (e) => scene.handleMouseDown(e));
+  scene.canvas.addEventListener("mouseup", (e) => scene.handleMouseUp(e));
+  scene.canvas.addEventListener("contextmenu", (e) => e.preventDefault());
+
+  scene.startGame();
+  requestAnimationFrame(gameLoop);
+}
+
+/**
+ * Override the internal GameScene constructor for testing purposes.
+ *
+ * @param {typeof GameScene} cls - Replacement class.
+ * @returns {void}
+ */
+export function __setGameSceneClass(cls) {
+  SceneClass = cls;
+}
+
+setupLobby(startGame);

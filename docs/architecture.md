@@ -18,10 +18,14 @@ This project is split into separate frontend and backend components.
   UUID and immediately sends a "welcome" message containing this ID. A new game
   can be created via the `/api/games` HTTP endpoint. The service began with a
   simple health check but is structured for future realtime features. The
-  **frontend** connects to this WebSocket when a `GameScene` is created and
-  forwards player input messages over the socket. Input includes `moveX` and
-  `moveY` deltas along with the mouse facing vector. The server interprets these
-  values using the `GameManager` to update each player's authoritative state.
+  Clients first see a lobby screen that can create or join a session using the
+  `/api/games` endpoint. The lobby passes the chosen `gameId` to a
+  `startGame(gameId)` function which instantiates `GameScene` and connects to a
+  WebSocket at `ws://${hostname}:8000/ws/game/${gameId}`. Once connected the
+  lobby hides and the game canvas becomes active. The game scene then forwards
+  player input messages over the socket. Input includes `moveX` and `moveY`
+  deltas along with the mouse facing vector. The server interprets these values
+  using the `GameManager` to update each player's authoritative state.
   Facing is kept as normalized `facing_x` and `facing_y` numbers so the player
   can point in any direction.
   A background task started on application startup runs a server game loop that

@@ -243,7 +243,6 @@ export class GameScene {
       this.startGame();
     });
     this.resizeCanvas();
-    this.initWebSocket();
   }
 
   /**
@@ -259,11 +258,11 @@ export class GameScene {
   /**
    * Establish a WebSocket connection to the backend.
    *
-   * Logs connection lifecycle events for debugging.
+   * @param {string} url - WebSocket endpoint to connect to.
    * @returns {void}
    */
-  initWebSocket() {
-    this.ws = new WebSocket("ws://localhost:8000/ws/game");
+  initWebSocket(url) {
+    this.ws = new WebSocket(url);
     this.ws.addEventListener("open", () => {
       console.log("Connected to game WebSocket");
     });
