@@ -37,6 +37,7 @@ async def game_loop() -> None:
 
     while True:
         for session in manager.get_all_sessions().values():
+            session.update_world()
             state = session.get_game_state().dict()
             for websocket in list(session.get_connections().values()):
                 try:
