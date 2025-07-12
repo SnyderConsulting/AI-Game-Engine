@@ -25,9 +25,11 @@ Shelving now forms organized aisles built from steel, wood, and plastic segments
 Use crafted tools like the **Hammer**, **Crowbar**, or **Axe** to chip away at shelves. Melee swings now deal more damage so only a handful are needed to break a shelf. Once its health reaches zero the shelf disappears, dropping building materials.
 Collision detection for melee swings uses the closest point on the shelf, so striking from the side reliably damages it.
 
-If a zombie touches you, the game ends and a **New Game** button appears so you can immediately play again.
+If a zombie touches you it now deals damage over time. When your health reaches zero the game ends and a **New Game** button appears so you can immediately play again.
 
 The canvas now automatically resizes to fill the entire browser window so the action takes up all available space.
+
+The viewport now scales using the window height and follows your character so wide monitors reveal more of the arena instead of stretching the image.
 
 Players now have a small health pool instead of dying instantly. A "Health" display shows the remaining points. Each zombie has a green health bar with a red background above its head so damage is immediately visible.
 The on-screen control instructions are fixed to the bottom-left corner so they never cover the health readout.
