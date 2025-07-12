@@ -36,6 +36,23 @@
     </style>
   </head>
   <body>
+    <div
+      id="lobby"
+      style="
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 1;
+      "
+    >
+      <button id="createGameBtn">Create Game</button>
+      <input id="gameIdInput" placeholder="Game ID" />
+      <button id="joinGameBtn">Join Game</button>
+    </div>
     <canvas
       id="gameCanvas"
       style="display: block; width: 100vw; height: 100vh"
