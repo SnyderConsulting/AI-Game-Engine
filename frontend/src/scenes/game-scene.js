@@ -66,6 +66,9 @@ export class GameScene {
     this.canvas = document.getElementById("gameCanvas");
     this.ctx = this.canvas.getContext("2d");
 
+    /** @type {string|null} Unique id assigned by the server. */
+    this.playerId = null;
+
     this.mainMenu = document.getElementById("mainMenu");
     this.startBtn = document.getElementById("startBtn");
     this.gameOverDiv = document.getElementById("gameOver");
@@ -278,15 +281,28 @@ export class GameScene {
   /**
    * Update local player state based on a WebSocket message.
    *
-   * @param {string} data - JSON encoded game state from the server.
+   * The server initially sends a `welcome` message containing the assigned
+   * `playerId`. All subsequent messages contain the full game state so the
+   * client can update its local objects.
+   *
+   * @param {string} data - JSON encoded payload from the server.
    * @returns {void}
    */
   handleServerMessage(data) {
     try {
       const state = JSON.parse(data);
+
+      // Connection handshake message contains the player's ID.
+      if (state.type === "welcome") {
+        this.playerId = state.playerId;
+        return;
+      }
+
       const ids = Object.keys(state.players || {});
       if (ids.length === 0) return;
-      const serverPlayer = state.players[ids[0]];
+
+      const id = this.playerId || ids[0];
+      const serverPlayer = state.players[id];
       if (!serverPlayer) return;
       this.player.x = serverPlayer.x;
       this.player.y = serverPlayer.y;

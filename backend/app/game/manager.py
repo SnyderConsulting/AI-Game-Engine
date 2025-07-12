@@ -1,6 +1,7 @@
 """Holds the authoritative game state on the server."""
 
 from typing import Any, Dict
+from uuid import uuid4
 
 from fastapi import WebSocket
 
@@ -15,13 +16,21 @@ class GameManager:
         # Track active WebSocket connections for broadcasting state
         self.connections: Dict[str, WebSocket] = {}
 
-    def add_player(self, player_id: str, websocket: WebSocket) -> None:
-        """Add a new player to the game with default state and store connection."""
+    def add_player(self, websocket: WebSocket) -> str:
+        """Add a new player with a unique ID and store the WebSocket connection.
 
+        Returns
+        -------
+        str
+            The generated player ID.
+        """
+
+        player_id = str(uuid4())
         self.state.players[player_id] = PlayerState(
             x=0.0, y=0.0, facing_x=0.0, facing_y=1.0
         )
         self.connections[player_id] = websocket
+        return player_id
 
     def remove_player(self, player_id: str) -> None:
         """Remove a player from the game if present and drop connection."""

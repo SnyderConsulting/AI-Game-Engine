@@ -10,17 +10,22 @@ from app.game.manager import manager
 
 def test_websocket_connection():
     with TestClient(app) as client:
-        with client.websocket_connect("/ws/game"):
-            pass
+        with client.websocket_connect("/ws/game") as ws:
+            welcome = ws.receive_json()
+            assert welcome["type"] == "welcome"
+            assert "playerId" in welcome
 
 
 def test_update_player_state_via_websocket():
     with TestClient(app) as client:
         with client.websocket_connect("/ws/game") as ws:
-            player_id = next(iter(manager.state.players))
+            welcome = ws.receive_json()
+            player_id = welcome["playerId"]
+
             ws.send_json(
                 {"action": "move", "moveX": 2, "moveY": 0, "facingX": 1, "facingY": 0}
             )
+
             import time
 
             time.sleep(0.05)
@@ -32,8 +37,9 @@ def test_update_player_state_via_websocket():
 
 def test_game_state_broadcast():
     with TestClient(app) as client:
-        with client.websocket_connect("/ws/game"):
-            player_id = next(iter(manager.state.players))
+        with client.websocket_connect("/ws/game") as ws:
+            welcome = ws.receive_json()
+            player_id = welcome["playerId"]
             ws_obj = manager.connections[player_id]
 
             from unittest.mock import AsyncMock
@@ -45,3 +51,5 @@ def test_game_state_broadcast():
 
             time.sleep(0.2)
             assert send_spy.called
+            sent_state = send_spy.call_args[0][0]
+            assert player_id in sent_state["players"]
