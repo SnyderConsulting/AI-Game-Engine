@@ -59,8 +59,7 @@ export class GameScene {
     this.skillTreeOpen = false;
 
     this.scale = 1;
-    this.offsetX = 0;
-    this.offsetY = 0;
+    this.camera = { x: 0, y: 0, width: 0, height: 0 };
   }
 
   /**
@@ -118,12 +117,9 @@ export class GameScene {
     const displayH = window.innerHeight;
     this.canvas.width = displayW;
     this.canvas.height = displayH;
-    this.scale = Math.min(
-      displayW / this.state.width,
-      displayH / this.state.height,
-    );
-    this.offsetX = (displayW / this.scale - this.state.width) / 2;
-    this.offsetY = (displayH / this.scale - this.state.height) / 2;
+    this.scale = displayH / this.state.height;
+    this.camera.width = displayW / this.scale;
+    this.camera.height = displayH / this.scale;
   }
 
   /**
@@ -157,7 +153,8 @@ export class GameScene {
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     ctx.setTransform(this.scale, 0, 0, this.scale, 0, 0);
-    ctx.translate(this.offsetX, this.offsetY);
+    this.updateCamera();
+    ctx.translate(-this.camera.x, -this.camera.y);
     this.state.walls.forEach((w) => {
       const img = WALL_IMAGES[w.material];
       if (img && img.complete) {
@@ -191,6 +188,7 @@ export class GameScene {
     });
     const player = this.state.players[this.playerId];
     if (player) {
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
       this.hud.render(ctx, player, { slots: [], hotbar: [] }, () => 0);
     }
   }
@@ -232,6 +230,23 @@ export class GameScene {
 
   toggleSkillTree() {
     this.togglePanel(this.skillTreeDiv, "skillTreeOpen");
+  }
+
+  /**
+   * Update the camera position to center on the active player.
+   * @returns {void}
+   */
+  updateCamera() {
+    const p = this.state.players[this.playerId];
+    if (!p) return;
+    const halfW = this.camera.width / 2;
+    const halfH = this.camera.height / 2;
+    let cx = p.x - halfW;
+    let cy = p.y - halfH;
+    cx = Math.max(0, Math.min(cx, this.state.width - this.camera.width));
+    cy = Math.max(0, Math.min(cy, this.state.height - this.camera.height));
+    this.camera.x = cx;
+    this.camera.y = cy;
   }
 
   /**

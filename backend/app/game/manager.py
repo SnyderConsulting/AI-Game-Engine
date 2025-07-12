@@ -5,6 +5,7 @@ from uuid import uuid4
 
 from fastapi import WebSocket
 import random
+import math
 
 from .models import CONTAINER_LOOT, GameState, PlayerState
 from .world import generate_world, spawn_player, update_zombies
@@ -61,6 +62,19 @@ class GameSession:
             self.state.width,
             self.state.height,
         )
+        for player in self.state.players.values():
+            if player.damage_cooldown > 0:
+                player.damage_cooldown -= 1
+        for zombie in self.state.zombies:
+            if zombie.attack_cooldown > 0:
+                zombie.attack_cooldown -= 1
+            for player in self.state.players.values():
+                dist = math.hypot(player.x - zombie.x, player.y - zombie.y)
+                if dist < 16 and zombie.attack_cooldown == 0:
+                    if player.damage_cooldown == 0:
+                        player.health = max(0, player.health - 1)
+                        player.damage_cooldown = 30
+                    zombie.attack_cooldown = 30
 
     def update_player_state(self, player_id: str, input_data: Dict[str, Any]) -> None:
         """Update the player's state using the received input."""

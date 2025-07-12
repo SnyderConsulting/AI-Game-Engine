@@ -66,8 +66,8 @@ data to these sprites so walls, containers and characters use the textures found
 in the `assets/` directory. The inventory UI now reads the authoritative player
 state sent over the WebSocket to populate its slots and hotbar.
 
-`GameScene` automatically scales the canvas to fit the browser window. The scene
-calculates a scale factor based on the server's world dimensions so the view is
-consistent on large and small displays. Rendering is performed with a transform
-that centers the world and avoids the zoomed in appearance seen in earlier
-builds.
+`GameScene` automatically scales the canvas using the browser window height.
+A small camera object keeps the player centered and clamps the view to the
+world bounds so wide screens simply reveal more of the arena instead of
+stretching the image. Rendering is performed with this transform to avoid the
+zoomed in appearance seen in earlier builds.
