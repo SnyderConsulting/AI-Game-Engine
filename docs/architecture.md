@@ -16,10 +16,11 @@ This project is split into separate frontend and backend components.
   capable of creating multiple `GameSession` objects. Each session tracks its
   own players and connections. When a client connects the session assigns it a
   UUID and immediately sends a "welcome" message containing this ID. A new game
-  can be created via the `/api/games` HTTP endpoint. The service began with a
-  simple health check but is structured for future realtime features. The
-  Clients first see a lobby screen that can create or join a session using the
-  `/api/games` endpoint. The lobby passes the chosen `gameId` to a
+  can be created via the `http://${hostname}:8000/api/games` HTTP endpoint. The
+  service began with a simple health check but is structured for future
+  realtime features. The Clients first see a lobby screen that can create or
+  join a session using the same `http://${hostname}:8000/api/games` endpoint.
+  The lobby passes the chosen `gameId` to a
   `startGame(gameId)` function which instantiates `GameScene` and connects to a
   WebSocket at `ws://${hostname}:8000/ws/game/${gameId}`. Once connected the
   lobby hides and the game canvas becomes active. The game scene then forwards

@@ -38,9 +38,7 @@ class GameSession:
         self.state.players.pop(player_id, None)
         self.connections.pop(player_id, None)
 
-    def update_player_state(
-        self, player_id: str, input_data: Dict[str, Any]
-    ) -> None:
+    def update_player_state(self, player_id: str, input_data: Dict[str, Any]) -> None:
         """Update the player's state using the received input."""
 
         player = self.state.players.get(player_id)
