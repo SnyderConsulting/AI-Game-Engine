@@ -14,9 +14,12 @@ class GameSession:
 
     def __init__(self) -> None:
         self.state = GameState(players={})
-        walls, zombies, door = generate_world(self.state.width, self.state.height)
+        walls, zombies, containers, door = generate_world(
+            self.state.width, self.state.height
+        )
         self.state.walls = walls
         self.state.zombies = zombies
+        self.state.containers = containers
         self.spawn_door = door
         # Track active WebSocket connections for broadcasting state
         self.connections: Dict[str, WebSocket] = {}

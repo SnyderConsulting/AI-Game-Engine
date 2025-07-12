@@ -2,7 +2,9 @@
 
 This repository includes a minimal zombie survival demo to showcase basic
 canvas-based gameplay. The game world is generated on the backend so every
-connected client sees the same layout and AI behavior.
+connected client sees the same layout and AI behavior. The server now builds the
+full hardware store map with shelves and searchable containers so the client can
+render a rich environment from the authoritative state.
 
 ## Running the Example
 
