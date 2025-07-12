@@ -57,6 +57,10 @@ export class GameScene {
     this.inventoryOpen = false;
     this.craftingOpen = false;
     this.skillTreeOpen = false;
+
+    this.scale = 1;
+    this.offsetX = 0;
+    this.offsetY = 0;
   }
 
   /**
@@ -110,8 +114,16 @@ export class GameScene {
    * @returns {void}
    */
   resizeCanvas() {
-    this.canvas.width = this.state.width;
-    this.canvas.height = this.state.height;
+    const displayW = window.innerWidth;
+    const displayH = window.innerHeight;
+    this.canvas.width = displayW;
+    this.canvas.height = displayH;
+    this.scale = Math.min(
+      displayW / this.state.width,
+      displayH / this.state.height,
+    );
+    this.offsetX = (displayW / this.scale - this.state.width) / 2;
+    this.offsetY = (displayH / this.scale - this.state.height) / 2;
   }
 
   /**
@@ -142,7 +154,10 @@ export class GameScene {
    */
   render() {
     const ctx = this.ctx;
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    ctx.setTransform(this.scale, 0, 0, this.scale, 0, 0);
+    ctx.translate(this.offsetX, this.offsetY);
     this.state.walls.forEach((w) => {
       const img = WALL_IMAGES[w.material];
       if (img && img.complete) {
