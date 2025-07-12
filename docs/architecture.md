@@ -35,9 +35,10 @@ This project is split into separate frontend and backend components.
   complete game state to all connected clients roughly 60 times per second.
 
 All map generation and AI logic now live exclusively on the backend. When a game
-session is created the server generates the walls, spawn door and initial
-zombies exactly once. Clients merely render this shared state and relay player
-input.
+session is created the server procedurally generates the hardware store layout
+including shelves and loot containers. It also creates a spawn door and an
+initial wave of zombies. Clients merely render this shared state and relay
+player input.
 
 Both sides communicate via HTTP or WebSockets. The repository emphasizes clear separation of concerns and maintainable code.
 The gameplay state is managed by a `GameScene` class in `frontend/src/scenes/game-scene.js`. It owns the player, zombies and other world objects and exposes `update` and `render` methods used by `main.js`.

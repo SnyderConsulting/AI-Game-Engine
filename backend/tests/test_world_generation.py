@@ -10,3 +10,4 @@ def test_world_generated_on_session_create():
     session = GameSession()
     assert len(session.state.walls) > 0
     assert len(session.state.zombies) > 0
+    assert len(session.state.containers) > 0
