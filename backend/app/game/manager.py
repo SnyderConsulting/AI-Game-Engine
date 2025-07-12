@@ -6,6 +6,7 @@ from uuid import uuid4
 from fastapi import WebSocket
 
 from .models import GameState, PlayerState
+from .world import generate_world, spawn_player, update_zombies
 
 
 class GameSession:
@@ -13,6 +14,10 @@ class GameSession:
 
     def __init__(self) -> None:
         self.state = GameState(players={})
+        walls, zombies, door = generate_world(self.state.width, self.state.height)
+        self.state.walls = walls
+        self.state.zombies = zombies
+        self.spawn_door = door
         # Track active WebSocket connections for broadcasting state
         self.connections: Dict[str, WebSocket] = {}
 
@@ -26,8 +31,12 @@ class GameSession:
         """
 
         player_id = str(uuid4())
+        x, y = spawn_player(self.state.width, self.state.height, self.state.walls)
         self.state.players[player_id] = PlayerState(
-            x=0.0, y=0.0, facing_x=0.0, facing_y=1.0
+            x=x,
+            y=y,
+            facing_x=0.0,
+            facing_y=1.0,
         )
         self.connections[player_id] = websocket
         return player_id
@@ -37,6 +46,17 @@ class GameSession:
 
         self.state.players.pop(player_id, None)
         self.connections.pop(player_id, None)
+
+    def update_world(self) -> None:
+        """Advance the game simulation one step."""
+
+        update_zombies(
+            self.state.zombies,
+            list(self.state.players.values()),
+            self.state.walls,
+            self.state.width,
+            self.state.height,
+        )
 
     def update_player_state(self, player_id: str, input_data: Dict[str, Any]) -> None:
         """Update the player's state using the received input."""

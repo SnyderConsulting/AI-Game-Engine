@@ -1,6 +1,8 @@
 # Zombie Survival Example
 
-This repository includes a minimal zombie survival demo to showcase basic canvas-based gameplay.
+This repository includes a minimal zombie survival demo to showcase basic
+canvas-based gameplay. The game world is generated on the backend so every
+connected client sees the same layout and AI behavior.
 
 ## Running the Example
 

@@ -24,6 +24,7 @@ def test_update_player_state_via_websocket():
             welcome = ws.receive_json()
             player_id = welcome["playerId"]
 
+            start_x = manager.get_session(game_id).state.players[player_id].x
             ws.send_json(
                 {
                     "action": "move",
@@ -38,7 +39,7 @@ def test_update_player_state_via_websocket():
 
             time.sleep(0.05)
             player = manager.get_session(game_id).state.players[player_id]
-            assert player.x == 2
+            assert player.x == start_x + 2
             assert player.facing_x == 1
             assert player.facing_y == 0
 
@@ -62,3 +63,5 @@ def test_game_state_broadcast():
             assert send_spy.called
             sent_state = send_spy.call_args[0][0]
             assert player_id in sent_state["players"]
+            assert "walls" in sent_state
+            assert "zombies" in sent_state
