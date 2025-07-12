@@ -22,12 +22,12 @@ This project is split into separate frontend and backend components.
   `http://localhost:3000` so the Vite server can call the API. The Clients first see a lobby screen that can create or
   join a session using the same `http://${hostname}:8000/api/games` endpoint.
   The lobby passes the chosen `gameId` to a
-  `startGame(gameId)` function which instantiates `GameScene` and connects to a
-  WebSocket at `ws://${hostname}:8000/ws/game/${gameId}`. Once connected the
-  lobby hides and the game canvas becomes active. The game scene then forwards
-  player input messages over the socket. Input includes `moveX` and `moveY`
-  deltas along with the mouse facing vector. The server interprets these values
-  using the `GameManager` to update each player's authoritative state.
+  `startGame(gameId)` function which constructs a `GameScene`, attaches keyboard
+  event listeners, and connects to a WebSocket at
+  `ws://${hostname}:8000/ws/game/${gameId}`. Once connected the lobby hides and
+  the game canvas becomes active. The scene forwards player input messages over
+  the socket such as `moveX` and `moveY` deltas. The server interprets these
+  values using the `GameManager` to update each player's authoritative state.
   Facing is kept as normalized `facing_x` and `facing_y` numbers so the player
   can point in any direction.
   A background task started on application startup runs a server game loop that
