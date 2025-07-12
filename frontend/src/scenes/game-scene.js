@@ -1,6 +1,7 @@
 /**
  * Minimal client scene that renders the authoritative state from the server.
  */
+import { createHUD } from "../components/hud.js";
 
 export class GameScene {
   /**
@@ -24,6 +25,17 @@ export class GameScene {
     };
 
     this.keys = {};
+
+    this.inventoryDiv = document.getElementById("inventory");
+    this.craftingDiv = document.getElementById("craftingMenu");
+    this.skillTreeDiv = document.getElementById("skillTree");
+    this.hud = createHUD({
+      pickupMsg: document.getElementById("pickupMessage"),
+      waveCounterDiv: document.getElementById("waveCounter"),
+    });
+    this.inventoryOpen = false;
+    this.craftingOpen = false;
+    this.skillTreeOpen = false;
   }
 
   /**
@@ -69,6 +81,7 @@ export class GameScene {
    * @returns {void}
    */
   update() {
+    this.hud.update();
     if (!this.ws || this.ws.readyState !== WebSocket.OPEN) return;
     const moveX = (this.keys["d"] ? 1 : 0) - (this.keys["a"] ? 1 : 0);
     const moveY = (this.keys["s"] ? 1 : 0) - (this.keys["w"] ? 1 : 0);
@@ -109,6 +122,27 @@ export class GameScene {
       ctx.arc(z.x, z.y, 10, 0, Math.PI * 2);
       ctx.fill();
     });
+    const player = this.state.players[this.playerId];
+    if (player) {
+      this.hud.render(ctx, player, { slots: [], hotbar: [] }, () => 0);
+    }
+  }
+
+  togglePanel(div, flag) {
+    this[flag] = !this[flag];
+    div.style.display = this[flag] ? "block" : "none";
+  }
+
+  toggleInventory() {
+    this.togglePanel(this.inventoryDiv, "inventoryOpen");
+  }
+
+  toggleCrafting() {
+    this.togglePanel(this.craftingDiv, "craftingOpen");
+  }
+
+  toggleSkillTree() {
+    this.togglePanel(this.skillTreeDiv, "skillTreeOpen");
   }
 
   /**
@@ -117,7 +151,24 @@ export class GameScene {
    * @returns {void}
    */
   handleKeyDown(e) {
-    this.keys[e.key.toLowerCase()] = true;
+    const k = e.key.toLowerCase();
+    this.keys[k] = true;
+    if (k === "i" || k === "e") this.toggleInventory();
+    else if (k === "c") this.toggleCrafting();
+    else if (k === "k") this.toggleSkillTree();
+    else if (k === "f") {
+      const player = this.state.players[this.playerId];
+      if (player) {
+        const target = this.state.containers?.find(
+          (c) => !c.opened && Math.hypot(c.x - player.x, c.y - player.y) < 20,
+        );
+        if (target && this.ws && this.ws.readyState === WebSocket.OPEN) {
+          this.ws.send(
+            JSON.stringify({ action: "loot", containerId: target.id }),
+          );
+        }
+      }
+    }
   }
 
   /**

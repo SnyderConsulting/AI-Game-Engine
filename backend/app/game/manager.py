@@ -4,8 +4,9 @@ from typing import Any, Dict, Optional
 from uuid import uuid4
 
 from fastapi import WebSocket
+import random
 
-from .models import GameState, PlayerState
+from .models import CONTAINER_LOOT, GameState, PlayerState
 from .world import generate_world, spawn_player, update_zombies
 
 
@@ -87,6 +88,13 @@ class GameSession:
                     player.y -= speed
                 elif direction == "down":
                     player.y += speed
+        elif input_data.get("action") == "loot":
+            cid = input_data.get("containerId")
+            for c in self.state.containers:
+                if c.id == cid and not c.opened:
+                    c.opened = True
+                    c.item = random.choice(CONTAINER_LOOT)
+                    break
 
         facing_x = input_data.get("facingX")
         facing_y = input_data.get("facingY")

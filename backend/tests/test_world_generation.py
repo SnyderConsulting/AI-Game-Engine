@@ -11,3 +11,4 @@ def test_world_generated_on_session_create():
     assert len(session.state.walls) > 0
     assert len(session.state.zombies) > 0
     assert len(session.state.containers) > 0
+    assert session.state.containers[0].id
