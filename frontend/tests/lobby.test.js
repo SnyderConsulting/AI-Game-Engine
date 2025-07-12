@@ -36,3 +36,11 @@ test("startGame constructs websocket URL with gameId", () => {
   startGame("abc123");
   assert.ok(capturedUrl.endsWith("/abc123"));
 });
+
+test("startGame hides the main menu if present", () => {
+  const menu = document.createElement("div");
+  menu.id = "mainMenu";
+  document.body.appendChild(menu);
+  startGame("test-id");
+  assert.strictEqual(menu.style.display, "none");
+});

@@ -25,7 +25,7 @@ This project is split into separate frontend and backend components.
   `startGame(gameId)` function which constructs a `GameScene`, attaches keyboard
   event listeners, and connects to a WebSocket at
   `ws://${hostname}:8000/ws/game/${gameId}`. Once connected the lobby hides and
-  the game canvas becomes active. The scene forwards player input messages over
+  the start menu overlay is removed so the game canvas becomes active. The scene forwards player input messages over
   the socket such as `moveX` and `moveY` deltas. The server interprets these
   values using the `GameManager` to update each player's authoritative state.
   Facing is kept as normalized `facing_x` and `facing_y` numbers so the player

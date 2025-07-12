@@ -21,6 +21,10 @@ export function startGame(gameId) {
   const wsUrl = `ws://${window.location.hostname}:8000/ws/game/${gameId}`;
   scene.initWebSocket(wsUrl);
 
+  // Hide splash screen so the canvas is visible once the session starts
+  const menu = document.getElementById("mainMenu");
+  if (menu) menu.style.display = "none";
+
   window.addEventListener("resize", () => scene.resizeCanvas());
   window.addEventListener("keydown", (e) => scene.handleKeyDown(e));
   window.addEventListener("keyup", (e) => scene.handleKeyUp(e));
