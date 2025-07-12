@@ -12,8 +12,8 @@ async def game_ws(websocket: WebSocket) -> None:
     """Handle a websocket connection from a game client."""
 
     await websocket.accept()
-    player_id = str(id(websocket))
-    manager.add_player(player_id, websocket)
+    player_id = manager.add_player(websocket)
+    await websocket.send_json({"type": "welcome", "playerId": player_id})
     print(f"Player {player_id} connected")
     try:
         while True:
