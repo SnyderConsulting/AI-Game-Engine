@@ -65,3 +65,18 @@ def test_game_state_broadcast():
             assert player_id in sent_state["players"]
             assert "walls" in sent_state
             assert "zombies" in sent_state
+
+
+def test_loot_container_command():
+    with TestClient(app) as client:
+        game_id = manager.create_game_session()
+        container_id = manager.get_session(game_id).state.containers[0].id
+        with client.websocket_connect(f"/ws/game/{game_id}") as ws:
+            ws.receive_json()
+            ws.send_json({"action": "loot", "containerId": container_id})
+            import time
+
+            time.sleep(0.05)
+            cont = manager.get_session(game_id).state.containers[0]
+            assert cont.opened is True
+            assert cont.item is not None

@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 from typing import Dict, List, Optional
+from uuid import uuid4
+from pydantic import Field
 
 from pydantic import BaseModel
 
@@ -135,6 +137,7 @@ CONTAINER_LOOT = ["scrap_metal", "duct_tape", "nails", "medkit"]
 class ContainerState(BaseModel):
     """Lootable container such as a cardboard box."""
 
+    id: str = Field(default_factory=lambda: str(uuid4()))
     x: float
     y: float
     opened: bool = False
