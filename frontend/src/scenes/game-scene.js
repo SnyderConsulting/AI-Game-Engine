@@ -2,6 +2,10 @@
  * Minimal client scene that renders the authoritative state from the server.
  */
 import { createHUD } from "../components/hud.js";
+import { ITEM_ICONS } from "../items.js";
+import { loadImages } from "../utils/assets.js";
+import { WALL_IMAGES } from "../entities/walls.js";
+import { createInventoryUI } from "../components/inventory-ui.js";
 
 export class GameScene {
   /**
@@ -32,6 +36,23 @@ export class GameScene {
     this.hud = createHUD({
       pickupMsg: document.getElementById("pickupMessage"),
       waveCounterDiv: document.getElementById("waveCounter"),
+    });
+    this.itemImages = loadImages(ITEM_ICONS);
+    this.playerSprite = loadImages({
+      player: "assets/sprite_player.png",
+    }).player;
+    this.zombieSprite = loadImages({ z: "assets/sprite_zombie.png" }).z;
+    this.fireZombieSprite = loadImages({
+      f: "assets/sprite_fire_zombie.png",
+    }).f;
+    this.cardboardBoxImg = loadImages({ box: "assets/cardboard_box.png" }).box;
+    this.inventoryUI = createInventoryUI({
+      inventoryDiv: this.inventoryDiv,
+      inventoryGrid: document.getElementById("inventoryGrid"),
+      hotbarDiv: document.getElementById("hotbar"),
+      inventoryBar: document.getElementById("inventoryBar"),
+      inventoryClose: document.getElementById("inventoryClose"),
+      inventoryPos: { left: null, top: null },
     });
     this.inventoryOpen = false;
     this.craftingOpen = false;
@@ -65,6 +86,23 @@ export class GameScene {
     }
     this.state = msg;
     this.resizeCanvas();
+    const player = this.state.players[this.playerId];
+    if (player && player.inventory && this.inventoryOpen) {
+      this.inventoryUI.renderInventory(
+        player.inventory,
+        player,
+        {},
+        this.itemImages,
+        () => ({ remaining: 0, max: 0 }),
+      );
+      this.inventoryUI.renderHotbar(
+        player.inventory,
+        player,
+        {},
+        this.itemImages,
+        () => ({ remaining: 0, max: 0 }),
+      );
+    }
   }
 
   /**
@@ -105,22 +143,36 @@ export class GameScene {
   render() {
     const ctx = this.ctx;
     ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    ctx.fillStyle = "gray";
     this.state.walls.forEach((w) => {
-      ctx.fillRect(w.x, w.y, w.size, w.size);
+      const img = WALL_IMAGES[w.material];
+      if (img && img.complete) {
+        ctx.drawImage(img, w.x, w.y, w.size, w.size);
+      } else {
+        ctx.fillStyle = "gray";
+        ctx.fillRect(w.x, w.y, w.size, w.size);
+      }
     });
-    ctx.fillStyle = "green";
     Object.entries(this.state.players).forEach(([id, p]) => {
-      ctx.fillStyle = id === this.playerId ? "blue" : "green";
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, 10, 0, Math.PI * 2);
-      ctx.fill();
+      const img = this.playerSprite;
+      const angle = Math.atan2(p.facing_y, p.facing_x) - Math.PI / 2;
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(angle);
+      ctx.drawImage(img, -16, -16, 32, 32);
+      ctx.restore();
     });
-    ctx.fillStyle = "red";
     this.state.zombies.forEach((z) => {
-      ctx.beginPath();
-      ctx.arc(z.x, z.y, 10, 0, Math.PI * 2);
-      ctx.fill();
+      const img =
+        z.variant === "fire" ? this.fireZombieSprite : this.zombieSprite;
+      const angle = Math.atan2(z.facing_y, z.facing_x) - Math.PI / 2;
+      ctx.save();
+      ctx.translate(z.x, z.y);
+      ctx.rotate(angle);
+      ctx.drawImage(img, -16, -16, 32, 32);
+      ctx.restore();
+    });
+    this.state.containers?.forEach((c) => {
+      ctx.drawImage(this.cardboardBoxImg, c.x - 10, c.y - 10, 20, 20);
     });
     const player = this.state.players[this.playerId];
     if (player) {
@@ -134,7 +186,29 @@ export class GameScene {
   }
 
   toggleInventory() {
-    this.togglePanel(this.inventoryDiv, "inventoryOpen");
+    const player = this.state.players[this.playerId];
+    if (player && player.inventory) {
+      this.inventoryOpen = !this.inventoryOpen;
+      this.inventoryUI.toggleInventory(this.inventoryOpen);
+      if (this.inventoryOpen) {
+        this.inventoryUI.renderInventory(
+          player.inventory,
+          player,
+          {},
+          this.itemImages,
+          () => ({ remaining: 0, max: 0 }),
+        );
+        this.inventoryUI.renderHotbar(
+          player.inventory,
+          player,
+          {},
+          this.itemImages,
+          () => ({ remaining: 0, max: 0 }),
+        );
+      }
+    } else {
+      this.togglePanel(this.inventoryDiv, "inventoryOpen");
+    }
   }
 
   toggleCrafting() {
