@@ -12,11 +12,12 @@ This project is split into separate frontend and backend components.
   accept drops.
   Game systems such as rendering, abilities and collisions reside in `frontend/src/systems/` to keep the main loop minimal. The collision system manages all projectile interactions as well as player contacts with zombies and world items.
 - **Backend**: Python FastAPI service providing API endpoints. It now exposes a
-  WebSocket endpoint at `/ws/game` and includes a lightweight `GameManager`
-  responsible for tracking connected players. When a client connects the
-  manager assigns it a UUID and immediately sends a "welcome" message
-  containing this ID. The service began with a simple
-  health check but is structured for future realtime features. The
+  WebSocket endpoint at `/ws/game/{game_id}` and includes a `GameManager`
+  capable of creating multiple `GameSession` objects. Each session tracks its
+  own players and connections. When a client connects the session assigns it a
+  UUID and immediately sends a "welcome" message containing this ID. A new game
+  can be created via the `/api/games` HTTP endpoint. The service began with a
+  simple health check but is structured for future realtime features. The
   **frontend** connects to this WebSocket when a `GameScene` is created and
   forwards player input messages over the socket. Input includes `moveX` and
   `moveY` deltas along with the mouse facing vector. The server interprets these

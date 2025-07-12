@@ -1,6 +1,6 @@
 """Holds the authoritative game state on the server."""
 
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 from uuid import uuid4
 
 from fastapi import WebSocket
@@ -8,8 +8,8 @@ from fastapi import WebSocket
 from .models import GameState, PlayerState
 
 
-class GameManager:
-    """Manage players and expose the current game state."""
+class GameSession:
+    """A single game session with its own state and connections."""
 
     def __init__(self) -> None:
         self.state = GameState(players={})
@@ -38,7 +38,9 @@ class GameManager:
         self.state.players.pop(player_id, None)
         self.connections.pop(player_id, None)
 
-    def update_player_state(self, player_id: str, input_data: Dict[str, Any]) -> None:
+    def update_player_state(
+        self, player_id: str, input_data: Dict[str, Any]
+    ) -> None:
         """Update the player's state using the received input."""
 
         player = self.state.players.get(player_id)
@@ -80,6 +82,31 @@ class GameManager:
         """Return the current active websocket connections."""
 
         return self.connections
+
+
+class GameManager:
+    """Manage multiple game sessions."""
+
+    def __init__(self) -> None:
+        # Map of game_id -> GameSession
+        self.game_sessions: Dict[str, GameSession] = {}
+
+    def create_game_session(self) -> str:
+        """Create a new ``GameSession`` and return its ID."""
+
+        game_id = str(uuid4())
+        self.game_sessions[game_id] = GameSession()
+        return game_id
+
+    def get_session(self, game_id: str) -> Optional[GameSession]:
+        """Return the session matching ``game_id`` if it exists."""
+
+        return self.game_sessions.get(game_id)
+
+    def get_all_sessions(self) -> Dict[str, GameSession]:
+        """Return all active game sessions."""
+
+        return self.game_sessions
 
 
 # Single global instance used by API routes
