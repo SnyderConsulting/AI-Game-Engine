@@ -231,6 +231,72 @@ def spawn_player(
     return random_open_position(width, height, walls)
 
 
+def find_path(
+    start: PlayerState | ZombieState,
+    goal: PlayerState | ZombieState,
+    walls: List[WallState],
+    width: int,
+    height: int,
+) -> List[Tuple[int, int]]:
+    """Return a grid path from ``start`` to ``goal`` avoiding walls.
+
+    Parameters
+    ----------
+    start : PlayerState | ZombieState
+        Entity representing the starting point.
+    goal : PlayerState | ZombieState
+        Entity representing the destination.
+    walls : list[WallState]
+        Impassable wall segments.
+    width : int
+        World width in pixels.
+    height : int
+        World height in pixels.
+
+    Returns
+    -------
+    list[tuple[int, int]]
+        Ordered list of grid coordinates starting at ``start`` and ending at
+        ``goal``. An empty list is returned when no path exists.
+    """
+
+    grid_w = width // SEGMENT_SIZE
+    grid_h = height // SEGMENT_SIZE
+    sx = int(start.x // SEGMENT_SIZE)
+    sy = int(start.y // SEGMENT_SIZE)
+    gx = int(goal.x // SEGMENT_SIZE)
+    gy = int(goal.y // SEGMENT_SIZE)
+
+    blocked = {(int(w.x // SEGMENT_SIZE), int(w.y // SEGMENT_SIZE)) for w in walls}
+
+    queue: List[Tuple[int, int]] = [(sx, sy)]
+    came_from: dict[Tuple[int, int], Tuple[int, int] | None] = {(sx, sy): None}
+    dirs = [(1, 0), (-1, 0), (0, 1), (0, -1)]
+
+    while queue:
+        cx, cy = queue.pop(0)
+        if (cx, cy) == (gx, gy):
+            break
+        for dx, dy in dirs:
+            nx, ny = cx + dx, cy + dy
+            if nx < 0 or ny < 0 or nx >= grid_w or ny >= grid_h:
+                continue
+            if (nx, ny) in blocked or (nx, ny) in came_from:
+                continue
+            came_from[(nx, ny)] = (cx, cy)
+            queue.append((nx, ny))
+
+    path: List[Tuple[int, int]] = []
+    cur = (gx, gy)
+    while cur in came_from and cur is not None:
+        path.insert(0, cur)
+        cur = came_from[cur]
+
+    if not path or path[0] != (sx, sy):
+        return []
+    return path
+
+
 def update_zombies(
     zombies: List[ZombieState],
     players: List[PlayerState],
@@ -238,22 +304,36 @@ def update_zombies(
     width: int,
     height: int,
 ) -> None:
-    """Move zombies a small step toward the nearest player."""
+    """Move zombies toward the nearest player using basic pathfinding."""
 
     if not players:
         return
 
     for z in zombies:
         target = min(players, key=lambda p: (p.x - z.x) ** 2 + (p.y - z.y) ** 2)
-        dx = target.x - z.x
-        dy = target.y - z.y
+        path = find_path(z, target, walls, width, height)
+        if len(path) >= 2:
+            nx, ny = path[1]
+            target_x = nx * SEGMENT_SIZE + SEGMENT_SIZE / 2
+            target_y = ny * SEGMENT_SIZE + SEGMENT_SIZE / 2
+        else:
+            target_x = target.x
+            target_y = target.y
+
+        dx = target_x - z.x
+        dy = target_y - z.y
         dist = math.hypot(dx, dy)
         if dist == 0:
             continue
-        step = 1
-        z.x += (dx / dist) * step
-        z.y += (dy / dist) * step
+
+        step = 1.0
+        new_x = z.x + (dx / dist) * step
+        new_y = z.y + (dy / dist) * step
+        colliding = any(
+            w.x <= new_x <= w.x + w.size and w.y <= new_y <= w.y + w.size for w in walls
+        )
+        if not colliding:
+            z.x = max(0, min(width, new_x))
+            z.y = max(0, min(height, new_y))
         z.facing_x = dx / dist
         z.facing_y = dy / dist
-        z.x = max(0, min(width, z.x))
-        z.y = max(0, min(height, z.y))
