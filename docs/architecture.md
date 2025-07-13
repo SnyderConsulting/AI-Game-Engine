@@ -50,6 +50,11 @@ timer per player and updates a `loot_progress` map in the shared state. Clients
 render a progress bar using this value. When the timer completes the server
 opens the container, awards the item to the player's inventory and broadcasts
 the updated world state.
+The client now compares each update against the previous one to detect newly
+opened containers and shelves. When a loot action resolves, the HUD briefly
+displays a message such as "You found Wood" or "Container is empty." The local
+inventory object is synchronized with the authoritative counts so new items
+immediately appear in the hotbar and inventory grid.
 
 Client UI panels are toggled entirely on the frontend. The `GameScene` listens
 for `I` (or `E`) to open the inventory, `C` to show crafting and `K` for
