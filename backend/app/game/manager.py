@@ -28,8 +28,11 @@ class GameSession:
         self.state.zombies = zombies
         self.state.containers = containers
         self.spawn_door = door
+        self.state.door = door
         # Track active WebSocket connections for broadcasting state
         self.connections: Dict[str, WebSocket] = {}
+        # active looting timers
+        self.loot_timers: Dict[str, Dict[str, Any]] = {}
 
     def add_player(self, websocket: WebSocket) -> str:
         """Add a new player with a unique ID and store the WebSocket connection.
@@ -81,6 +84,28 @@ class GameSession:
                         player.damage_cooldown = 30
                     zombie.attack_cooldown = 30
 
+        to_remove = []
+        for pid, info in list(self.loot_timers.items()):
+            container = info["container"]
+            player = self.state.players.get(pid)
+            if not player or container.opened:
+                to_remove.append(pid)
+                continue
+            if math.hypot(player.x - container.x, player.y - container.y) > 20:
+                to_remove.append(pid)
+                continue
+            info["ticks"] -= 1
+            if info["ticks"] <= 0:
+                container.opened = True
+                container.item = random.choice(CONTAINER_LOOT)
+                item = container.item
+                if item:
+                    player.inventory[item] = player.inventory.get(item, 0) + 1
+                to_remove.append(pid)
+
+        for pid in to_remove:
+            self.loot_timers.pop(pid, None)
+
     def update_player_state(self, player_id: str, input_data: Dict[str, Any]) -> None:
         """Update the player's state using the received input."""
 
@@ -93,6 +118,8 @@ class GameSession:
         # work while newer clients can send more granular values.
         speed = 2
         if input_data.get("action") == "move":
+            if player.health <= 0:
+                return
             dx = dy = 0.0
             if "moveX" in input_data or "moveY" in input_data:
                 dx = float(input_data.get("moveX", 0))
@@ -119,12 +146,16 @@ class GameSession:
                 player.x, new_y, self.state.walls
             ):
                 player.y = new_y
-        elif input_data.get("action") == "loot":
+        elif input_data.get("action") == "start_looting":
             cid = input_data.get("containerId")
             for c in self.state.containers:
                 if c.id == cid and not c.opened:
-                    c.opened = True
-                    c.item = random.choice(CONTAINER_LOOT)
+                    dist = math.hypot(player.x - c.x, player.y - c.y)
+                    if dist < 20:
+                        self.loot_timers[player_id] = {
+                            "container": c,
+                            "ticks": 180,
+                        }
                     break
 
         facing_x = input_data.get("facingX")
