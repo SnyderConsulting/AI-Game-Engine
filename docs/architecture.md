@@ -54,7 +54,8 @@ The client now compares each update against the previous one to detect newly
 opened containers and shelves. When a loot action resolves, the HUD briefly
 displays a message such as "You found Wood" or "Container is empty." Loot
 messages appear with a dark translucent background so they remain readable on
-any backdrop. Containers and shelves flagged as opened are rendered at 50%
+any backdrop. When no message is active the element is hidden entirely to avoid
+leftover artifacts. Containers and shelves flagged as opened are rendered at 50%
 opacity so players can easily tell which ones have been searched. The local
 inventory object is synchronized with the authoritative counts so new items
 immediately appear in the hotbar and inventory grid.
