@@ -1,5 +1,6 @@
 import os
 import sys
+import time
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
@@ -92,3 +93,57 @@ def test_loot_container_command():
             cont = manager.get_session(game_id).state.containers[0]
             assert cont.opened is True
             assert cont.item is not None
+            player_state = manager.get_session(game_id).state.players[player_id]
+            assert cont.item in player_state.inventory
+
+
+def test_loot_cancel_command():
+    with TestClient(app) as client:
+        game_id = manager.create_game_session()
+        container = manager.get_session(game_id).state.containers[0]
+        session = manager.get_session(game_id)
+        with client.websocket_connect(f"/ws/game/{game_id}") as ws:
+            welcome = ws.receive_json()
+            player_id = welcome["playerId"]
+            player = session.state.players[player_id]
+            player.x, player.y = container.x, container.y
+            ws.send_json({"action": "start_looting", "containerId": container.id})
+
+            for _ in range(50):
+                if player_id in session.loot_timers:
+                    break
+                time.sleep(0.02)
+
+            ws.send_json({"action": "cancel_looting"})
+            time.sleep(0.05)
+            assert player_id not in session.loot_timers
+            session.update_world()
+            cont = manager.get_session(game_id).state.containers[0]
+            assert cont.opened is False
+
+
+def test_loot_shelf_command():
+    with TestClient(app) as client:
+        game_id = manager.create_game_session()
+        shelf = manager.get_session(game_id).state.walls[0]
+        session = manager.get_session(game_id)
+        with client.websocket_connect(f"/ws/game/{game_id}") as ws:
+            welcome = ws.receive_json()
+            player_id = welcome["playerId"]
+            player = session.state.players[player_id]
+            # position player next to shelf edge
+            player.x = shelf.x + shelf.size + 1
+            player.y = shelf.y + shelf.size / 2
+            ws.send_json({"action": "start_looting"})
+
+            for _ in range(50):
+                if player_id in session.loot_timers:
+                    break
+                time.sleep(0.02)
+            session.loot_timers[player_id]["ticks"] = 1
+            session.update_world()
+            shelf_state = manager.get_session(game_id).state.walls[0]
+            assert shelf_state.opened is True
+            if shelf_state.item:
+                player_state = manager.get_session(game_id).state.players[player_id]
+                assert shelf_state.item in player_state.inventory
