@@ -177,6 +177,8 @@ export class GameScene {
     this.scale = 1;
     this.camera = { x: 0, y: 0, width: 0, height: 0 };
 
+    this.mousePos = { x: 0, y: 0 };
+
     this.lootProgress = document.getElementById("lootProgress");
     this.lootFill = document.getElementById("lootFill");
     this.isLooting = false;
@@ -306,17 +308,22 @@ export class GameScene {
     if (!this.ws || this.ws.readyState !== WebSocket.OPEN) return;
     const moveX = (this.keys["d"] ? 1 : 0) - (this.keys["a"] ? 1 : 0);
     const moveY = (this.keys["s"] ? 1 : 0) - (this.keys["w"] ? 1 : 0);
-    if (moveX || moveY) {
-      this.ws.send(
-        JSON.stringify({
-          action: "move",
-          moveX,
-          moveY,
-          facingX: moveX,
-          facingY: moveY,
-        }),
-      );
-    }
+    const player = this.state.players[this.playerId];
+    if (!player) return;
+    const dirX = this.mousePos.x - player.x;
+    const dirY = this.mousePos.y - player.y;
+    const len = Math.hypot(dirX, dirY) || 1;
+    const facingX = dirX / len;
+    const facingY = dirY / len;
+    this.ws.send(
+      JSON.stringify({
+        action: "move",
+        moveX,
+        moveY,
+        facingX,
+        facingY,
+      }),
+    );
   }
 
   /**
@@ -345,7 +352,16 @@ export class GameScene {
     }
     Object.entries(this.state.players).forEach(([id, p]) => {
       const img = this.playerSprite;
-      const angle = Math.atan2(p.facing_y, p.facing_x) - Math.PI / 2;
+      let facingX = p.facing_x;
+      let facingY = p.facing_y;
+      if (id === this.playerId) {
+        const dx = this.mousePos.x - p.x;
+        const dy = this.mousePos.y - p.y;
+        const d = Math.hypot(dx, dy) || 1;
+        facingX = dx / d;
+        facingY = dy / d;
+      }
+      const angle = Math.atan2(facingY, facingX) - Math.PI / 2;
       ctx.save();
       ctx.translate(p.x, p.y);
       ctx.rotate(angle);
@@ -363,7 +379,9 @@ export class GameScene {
       ctx.restore();
     });
     this.state.containers?.forEach((c) => {
+      ctx.globalAlpha = c.opened ? 0.5 : 1;
       ctx.drawImage(this.cardboardBoxImg, c.x - 10, c.y - 10, 20, 20);
+      ctx.globalAlpha = 1;
     });
     const player = this.state.players[this.playerId];
     if (player) {
@@ -424,6 +442,21 @@ export class GameScene {
       this.state.players[this.playerId] || {},
       SKILL_INFO,
     );
+  }
+
+  /**
+   * Update the stored mouse position converting from screen to world coords.
+   *
+   * @param {number} clientX - Mouse X coordinate on the page.
+   * @param {number} clientY - Mouse Y coordinate on the page.
+   * @returns {void}
+   */
+  setMousePos(clientX, clientY) {
+    const rect = this.canvas.getBoundingClientRect();
+    const x = (clientX - rect.left) / this.scale + this.camera.x;
+    const y = (clientY - rect.top) / this.scale + this.camera.y;
+    this.mousePos.x = x;
+    this.mousePos.y = y;
   }
 
   /**

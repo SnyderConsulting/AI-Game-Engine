@@ -28,6 +28,9 @@ export function startGame(gameId) {
   window.addEventListener("resize", () => scene.resizeCanvas());
   window.addEventListener("keydown", (e) => scene.handleKeyDown(e));
   window.addEventListener("keyup", (e) => scene.handleKeyUp(e));
+  window.addEventListener("mousemove", (e) =>
+    scene.setMousePos(e.clientX, e.clientY),
+  );
   scene.canvas.addEventListener("contextmenu", (e) => e.preventDefault());
 
   requestAnimationFrame(gameLoop);

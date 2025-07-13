@@ -52,7 +52,10 @@ opens the container, awards the item to the player's inventory and broadcasts
 the updated world state.
 The client now compares each update against the previous one to detect newly
 opened containers and shelves. When a loot action resolves, the HUD briefly
-displays a message such as "You found Wood" or "Container is empty." The local
+displays a message such as "You found Wood" or "Container is empty." Loot
+messages appear with a dark translucent background so they remain readable on
+any backdrop. Containers and shelves flagged as opened are rendered at 50%
+opacity so players can easily tell which ones have been searched. The local
 inventory object is synchronized with the authoritative counts so new items
 immediately appear in the hotbar and inventory grid.
 
@@ -74,6 +77,11 @@ state sent over the WebSocket to populate its slots and hotbar.
 never above a scale of `1` so tall monitors don't zoom in. A small camera
 keeps the player centered and clamps the view to the world bounds so wide
 screens reveal more of the arena without stretching the image.
+
+Player rotation is calculated client-side each frame based on the mouse cursor
+position so aiming works independently of movement. The orientation is also sent
+to the server alongside movement updates so other clients see the correct
+rotation.
 
 UI panels such as the inventory, crafting menu and skill tree use a small helper
 `makeDraggable` so each window can be moved by its title bar and closed with the
