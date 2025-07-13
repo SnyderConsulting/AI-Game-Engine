@@ -1,19 +1,40 @@
+/**
+ * Create the HUD overlay shown during gameplay.
+ *
+ * @param {{pickupMsg:HTMLElement, waveCounterDiv:HTMLElement}} param0
+ *   Elements used to display pickup text and the current wave.
+ * @returns {{
+ *   showPickupMessage: Function,
+ *   update: Function,
+ *   clearPickupMessage: Function,
+ *   setWave: Function,
+ *   showWaveCounter: Function,
+ *   hideWaveCounter: Function,
+ *   render: Function,
+ * }} HUD control methods.
+ */
 export function createHUD({ pickupMsg, waveCounterDiv }) {
   let pickupTimer = 0;
+  pickupMsg.style.display = "none";
 
   function showPickupMessage(text) {
     pickupMsg.textContent = text;
+    pickupMsg.style.display = "block";
     pickupTimer = 60;
   }
 
   function clearPickupMessage() {
     pickupMsg.textContent = "";
+    pickupMsg.style.display = "none";
     pickupTimer = 0;
   }
   function update() {
     if (pickupTimer > 0) {
       pickupTimer--;
-      if (pickupTimer === 0) pickupMsg.textContent = "";
+      if (pickupTimer === 0) {
+        pickupMsg.textContent = "";
+        pickupMsg.style.display = "none";
+      }
     }
   }
 

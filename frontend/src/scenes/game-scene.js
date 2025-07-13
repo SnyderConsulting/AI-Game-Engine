@@ -339,12 +339,14 @@ export class GameScene {
     ctx.translate(-this.camera.x, -this.camera.y);
     this.state.walls.forEach((w) => {
       const img = WALL_IMAGES[w.material];
+      ctx.globalAlpha = w.opened ? 0.5 : 1;
       if (img && img.complete) {
         ctx.drawImage(img, w.x, w.y, w.size, w.size);
       } else {
         ctx.fillStyle = "gray";
         ctx.fillRect(w.x, w.y, w.size, w.size);
       }
+      ctx.globalAlpha = 1;
     });
     if (this.state.door) {
       ctx.fillStyle = "brown";
