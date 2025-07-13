@@ -51,3 +51,15 @@ async def game_loop() -> None:
 app.include_router(routes_health.router)
 app.include_router(routes_game.router)
 app.include_router(websocket_routes.router)
+
+
+def start() -> None:
+    """Launch the development server bound to all network interfaces."""
+
+    import uvicorn
+
+    uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True)
+
+
+if __name__ == "__main__":
+    start()
