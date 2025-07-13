@@ -9,7 +9,12 @@ import { createInventoryUI } from "../components/inventory-ui.js";
 import { createCraftingUI } from "../components/crafting-ui.js";
 import { createSkillTreeUI } from "../components/skill-tree-ui.js";
 import { makeDraggable } from "../ui.js";
-import { createInventory } from "../systems/inventory-system.js";
+import {
+  createInventory,
+  addItem,
+  removeItem,
+  countItem,
+} from "../systems/inventory-system.js";
 import { SKILL_INFO } from "../systems/skill-tree-system.js";
 
 export const LOOT_TICKS = 180;
@@ -178,6 +183,27 @@ export class GameScene {
   }
 
   /**
+   * Synchronize the local inventory with authoritative counts from the server.
+   *
+   * @param {Record<string, number>} serverInv - Mapping of item ids to counts.
+   * @returns {void}
+   */
+  syncInventory(serverInv) {
+    const all = new Set([
+      ...Object.keys(serverInv),
+      ...this.inventory.slots.filter((s) => s.item).map((s) => s.item),
+      ...this.inventory.hotbar.filter((s) => s.item).map((s) => s.item),
+    ]);
+    for (const id of all) {
+      const target = serverInv[id] || 0;
+      const current = countItem(this.inventory, id);
+      if (current < target) addItem(this.inventory, id, target - current);
+      else if (current > target)
+        removeItem(this.inventory, id, current - target);
+    }
+  }
+
+  /**
    * Establish a WebSocket connection to the backend.
    *
    * @param {string} url - WebSocket endpoint.
@@ -202,7 +228,29 @@ export class GameScene {
       this.playerId = msg.playerId;
       return;
     }
+    const oldContainers = this.state.containers || [];
+    const oldWalls = this.state.walls || [];
     this.state = msg;
+    // Show loot results for newly opened containers
+    msg.containers?.forEach((c) => {
+      const prev = oldContainers.find((p) => p.id === c.id);
+      if (c.opened && (!prev || !prev.opened)) {
+        this.hud.showPickupMessage(
+          c.item ? `You found ${c.item}` : "Container is empty",
+        );
+      }
+    });
+    // Show loot results for shelves
+    msg.walls?.forEach((w, i) => {
+      const prev = oldWalls[i];
+      if (w.opened && (!prev || !prev.opened)) {
+        this.hud.showPickupMessage(
+          w.item ? `You found ${w.item}` : "Nothing here",
+        );
+      }
+    });
+    const player = msg.players[this.playerId];
+    if (player) this.syncInventory(player.inventory || {});
     const remaining = msg.loot_progress?.[this.playerId];
     if (typeof remaining === "number") {
       this.isLooting = true;
@@ -215,11 +263,11 @@ export class GameScene {
       this.lootProgress.style.display = "none";
     }
     this.resizeCanvas();
-    const player = this.state.players[this.playerId];
+    const curPlayer = this.state.players[this.playerId];
     if (this.inventoryOpen) {
       this.inventoryUI.renderInventory(
         this.inventory,
-        player || {},
+        curPlayer || {},
         {},
         this.itemImages,
         () => ({ remaining: 0, max: 0 }),
@@ -227,7 +275,7 @@ export class GameScene {
     }
     this.inventoryUI.renderHotbar(
       this.inventory,
-      player || {},
+      curPlayer || {},
       {},
       this.itemImages,
       () => ({ remaining: 0, max: 0 }),
