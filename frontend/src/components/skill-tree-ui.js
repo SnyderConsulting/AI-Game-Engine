@@ -40,7 +40,8 @@ export function createSkillTreeUI(
         tile.style.outline = "2px solid yellow";
       }
       const img = document.createElement("img");
-      img.src = itemIcons[s.id];
+      const src = itemIcons[s.id];
+      img.src = typeof src === "string" ? src : src.src;
       img.style.width = "48px";
       img.style.height = "48px";
       img.style.opacity = s.level > 0 ? 1 : 0.5;

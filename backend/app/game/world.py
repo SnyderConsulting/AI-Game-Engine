@@ -237,6 +237,7 @@ def find_path(
     walls: List[WallState],
     width: int,
     height: int,
+    dynamic_blocks: List[Tuple[int, int]] | None = None,
 ) -> List[Tuple[int, int]]:
     """Return a grid path from ``start`` to ``goal`` avoiding walls.
 
@@ -252,6 +253,8 @@ def find_path(
         World width in pixels.
     height : int
         World height in pixels.
+    dynamic_blocks : list[tuple[int, int]] | None, optional
+        Additional temporary obstacles such as other zombies.
 
     Returns
     -------
@@ -268,6 +271,8 @@ def find_path(
     gy = int(goal.y // SEGMENT_SIZE)
 
     blocked = {(int(w.x // SEGMENT_SIZE), int(w.y // SEGMENT_SIZE)) for w in walls}
+    if dynamic_blocks:
+        blocked.update(dynamic_blocks)
 
     queue: List[Tuple[int, int]] = [(sx, sy)]
     came_from: dict[Tuple[int, int], Tuple[int, int] | None] = {(sx, sy): None}
@@ -309,9 +314,14 @@ def update_zombies(
     if not players:
         return
 
-    for z in zombies:
+    for idx, z in enumerate(zombies):
         target = min(players, key=lambda p: (p.x - z.x) ** 2 + (p.y - z.y) ** 2)
-        path = find_path(z, target, walls, width, height)
+        dynamic_blocks = {
+            (int(o.x // SEGMENT_SIZE), int(o.y // SEGMENT_SIZE))
+            for i, o in enumerate(zombies)
+            if i != idx
+        }
+        path = find_path(z, target, walls, width, height, list(dynamic_blocks))
         if len(path) >= 2:
             nx, ny = path[1]
             target_x = nx * SEGMENT_SIZE + SEGMENT_SIZE / 2

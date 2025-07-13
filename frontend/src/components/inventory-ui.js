@@ -63,7 +63,8 @@ export function createInventoryUI({
       if (slot.item) {
         if (itemIcons[slot.item]) {
           const img = document.createElement("img");
-          img.src = itemIcons[slot.item];
+          const src = itemIcons[slot.item];
+          img.src = typeof src === "string" ? src : src.src;
           img.draggable = false;
           img.style.width = "32px";
           img.style.height = "32px";
@@ -222,7 +223,8 @@ export function createInventoryUI({
       if (slot.item) {
         if (itemIcons[slot.item]) {
           const img = document.createElement("img");
-          img.src = itemIcons[slot.item];
+          const src = itemIcons[slot.item];
+          img.src = typeof src === "string" ? src : src.src;
           img.draggable = false;
           img.style.width = "32px";
           img.style.height = "32px";
