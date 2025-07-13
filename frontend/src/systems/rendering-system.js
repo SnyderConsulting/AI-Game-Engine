@@ -61,14 +61,14 @@ export function render(ctx, state) {
 
   walls.forEach((w) => {
     const img = WALL_IMAGES[w.material];
+    ctx.globalAlpha = w.opened ? 0.5 : 1;
     if (img && img.complete) {
-      ctx.globalAlpha = w.opened ? 0.5 : 1;
       ctx.drawImage(img, w.x, w.y, SEGMENT_SIZE, SEGMENT_SIZE);
-      ctx.globalAlpha = 1;
     } else {
       ctx.fillStyle = "gray";
       ctx.fillRect(w.x, w.y, SEGMENT_SIZE, SEGMENT_SIZE);
     }
+    ctx.globalAlpha = 1;
     if (w.damageTimer > 0) {
       ctx.fillStyle = "rgba(255,0,0,0.5)";
       ctx.fillRect(w.x, w.y, SEGMENT_SIZE, SEGMENT_SIZE);
