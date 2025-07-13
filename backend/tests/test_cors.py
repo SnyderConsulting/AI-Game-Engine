@@ -18,3 +18,11 @@ def test_cors_headers_on_post():
             response.headers.get("access-control-allow-origin")
             == "http://localhost:3000"
         )
+
+        ip_origin = "http://192.168.0.42:3000"
+        response = client.post(
+            "/api/games",
+            headers={"Origin": ip_origin},
+        )
+        assert response.status_code == 200
+        assert response.headers.get("access-control-allow-origin") == ip_origin
