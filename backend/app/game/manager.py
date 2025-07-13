@@ -7,8 +7,25 @@ from fastapi import WebSocket
 import random
 import math
 
-from .models import CONTAINER_LOOT, GameState, PlayerState
+from .models import (
+    CONTAINER_LOOT,
+    CRAFTING_MATERIALS,
+    SHELF_LOOT_CHANCE,
+    GameState,
+    PlayerState,
+)
 from .world import generate_world, spawn_player, update_zombies
+
+LOOT_TICKS = 180
+INTERACT_RANGE = 20
+
+
+def _wall_distance(px: float, py: float, wall) -> float:
+    """Return the distance from point ``(px, py)`` to a wall's edge."""
+
+    closest_x = max(wall.x, min(px, wall.x + wall.size))
+    closest_y = max(wall.y, min(py, wall.y + wall.size))
+    return math.hypot(px - closest_x, py - closest_y)
 
 
 def _collides(x: float, y: float, walls) -> bool:
@@ -86,25 +103,48 @@ class GameSession:
 
         to_remove = []
         for pid, info in list(self.loot_timers.items()):
-            container = info["container"]
+            target = info.get("container") or info.get("shelf")
             player = self.state.players.get(pid)
-            if not player or container.opened:
+            if not player or target.opened:
                 to_remove.append(pid)
                 continue
-            if math.hypot(player.x - container.x, player.y - container.y) > 20:
+
+            if "container" in info:
+                in_range = (
+                    math.hypot(player.x - target.x, player.y - target.y)
+                    <= INTERACT_RANGE
+                )
+            else:
+                in_range = _wall_distance(player.x, player.y, target) <= INTERACT_RANGE
+
+            if not in_range:
                 to_remove.append(pid)
                 continue
+
             info["ticks"] -= 1
             if info["ticks"] <= 0:
-                container.opened = True
-                container.item = random.choice(CONTAINER_LOOT)
-                item = container.item
-                if item:
-                    player.inventory[item] = player.inventory.get(item, 0) + 1
+                if "container" in info:
+                    target.opened = True
+                    target.item = random.choice(CONTAINER_LOOT)
+                    item = target.item
+                    if item:
+                        player.inventory[item] = player.inventory.get(item, 0) + 1
+                else:
+                    if not target.opened:
+                        if random.random() < SHELF_LOOT_CHANCE:
+                            target.item = random.choice(CRAFTING_MATERIALS)
+                        target.opened = True
+                        if target.item:
+                            item = target.item
+                            player.inventory[item] = player.inventory.get(item, 0) + 1
                 to_remove.append(pid)
 
         for pid in to_remove:
             self.loot_timers.pop(pid, None)
+
+        self.state.loot_progress = {
+            pid: info["ticks"] for pid, info in self.loot_timers.items()
+        }
 
     def update_player_state(self, player_id: str, input_data: Dict[str, Any]) -> None:
         """Update the player's state using the received input."""
@@ -148,15 +188,29 @@ class GameSession:
                 player.y = new_y
         elif input_data.get("action") == "start_looting":
             cid = input_data.get("containerId")
-            for c in self.state.containers:
-                if c.id == cid and not c.opened:
-                    dist = math.hypot(player.x - c.x, player.y - c.y)
-                    if dist < 20:
+            if cid:
+                for c in self.state.containers:
+                    if c.id == cid and not c.opened:
+                        dist = math.hypot(player.x - c.x, player.y - c.y)
+                        if dist <= INTERACT_RANGE:
+                            self.loot_timers[player_id] = {
+                                "container": c,
+                                "ticks": LOOT_TICKS,
+                            }
+                        break
+            else:
+                for w in self.state.walls:
+                    if (
+                        not w.opened
+                        and _wall_distance(player.x, player.y, w) <= INTERACT_RANGE
+                    ):
                         self.loot_timers[player_id] = {
-                            "container": c,
-                            "ticks": 180,
+                            "shelf": w,
+                            "ticks": LOOT_TICKS,
                         }
-                    break
+                        break
+        elif input_data.get("action") == "cancel_looting":
+            self.loot_timers.pop(player_id, None)
 
         facing_x = input_data.get("facingX")
         facing_y = input_data.get("facingY")

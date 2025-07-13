@@ -134,6 +134,19 @@ class PlayerState(BaseModel):
 
 CONTAINER_LOOT = ["scrap_metal", "duct_tape", "nails", "medkit"]
 
+# Items that may appear when searching shelves.
+CRAFTING_MATERIALS = [
+    "scrap_metal",
+    "duct_tape",
+    "nails",
+    "plastic_fragments",
+    "wood_planks",
+    "steel_plates",
+]
+
+# Chance that a shelf contains an item when opened.
+SHELF_LOOT_CHANCE = 0.2
+
 
 class ContainerState(BaseModel):
     """Lootable container such as a cardboard box."""
@@ -168,3 +181,5 @@ class GameState(BaseModel):
     door: DoorState | None = None
     width: int = 2400
     height: int = 1600
+    # Remaining loot timer ticks for each player
+    loot_progress: Dict[str, int] = Field(default_factory=dict)

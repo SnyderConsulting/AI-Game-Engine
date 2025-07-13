@@ -12,6 +12,21 @@ import { makeDraggable } from "../ui.js";
 import { createInventory } from "../systems/inventory-system.js";
 import { SKILL_INFO } from "../systems/skill-tree-system.js";
 
+export const LOOT_TICKS = 180;
+
+/**
+ * Compute the distance from a point to the edge of a wall.
+ * @param {number} px - X position.
+ * @param {number} py - Y position.
+ * @param {object} wall - Wall data with x, y and size.
+ * @returns {number} Distance in pixels.
+ */
+function distanceToWall(px, py, wall) {
+  const cx = Math.max(wall.x, Math.min(px, wall.x + wall.size));
+  const cy = Math.max(wall.y, Math.min(py, wall.y + wall.size));
+  return Math.hypot(px - cx, py - cy);
+}
+
 export class GameScene {
   /**
    * Construct a new scene and set up default state.
@@ -188,6 +203,17 @@ export class GameScene {
       return;
     }
     this.state = msg;
+    const remaining = msg.loot_progress?.[this.playerId];
+    if (typeof remaining === "number") {
+      this.isLooting = true;
+      const pct = (LOOT_TICKS - remaining) / LOOT_TICKS;
+      this.lootFill.style.width = `${Math.min(1, pct) * 100}%`;
+      this.lootProgress.style.display = "block";
+    } else if (this.isLooting) {
+      this.isLooting = false;
+      this.lootFill.style.width = "0%";
+      this.lootProgress.style.display = "none";
+    }
     this.resizeCanvas();
     const player = this.state.players[this.playerId];
     if (this.inventoryOpen) {
@@ -382,15 +408,21 @@ export class GameScene {
     else if (k === "k") this.toggleSkillTree();
     else if (k === "f" && !this.isLooting) {
       const player = this.state.players[this.playerId];
-      if (player) {
+      if (player && this.ws && this.ws.readyState === WebSocket.OPEN) {
         const target = this.state.containers?.find(
           (c) => !c.opened && Math.hypot(c.x - player.x, c.y - player.y) < 20,
         );
-        if (target && this.ws && this.ws.readyState === WebSocket.OPEN) {
-          this.ws.send(
-            JSON.stringify({ action: "start_looting", containerId: target.id }),
+        let msg = null;
+        if (target) {
+          msg = { action: "start_looting", containerId: target.id };
+        } else {
+          const shelf = this.state.walls.find(
+            (w) => !w.opened && distanceToWall(player.x, player.y, w) < 20,
           );
-          this.startLootProgress();
+          if (shelf) msg = { action: "start_looting" };
+        }
+        if (msg) {
+          this.ws.send(JSON.stringify(msg));
         }
       }
     }
@@ -402,25 +434,10 @@ export class GameScene {
    * @returns {void}
    */
   handleKeyUp(e) {
-    this.keys[e.key.toLowerCase()] = false;
-  }
-
-  startLootProgress() {
-    this.isLooting = true;
-    this.lootFill.style.width = "0%";
-    this.lootProgress.style.display = "block";
-    const start = performance.now();
-    const step = (t) => {
-      const pct = (t - start) / 3000;
-      this.lootFill.style.width = `${Math.min(1, pct) * 100}%`;
-      if (pct < 1 && this.isLooting) {
-        requestAnimationFrame(step);
-      } else {
-        this.isLooting = false;
-        this.lootProgress.style.display = "none";
-        this.lootFill.style.width = "0%";
-      }
-    };
-    requestAnimationFrame(step);
+    const k = e.key.toLowerCase();
+    this.keys[k] = false;
+    if (k === "f" && this.ws && this.ws.readyState === WebSocket.OPEN) {
+      this.ws.send(JSON.stringify({ action: "cancel_looting" }));
+    }
   }
 }
