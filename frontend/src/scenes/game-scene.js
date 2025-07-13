@@ -213,7 +213,8 @@ export class GameScene {
     const displayH = window.innerHeight;
     this.canvas.width = displayW;
     this.canvas.height = displayH;
-    this.scale = displayH / this.state.height;
+    const scaleByHeight = displayH / this.state.height;
+    this.scale = Math.min(1, scaleByHeight);
     this.camera.width = displayW / this.scale;
     this.camera.height = displayH / this.scale;
   }

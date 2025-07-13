@@ -11,6 +11,11 @@ from .models import CONTAINER_LOOT, GameState, PlayerState
 from .world import generate_world, spawn_player, update_zombies
 
 
+def _collides(x: float, y: float, walls) -> bool:
+    """Return True if point ``(x, y)`` intersects a wall."""
+    return any(w.x <= x <= w.x + w.size and w.y <= y <= w.y + w.size for w in walls)
+
+
 class GameSession:
     """A single game session with its own state and connections."""
 
@@ -88,20 +93,32 @@ class GameSession:
         # work while newer clients can send more granular values.
         speed = 2
         if input_data.get("action") == "move":
+            dx = dy = 0.0
             if "moveX" in input_data or "moveY" in input_data:
-                # Client provided delta values. Use them directly.
-                player.x += float(input_data.get("moveX", 0))
-                player.y += float(input_data.get("moveY", 0))
+                dx = float(input_data.get("moveX", 0))
+                dy = float(input_data.get("moveY", 0))
             else:
                 direction = input_data.get("direction")
                 if direction == "left":
-                    player.x -= speed
+                    dx = -speed
                 elif direction == "right":
-                    player.x += speed
+                    dx = speed
                 elif direction == "up":
-                    player.y -= speed
+                    dy = -speed
                 elif direction == "down":
-                    player.y += speed
+                    dy = speed
+
+            new_x = player.x + dx
+            new_y = player.y + dy
+
+            if 0 <= new_x <= self.state.width and not _collides(
+                new_x, player.y, self.state.walls
+            ):
+                player.x = new_x
+            if 0 <= new_y <= self.state.height and not _collides(
+                player.x, new_y, self.state.walls
+            ):
+                player.y = new_y
         elif input_data.get("action") == "loot":
             cid = input_data.get("containerId")
             for c in self.state.containers:

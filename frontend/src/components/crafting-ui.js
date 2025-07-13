@@ -23,7 +23,8 @@ export function createCraftingUI(
 
       const icon = document.createElement("img");
       if (itemIcons[r.id]) {
-        icon.src = itemIcons[r.id];
+        const src = itemIcons[r.id];
+        icon.src = typeof src === "string" ? src : src.src;
       }
       icon.style.width = "40px";
       icon.style.height = "40px";
@@ -42,7 +43,10 @@ export function createCraftingUI(
       Object.entries(r.ingredients).forEach(([id, qty]) => {
         const line = document.createElement("div");
         const ingIcon = document.createElement("img");
-        if (itemIcons[id]) ingIcon.src = itemIcons[id];
+        if (itemIcons[id]) {
+          const src = itemIcons[id];
+          ingIcon.src = typeof src === "string" ? src : src.src;
+        }
         ingIcon.style.width = "16px";
         ingIcon.style.height = "16px";
         ingIcon.style.marginRight = "4px";
