@@ -22,10 +22,15 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
+# Accept requests from the Vite dev server whether it is accessed via
+# localhost or another device on the local network. The explicit
+# `allow_origins` entry covers the common localhost case while the
+# regular expression matches any IPv4 address on port 3000.
 origins = ["http://localhost:3000"]
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
+    allow_origin_regex=r"http://(?:localhost|\d{1,3}(?:\.\d{1,3}){3}):3000",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
