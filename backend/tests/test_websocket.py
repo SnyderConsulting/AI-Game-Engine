@@ -71,12 +71,24 @@ def test_loot_container_command():
     with TestClient(app) as client:
         game_id = manager.create_game_session()
         container_id = manager.get_session(game_id).state.containers[0].id
+        session = manager.get_session(game_id)
         with client.websocket_connect(f"/ws/game/{game_id}") as ws:
-            ws.receive_json()
-            ws.send_json({"action": "loot", "containerId": container_id})
+            welcome = ws.receive_json()
+            player_id = welcome["playerId"]
+            player = session.state.players[player_id]
+            cont = session.state.containers[0]
+            player.x, player.y = cont.x, cont.y
+            ws.send_json({"action": "start_looting", "containerId": container_id})
+
+            session = manager.get_session(game_id)
             import time
 
-            time.sleep(0.05)
+            for _ in range(50):
+                if player_id in session.loot_timers:
+                    break
+                time.sleep(0.02)
+            session.loot_timers[player_id]["ticks"] = 1
+            session.update_world()
             cont = manager.get_session(game_id).state.containers[0]
             assert cont.opened is True
             assert cont.item is not None

@@ -156,6 +156,10 @@ export class GameScene {
 
     this.scale = 1;
     this.camera = { x: 0, y: 0, width: 0, height: 0 };
+
+    this.lootProgress = document.getElementById("lootProgress");
+    this.lootFill = document.getElementById("lootFill");
+    this.isLooting = false;
   }
 
   /**
@@ -261,6 +265,10 @@ export class GameScene {
         ctx.fillRect(w.x, w.y, w.size, w.size);
       }
     });
+    if (this.state.door) {
+      ctx.fillStyle = "brown";
+      ctx.fillRect(this.state.door.x - 10, this.state.door.y - 10, 20, 20);
+    }
     Object.entries(this.state.players).forEach(([id, p]) => {
       const img = this.playerSprite;
       const angle = Math.atan2(p.facing_y, p.facing_x) - Math.PI / 2;
@@ -372,7 +380,7 @@ export class GameScene {
     if (k === "i" || k === "e") this.toggleInventory();
     else if (k === "c") this.toggleCrafting();
     else if (k === "k") this.toggleSkillTree();
-    else if (k === "f") {
+    else if (k === "f" && !this.isLooting) {
       const player = this.state.players[this.playerId];
       if (player) {
         const target = this.state.containers?.find(
@@ -380,8 +388,9 @@ export class GameScene {
         );
         if (target && this.ws && this.ws.readyState === WebSocket.OPEN) {
           this.ws.send(
-            JSON.stringify({ action: "loot", containerId: target.id }),
+            JSON.stringify({ action: "start_looting", containerId: target.id }),
           );
+          this.startLootProgress();
         }
       }
     }
@@ -394,5 +403,24 @@ export class GameScene {
    */
   handleKeyUp(e) {
     this.keys[e.key.toLowerCase()] = false;
+  }
+
+  startLootProgress() {
+    this.isLooting = true;
+    this.lootFill.style.width = "0%";
+    this.lootProgress.style.display = "block";
+    const start = performance.now();
+    const step = (t) => {
+      const pct = (t - start) / 3000;
+      this.lootFill.style.width = `${Math.min(1, pct) * 100}%`;
+      if (pct < 1 && this.isLooting) {
+        requestAnimationFrame(step);
+      } else {
+        this.isLooting = false;
+        this.lootProgress.style.display = "none";
+        this.lootFill.style.width = "0%";
+      }
+    };
+    requestAnimationFrame(step);
   }
 }

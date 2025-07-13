@@ -125,6 +125,7 @@ class PlayerState(BaseModel):
     phoenix_cooldown: int = 0
     damage_buff_timer: int = 0
     damage_buff_mult: float = 1.0
+    inventory: Dict[str, int] = Field(default_factory=dict)
 
 
 # ---------------------------------------------------------------------------
@@ -145,6 +146,13 @@ class ContainerState(BaseModel):
     type: str = "cardboard_box"
 
 
+class DoorState(BaseModel):
+    """Simple spawn door descriptor."""
+
+    x: float
+    y: float
+
+
 # ---------------------------------------------------------------------------
 # Game state container
 # ---------------------------------------------------------------------------
@@ -157,5 +165,6 @@ class GameState(BaseModel):
     zombies: List[ZombieState] = []
     walls: List[WallState] = []
     containers: List[ContainerState] = []
-    width: int = 800
-    height: int = 600
+    door: DoorState | None = None
+    width: int = 2400
+    height: int = 1600

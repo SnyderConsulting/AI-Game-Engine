@@ -10,6 +10,7 @@ from .models import (
     CONTAINER_LOOT,
     WALL_MATERIALS,
     ContainerState,
+    DoorState,
     PlayerState,
     WallState,
     ZombieState,
@@ -140,7 +141,7 @@ def spawn_containers(
     return containers
 
 
-def create_spawn_door(width: int, height: int, walls: List[WallState]) -> dict:
+def create_spawn_door(width: int, height: int, walls: List[WallState]) -> DoorState:
     door = None
     inside = None
     while True:
@@ -168,7 +169,7 @@ def create_spawn_door(width: int, height: int, walls: List[WallState]) -> dict:
         )
         if not colliding:
             break
-    return door
+    return DoorState(x=door["x"], y=door["y"])
 
 
 def create_zombie(x: float, y: float, variant: str = "normal") -> ZombieState:
@@ -177,15 +178,15 @@ def create_zombie(x: float, y: float, variant: str = "normal") -> ZombieState:
 
 def spawn_zombie_wave(
     count: int,
-    door: dict,
+    door: DoorState,
     width: int,
     height: int,
     variant: str = "normal",
     walls: List[WallState] | None = None,
 ) -> List[ZombieState]:
     walls = walls or []
-    spawn_x = min(max(door["x"], 1), width - 1)
-    spawn_y = min(max(door["y"], 1), height - 1)
+    spawn_x = min(max(door.x, 1), width - 1)
+    spawn_y = min(max(door.y, 1), height - 1)
     zombies: List[ZombieState] = []
     for _ in range(count):
         attempts = 0
@@ -213,7 +214,7 @@ def spawn_zombie_wave(
 
 def generate_world(
     width: int, height: int
-) -> Tuple[List[WallState], List[ZombieState], List[ContainerState], dict]:
+) -> Tuple[List[WallState], List[ZombieState], List[ContainerState], DoorState]:
     """Create walls, zombies, containers and a spawn door."""
 
     walls = generate_store_walls(width, height)
