@@ -19,7 +19,7 @@ This project is split into separate frontend and backend components.
   can be created via the `http://${hostname}:8000/api/games` HTTP endpoint. The
   service began with a simple health check but is structured for future
   realtime features. During development the backend enables CORS for
-  `http://localhost:3000` so the Vite server can call the API. The Clients first see a lobby screen that can create or
+  the hostname serving the frontend so the Vite server or built files can call the API. The Clients first see a lobby screen that can create or
   join a session using the same `http://${hostname}:8000/api/games` endpoint.
   The lobby passes the chosen `gameId` to a
   `startGame(gameId)` function which constructs a `GameScene`, attaches keyboard
