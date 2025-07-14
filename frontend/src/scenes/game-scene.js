@@ -306,8 +306,12 @@ export class GameScene {
   update() {
     this.hud.update();
     if (!this.ws || this.ws.readyState !== WebSocket.OPEN) return;
-    const moveX = (this.keys["d"] ? 1 : 0) - (this.keys["a"] ? 1 : 0);
-    const moveY = (this.keys["s"] ? 1 : 0) - (this.keys["w"] ? 1 : 0);
+    const moveX =
+      (this.keys["d"] || this.keys["arrowright"] ? 1 : 0) -
+      (this.keys["a"] || this.keys["arrowleft"] ? 1 : 0);
+    const moveY =
+      (this.keys["s"] || this.keys["arrowdown"] ? 1 : 0) -
+      (this.keys["w"] || this.keys["arrowup"] ? 1 : 0);
     const player = this.state.players[this.playerId];
     if (!player) return;
     const dirX = this.mousePos.x - player.x;
@@ -479,7 +483,16 @@ export class GameScene {
   }
 
   /**
-   * Handle key down events.
+   * Handle key down events for movement and actions.
+   *
+   * Recognized controls:
+   * - **WASD** or **Arrow Keys** for movement
+   * - **F** or **Page Down** to loot
+   * - **Tab** to attack
+   * - **I/E** to open inventory
+   * - **C** to open crafting
+   * - **K** to open the skill tree
+   *
    * @param {KeyboardEvent} e - Event data.
    * @returns {void}
    */
@@ -489,7 +502,11 @@ export class GameScene {
     if (k === "i" || k === "e") this.toggleInventory();
     else if (k === "c") this.toggleCrafting();
     else if (k === "k") this.toggleSkillTree();
-    else if (k === "f" && !this.isLooting) {
+    else if (k === "tab") {
+      if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+        this.ws.send(JSON.stringify({ action: "attack" }));
+      }
+    } else if ((k === "f" || k === "pagedown") && !this.isLooting) {
       const player = this.state.players[this.playerId];
       if (player && this.ws && this.ws.readyState === WebSocket.OPEN) {
         const target = this.state.containers?.find(
@@ -513,13 +530,21 @@ export class GameScene {
 
   /**
    * Handle key up events.
+   *
+   * Releasing **F** or **Page Down** cancels looting.
+   * All other keys simply update the internal state map.
+   *
    * @param {KeyboardEvent} e - Event data.
    * @returns {void}
    */
   handleKeyUp(e) {
     const k = e.key.toLowerCase();
     this.keys[k] = false;
-    if (k === "f" && this.ws && this.ws.readyState === WebSocket.OPEN) {
+    if (
+      (k === "f" || k === "pagedown") &&
+      this.ws &&
+      this.ws.readyState === WebSocket.OPEN
+    ) {
       this.ws.send(JSON.stringify({ action: "cancel_looting" }));
     }
   }

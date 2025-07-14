@@ -35,7 +35,7 @@ Players now have a small health pool instead of dying instantly. A "Health" disp
 The on-screen control instructions are fixed to the bottom-left corner so they never cover the health readout.
 The player character now always faces your mouse cursor. A custom cursor icon marks the target location so you can aim while moving in any direction.
 
-The arena contains a baseball bat that starts on the ground. It now appears using its bat icon rather than an orange dot. When collected it automatically occupies the first open hotbar slot. Only the item in the **active** hotbar slot can be used. The first slot is active by default and you can switch slots by pressing the number keys **1-5**. If the baseball bat is not in the active slot it cannot be swung. Press the **Space** key or left mouse button to swing when it is equipped. Zombies hit by the swing take damage, are pushed back slightly, and can be struck from a small distance away. Earlier builds included turrets, but they have been removed to simplify gameplay.
+The arena contains a baseball bat that starts on the ground. It now appears using its bat icon rather than an orange dot. When collected it automatically occupies the first open hotbar slot. Only the item in the **active** hotbar slot can be used. The first slot is active by default and you can switch slots by pressing the number keys **1-5**. If the baseball bat is not in the active slot it cannot be swung. Press **Space**, **Tab**, or the left mouse button to swing when it is equipped. Zombies hit by the swing take damage, are pushed back slightly, and can be struck from a small distance away. Earlier builds included turrets, but they have been removed to simplify gameplay.
 
 ## Inventory System
 
@@ -61,11 +61,11 @@ Press **C** to open the crafting menu at any time. Only recipes for which you ow
 
 ## Containers
 
-Cardboard boxes are scattered around the arena. They are now rendered using a box icon instead of a brown square. Stand next to one and hold **F** to loot it. A progress bar appears in the center of the screen for three seconds while you search. When the bar completes the box opens. Each box now contains **Scrap Metal**, **Duct Tape**, **Nails**, or a **Medkit** with equal probability. If there is room in your hotbar or inventory the item is added automatically. Otherwise a brief "Inventory Full" message appears. Opened boxes appear faded so you know they have been searched. Loot notifications now appear just above the hotbar so they remain visible.
+Cardboard boxes are scattered around the arena. They are now rendered using a box icon instead of a brown square. Stand next to one and hold **F** or **Page Down** to loot it. A progress bar appears in the center of the screen for three seconds while you search. When the bar completes the box opens. Each box now contains **Scrap Metal**, **Duct Tape**, **Nails**, or a **Medkit** with equal probability. If there is room in your hotbar or inventory the item is added automatically. Otherwise a brief "Inventory Full" message appears. Opened boxes appear faded so you know they have been searched. Loot notifications now appear just above the hotbar so they remain visible.
 
-Shelves can now be searched the same way. Stand beside a shelf segment, face it, and hold **F** to rummage through. Searching takes time and each shelf can only be looted once. Looted shelves fade just like opened boxes. Shelves usually contain nothing, but very rarely yield extra crafting materials like **Scrap Metal**, **Duct Tape**, **Nails**, **Plastic Fragments**, **Wood Planks**, or **Steel Plates**.
+Shelves can now be searched the same way. Stand beside a shelf segment, face it, and hold **F** or **Page Down** to rummage through. Searching takes time and each shelf can only be looted once. Looted shelves fade just like opened boxes. Shelves usually contain nothing, but very rarely yield extra crafting materials like **Scrap Metal**, **Duct Tape**, **Nails**, **Plastic Fragments**, **Wood Planks**, or **Steel Plates**.
 
-Equip a Medkit and press the **Space** key or left mouse button to restore up to 3 health without exceeding your maximum.
+Equip a Medkit and press **Space**, **Tab**, or the left mouse button to restore up to 3 health without exceeding your maximum.
 
 ## Fire Zombies
 
@@ -73,11 +73,11 @@ Some zombies emerge imbued with flame. These **Fire Zombies** appear with a red 
 
 Collecting Fire Cores unlocks a new recipe:
 
-- **Fire Mutation Serum** - Combine three Fire Cores to craft. Equip the serum and press the **Space** key or left mouse button to inject it. Each injection grants one **Fire Mutation Point** you can spend in the skill tree (press **K** to open).
+- **Fire Mutation Serum** - Combine three Fire Cores to craft. Equip the serum and press **Space**, **Tab**, or the left mouse button to inject it. Each injection grants one **Fire Mutation Point** you can spend in the skill tree (press **K** to open).
 
 ## Fireball Ability
 
-Spend **2 Fire Mutation Points** in the skill tree to unlock the _Fireball_ ability. Unlocking places a Fireball icon in your hotbar. Equip it like any other item by selecting the slot with the number keys. While equipped press **Space** or left mouse button to hurl a blazing projectile toward the mouse cursor. Each cast consumes one Fire Core from your inventory. The Fireball travels about eight tiles, damaging zombies it hits and dissipating on impact with walls or enemies. A dashed line preview displays the path and a dotted circle shows the blast radius before you cast. The preview shortens when a wall or zombie blocks the shot. When the Fireball explodes a faint red circle briefly highlights the impact area. If you attempt to cast without any cores a brief "Out of Fire Cores!" message appears. Starting a new game resets points and skills so you must craft the serum again in future runs.
+Spend **2 Fire Mutation Points** in the skill tree to unlock the _Fireball_ ability. Unlocking places a Fireball icon in your hotbar. Equip it like any other item by selecting the slot with the number keys. While equipped press **Space**, **Tab**, or the left mouse button to hurl a blazing projectile toward the mouse cursor. Each cast consumes one Fire Core from your inventory. The Fireball travels about eight tiles, damaging zombies it hits and dissipating on impact with walls or enemies. A dashed line preview displays the path and a dotted circle shows the blast radius before you cast. The preview shortens when a wall or zombie blocks the shot. When the Fireball explodes a faint red circle briefly highlights the impact area. If you attempt to cast without any cores a brief "Out of Fire Cores!" message appears. Starting a new game resets points and skills so you must craft the serum again in future runs.
 
 ### Fireball Upgrades
 
