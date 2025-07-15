@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { JSDOM } from "jsdom";
 import { GameScene } from "../src/scenes/game-scene.js";
+import { addItem } from "../src/systems/inventory-system.js";
 
 function setupScene() {
   const dom = new JSDOM(`<!DOCTYPE html><canvas id="gameCanvas"></canvas>
@@ -76,4 +77,23 @@ test("tab sends attack action", () => {
   scene.ws = { readyState: 1, send: (msg) => (sent = JSON.parse(msg)) };
   scene.handleKeyDown({ key: "Tab" });
   assert.strictEqual(sent.action, "attack");
+});
+
+test("number keys change active hotbar slot", () => {
+  const scene = setupScene();
+  addItem(scene.inventory, "core", 1);
+  scene.handleKeyDown({ key: "2" });
+  assert.strictEqual(scene.inventory.active, 1);
+});
+
+test("left click sends use_item message", () => {
+  const scene = setupScene();
+  scene.playerId = "p";
+  scene.state.players = { p: { x: 0, y: 0 } };
+  addItem(scene.inventory, "medkit", 1);
+  let sent = null;
+  scene.ws = { readyState: 1, send: (msg) => (sent = JSON.parse(msg)) };
+  scene.handleMouseDown({ button: 0 });
+  assert.strictEqual(sent.type, "use_item");
+  assert.strictEqual(sent.itemId, "medkit");
 });

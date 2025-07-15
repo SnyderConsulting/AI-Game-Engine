@@ -14,6 +14,7 @@ import {
   addItem,
   removeItem,
   countItem,
+  setActiveHotbar,
 } from "../systems/inventory-system.js";
 import { SKILL_INFO } from "../systems/skill-tree-system.js";
 
@@ -113,6 +114,11 @@ export class GameScene {
             this.itemImages,
             () => ({ remaining: 0, max: 0 }),
           ),
+      },
+      (itemId) => {
+        if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+          this.ws.send(JSON.stringify({ type: "craft_item", itemId }));
+        }
       },
     );
 
@@ -499,6 +505,16 @@ export class GameScene {
   handleKeyDown(e) {
     const k = e.key.toLowerCase();
     this.keys[k] = true;
+    if ("12345".includes(k)) {
+      setActiveHotbar(this.inventory, parseInt(k, 10) - 1);
+      this.inventoryUI.renderHotbar(
+        this.inventory,
+        this.state.players[this.playerId] || {},
+        {},
+        this.itemImages,
+        () => ({ remaining: 0, max: 0 }),
+      );
+    }
     if (k === "i" || k === "e") this.toggleInventory();
     else if (k === "c") this.toggleCrafting();
     else if (k === "k") this.toggleSkillTree();
@@ -546,6 +562,27 @@ export class GameScene {
       this.ws.readyState === WebSocket.OPEN
     ) {
       this.ws.send(JSON.stringify({ action: "cancel_looting" }));
+    }
+  }
+
+  /**
+   * Handle mouse button presses for item usage.
+   *
+   * @param {MouseEvent} e - Event data.
+   * @returns {void}
+   */
+  handleMouseDown(e) {
+    if (e.button !== 0) return;
+    const slot = this.inventory.hotbar[this.inventory.active];
+    if (!slot.item) return;
+    if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+      this.ws.send(
+        JSON.stringify({
+          type: "use_item",
+          slotIndex: this.inventory.active,
+          itemId: slot.item,
+        }),
+      );
     }
   }
 }

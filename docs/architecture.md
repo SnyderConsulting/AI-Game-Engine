@@ -74,6 +74,11 @@ data to these sprites so walls, containers and characters use the textures found
 in the `assets/` directory. The inventory UI now reads the authoritative player
 state sent over the WebSocket to populate its slots and hotbar.
 
+Crafting is server-authoritative as well. Clicking a recipe sends
+`{"type": "craft_item", "itemId": "..."}` so the backend can verify materials
+before adding the result to the player's inventory. Using an item dispatches a
+similar `use_item` message ensuring all effects occur on the server.
+
 `GameScene` automatically scales the canvas using the browser window height but
 never above a scale of `1` so tall monitors don't zoom in. A small camera
 keeps the player centered and clamps the view to the world bounds so wide

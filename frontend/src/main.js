@@ -31,6 +31,7 @@ export function startGame(gameId) {
   window.addEventListener("mousemove", (e) =>
     scene.setMousePos(e.clientX, e.clientY),
   );
+  scene.canvas.addEventListener("mousedown", (e) => scene.handleMouseDown(e));
   scene.canvas.addEventListener("contextmenu", (e) => e.preventDefault());
 
   requestAnimationFrame(gameLoop);

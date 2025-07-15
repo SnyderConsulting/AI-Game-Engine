@@ -20,6 +20,30 @@ SEGMENT_SIZE = 40
 FIRE_ZOMBIE_CHANCE = 0.2
 ZOMBIE_WAVE_SIZE = 5
 
+# Recipes used for server-authoritative crafting. Each entry maps the
+# resulting item id to the required ingredients and optional output
+# quantity. When no output is specified the crafted item id is awarded
+# in a quantity of one.
+CRAFTING_RECIPES = {
+    "zombie_essence": {"ingredients": {"flesh": 1, "teeth": 1}},
+    "elemental_potion": {"ingredients": {"zombie_essence": 1, "magic_essence": 1}},
+    "transformation_syringe": {
+        "ingredients": {"zombie_core": 1, "elemental_potion": 1}
+    },
+    "mutation_serum_fire": {"ingredients": {"fire_core": 3}},
+    "bow": {"ingredients": {"wood_planks": 3, "nails": 2}},
+    "arrow": {
+        "ingredients": {"wood_planks": 1, "nails": 1},
+        "output": {"id": "arrow", "qty": 5},
+    },
+    "hammer": {"ingredients": {"scrap_metal": 2, "duct_tape": 1}},
+    "crowbar": {"ingredients": {"scrap_metal": 3, "duct_tape": 1}},
+    "axe": {"ingredients": {"scrap_metal": 4, "duct_tape": 2}},
+    "baseball_bat": {"ingredients": {"wood_planks": 2, "duct_tape": 1}},
+    "reinforced_axe": {"ingredients": {"steel_plates": 3, "wood_planks": 2}},
+    "wood_barricade": {"ingredients": {"wood_planks": 2, "nails": 4}},
+}
+
 
 # ---------------------------------------------------------------------------
 # World generation helpers
@@ -348,3 +372,50 @@ def update_zombies(
             z.y = max(0, min(height, new_y))
         z.facing_x = dx / dist
         z.facing_y = dy / dist
+
+
+def craft_item(player: PlayerState, item_id: str) -> bool:
+    """Craft ``item_id`` for ``player`` if materials are available."""
+
+    recipe = CRAFTING_RECIPES.get(item_id)
+    if not recipe:
+        return False
+    for ing, qty in recipe["ingredients"].items():
+        if player.inventory.get(ing, 0) < qty:
+            return False
+
+    for ing, qty in recipe["ingredients"].items():
+        remaining = player.inventory.get(ing, 0) - qty
+        if remaining <= 0:
+            player.inventory.pop(ing, None)
+        else:
+            player.inventory[ing] = remaining
+
+    output = recipe.get("output", {"id": item_id, "qty": 1})
+    out_id = output["id"]
+    out_qty = output.get("qty", 1)
+    player.inventory[out_id] = player.inventory.get(out_id, 0) + out_qty
+    return True
+
+
+def use_item(player: PlayerState, item_id: str) -> bool:
+    """Apply the effect of ``item_id`` if present in the player's inventory."""
+
+    if player.inventory.get(item_id, 0) <= 0:
+        return False
+
+    from .models import PLAYER_MAX_HEALTH
+
+    if item_id == "medkit":
+        player.health = min(PLAYER_MAX_HEALTH, player.health + 3)
+    elif item_id == "mutation_serum_fire":
+        player.fire_mutation_points += 1
+    else:
+        player.weapon = item_id
+
+    remaining = player.inventory.get(item_id, 0) - 1
+    if remaining <= 0:
+        player.inventory.pop(item_id, None)
+    else:
+        player.inventory[item_id] = remaining
+    return True

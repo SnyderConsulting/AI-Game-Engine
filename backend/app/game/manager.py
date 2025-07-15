@@ -218,6 +218,26 @@ class GameSession:
             player.facing_x = float(facing_x)
             player.facing_y = float(facing_y)
 
+    def craft_item(self, player_id: str, item_id: str) -> None:
+        """Attempt to craft ``item_id`` for the specified player."""
+
+        from .world import craft_item as _craft
+
+        player = self.state.players.get(player_id)
+        if not player:
+            return
+        _craft(player, item_id)
+
+    def use_item(self, player_id: str, item_id: str) -> None:
+        """Use ``item_id`` from the player's inventory."""
+
+        from .world import use_item as _use
+
+        player = self.state.players.get(player_id)
+        if not player:
+            return
+        _use(player, item_id)
+
     def get_game_state(self) -> GameState:
         """Return the current game state."""
 
