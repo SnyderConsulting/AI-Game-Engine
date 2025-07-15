@@ -23,7 +23,13 @@ async def game_ws(websocket: WebSocket, game_id: str) -> None:
     try:
         while True:
             data = await websocket.receive_json()
-            session.update_player_state(player_id, data)
+            msg_type = data.get("type")
+            if msg_type == "craft_item":
+                session.craft_item(player_id, data.get("itemId", ""))
+            elif msg_type == "use_item":
+                session.use_item(player_id, data.get("itemId", ""))
+            else:
+                session.update_player_state(player_id, data)
     except WebSocketDisconnect:
         session.remove_player(player_id)
         print(f"Player {player_id} disconnected from game {game_id}")

@@ -1,9 +1,26 @@
 import { countItem } from "../systems/inventory-system.js";
-import { RECIPES, canCraft, craftRecipe } from "../systems/crafting-system.js";
+import { RECIPES, canCraft } from "../systems/crafting-system.js";
 
+/**
+ * Build and manage the crafting menu UI.
+ *
+ * @param {object} elements - DOM references used by the UI.
+ * @param {HTMLElement} elements.craftingDiv - Root crafting element.
+ * @param {HTMLElement} elements.craftingList - Container for recipe entries.
+ * @param {HTMLElement} elements.craftingBar - Draggable bar element.
+ * @param {HTMLElement} elements.craftingClose - Close button element.
+ * @param {{left:number|null,top:number|null}} elements.craftingPos - Saved menu position.
+ * @param {object} callbacks - Rendering callbacks.
+ * @param {Function} callbacks.renderInventory - Rerender the inventory UI.
+ * @param {Function} callbacks.renderHotbar - Rerender the hotbar UI.
+ * @param {Function} sendCraftMessage - Function used to notify the server when crafting.
+ * @returns {{renderCrafting:Function,toggleCrafting:Function,isOpen:Function}}
+ *   Helper methods for controlling the crafting UI.
+ */
 export function createCraftingUI(
   { craftingDiv, craftingList, craftingBar, craftingClose, craftingPos },
   { renderInventory, renderHotbar },
+  sendCraftMessage,
 ) {
   let open = false;
 
@@ -61,13 +78,9 @@ export function createCraftingUI(
       if (canCraft(inventory, r)) {
         container.style.cursor = "pointer";
         container.addEventListener("click", () => {
-          const added = craftRecipe(inventory, r);
-          if (!added && worldItems) {
-            worldItems.push({ x: player.x, y: player.y, type: r.id, count: 1 });
+          if (typeof sendCraftMessage === "function") {
+            sendCraftMessage(r.id);
           }
-          if (renderInventory) renderInventory();
-          renderCrafting(inventory, player, itemIcons, worldItems);
-          if (renderHotbar) renderHotbar();
         });
       }
       craftingList.appendChild(container);

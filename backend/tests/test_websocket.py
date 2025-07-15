@@ -147,3 +147,34 @@ def test_loot_shelf_command():
             if shelf_state.item:
                 player_state = manager.get_session(game_id).state.players[player_id]
                 assert shelf_state.item in player_state.inventory
+
+
+def test_craft_item_command():
+    with TestClient(app) as client:
+        game_id = manager.create_game_session()
+        session = manager.get_session(game_id)
+        with client.websocket_connect(f"/ws/game/{game_id}") as ws:
+            welcome = ws.receive_json()
+            player_id = welcome["playerId"]
+            player = session.state.players[player_id]
+            player.inventory["scrap_metal"] = 2
+            player.inventory["duct_tape"] = 1
+            ws.send_json({"type": "craft_item", "itemId": "hammer"})
+            time.sleep(0.05)
+            assert player.inventory.get("hammer", 0) == 1
+
+
+def test_use_item_command():
+    with TestClient(app) as client:
+        game_id = manager.create_game_session()
+        session = manager.get_session(game_id)
+        with client.websocket_connect(f"/ws/game/{game_id}") as ws:
+            welcome = ws.receive_json()
+            player_id = welcome["playerId"]
+            player = session.state.players[player_id]
+            player.inventory["medkit"] = 1
+            player.health = 5
+            ws.send_json({"type": "use_item", "itemId": "medkit", "slotIndex": 0})
+            time.sleep(0.05)
+            assert player.inventory.get("medkit", 0) == 0
+            assert player.health > 5
